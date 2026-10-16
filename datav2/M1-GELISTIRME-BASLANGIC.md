@@ -46,6 +46,7 @@ Sırayla oku. Çelişki olursa **üstteki kazanır**.
 | Rehberde (eski) | Yeni (datav2) |
 |---|---|
 | `banking_logs`, ECS alanları, `trace.id` | `kibana_logs`, Kibana alanları, **`correlation_id`** |
+| İnternet Şube / Mobil kanal logları | **Yok.** 9 ekran çalışan ekranıdır; loglar yalnızca 1 Şube, 2 Çağrı Merkezi, 5 Servis, 6 İş Birimi kanalından gelir |
 | `error_rules` (`error_code`) | **`error_handling_rules`** (`error_number` + `error_code`, `source`, `status`, öneri/onay akışı) |
 | servis, `service_id`, `services`, `screen_services` | **departman**, `department_id`, `departments`, `screen_departments` |
 | `solutions` (SOL-xxx, title/symptom/steps) | **`solution_templates`** (`solution_text` + `mercek_assigned_*`), kapanış: `closure_codes` |
@@ -133,26 +134,26 @@ Veri sonu: **2026-10-17 09:00 (+03)**. Demo kayıtları bu andan sonra oluşur.
 - Elif (10000004), gelir **38.000**, mevcut kredisi **yok**.
 - 400.000 / 3 ay taksit **144.185,92**; 400.000 / 36 ay **22.754,17**; en yüksek tutar ≈ **334.004** → öneri **330.000** / 36 ay (**18.772,19**).
 - Kural 1: KRDTKULL · 120218 AFFORDABILITY_EXCEEDED · business · `open_incident=0` → **prevented_calls +1**.
-- Geçmişte bu türden **103** çağrı açılmış (Mercek'in önleyebileceği).
+- Geçmişte bu türden **106** çağrı açılmış (Mercek'in önleyebileceği).
 
 **B — Başkentgaz zaman aşımı (kurum kaynaklı, ana kayıt)**
-- 17.10 08:30–09:00: ODMTTLMT · GAZ02 · **110731** INSTITUTION_TIMEOUT · **46** log (şube 25, mobil 11, çağrı merkezi 7, internet 3), 46 farklı müşteri; 601 Kızılay'da 7'si `elif`.
-- 30 günlük olağan: GAZ02'de yalnızca 2 gece bakım zaman aşımı (DUY-0398: 02–04 bakım penceresi) → bu sabahki **bakım penceresi dışında**.
+- 17.10 08:30–09:00: ODMTTLMT · GAZ02 · **110731** INSTITUTION_TIMEOUT · **46** log (şube 601 Kızılay 34, çağrı merkezi 12), 46 farklı müşteri; şube kayıtlarının 8'i `elif`.
+- 30 günlük olağan: GAZ02'de bugünden önce **hiç** zaman aşımı yok; ayrıca bilinen bakım penceresi (DUY-0398: 02–04) dışında → olağan dışı artış.
 - Kural 7 `open_incident=1`, departman FATURA_ODEME → **CAG-2051** (öncelik 2) + bağlı vakalar **CAG-2051-NN** (kapanış MUKERRER_CAGRI / ANA_KAYDA_BAGLANDI).
 - Eşleşme **SOL-031** (DIS_KURUM_KAYNAKLI / KURUM_SERVIS_KESINTISI); "benzer geçmiş olay" = SOL-031 ile kapanmış **6** çağrı.
 
 **C — İSKİ 13 hane (kural "çağrı açma" der, Mercek örüntüden aşar)**
 - ODMTTLMT · **110412** SUBSCRIBER_NO_INVALID · kural 8 `open_incident=0`.
-- 01.10 öncesi **0**; sonrası **412** (İSKİ **400 = %97,1**, hepsi **13 hane**; 12 ASKİ, 5 hane), İSKİ'de **394** farklı müşteri. Günlük ~24; 30 günde ≥ 50 eşiği **03.10**'da aşılmış.
+- 01.10 öncesi **0**; sonrası **412** (İSKİ **400 = %97,1**, hepsi **13 hane**; 12 ASKİ, 5 hane), İSKİ'de **393** farklı müşteri. Günlük ~24; 30 günde ≥ 50 eşiği **03.10**'da aşılmış.
 - Mercek örüntü eşiğiyle kuralı aşar → **CAG-2052** açar.
 - Hazır çözüm: SOL-005 ("kullanıcı hatası") **yanıltıcı**; aynı şablonla kapatılmış **10** İSKİ çağrısı + **2** açık (pilottaki Mercek de SOL-005 önermiş → örüntü taramasıyla kendini düzeltir).
 - Kök neden: ortak kutudaki **EML-0022** (12.09) ve **EML-0027** (26.09), ikisi `yeni` (işlenmemiş).
 - Kod: ODMTTLMT abone no kuralı `6–12 hane` (frontend form + backend doğrulama); kalıcı öneri: hane sayısı **PRMTGENL**'de kurum bazlı parametre.
 - Proaktif bulgu (G): **EML-0031** ASKİ, 01.01.2027'den itibaren 13 hane.
 
-**F — Günün en sorunlu ekranı:** 17.10'da ODMTTLMT **51** uyarı/hata (B'nin 46'sı dahil), ardından KRTTBASV 1.
+**F — Günün en sorunlu ekranı:** 17.10'da ODMTTLMT **48** uyarı/hata (B'nin 46'sı dahil); diğer ekranlarda yok.
 
-**Mercek pilotu (M1.6 için):** 15–16.10'da **53** çağrıda `enriched_json` dolu; kapanan **20**'sinde öneri aynen kullanılmış ve çözüm süresi yarıya inmiş.
+**Mercek pilotu (M1.6 için):** 15–16.10'da **62** çağrıda `enriched_json` dolu; kapanan **28**'inde öneri aynen kullanılmış ve çözüm süresi yarıya inmiş.
 
 ---
 

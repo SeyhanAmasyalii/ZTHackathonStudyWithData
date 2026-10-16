@@ -112,7 +112,7 @@ Not: eski taslakta ODMTFATR / ODMRGCMS / ODMTVRGI vardı; yeni katalogda bu ekra
 | name | Ad | Şube |
 | incident_channel | Çağrıdaki kanal karşılığı | `sube` |
 
-Değerler: 1 Şube→sube · 2 Çağrı Merkezi→cagri_merkezi · 3 İnternet Şube→dijital · 4 Mobil→dijital · 5 Servis→null (çağrı açılmaz).
+Değerler: 1 Şube→sube · 2 Çağrı Merkezi→cagri_merkezi · 3 İnternet Şube→dijital · 4 Mobil→dijital · 5 Servis→null (çağrı açılmaz) · 6 İş Birimi→is_birimi. **16.10 kararı:** 9 ekran çalışan ekranıdır; kibana_logs'ta 3 ve 4 kullanılmaz, `user_name` her zaman çalışan kodu (gece işinde `BATCH_TAHSILAT`).
 
 ### incident_categories 🟡
 | Kolon | Açıklama | Örnek |
@@ -181,7 +181,7 @@ loan_id, customer_number, product, principal, remaining_principal, monthly_rate,
 Yok: kibana_index, request_id, source (demo kaydı = timestamp > 17.10 09:00), ClientIp, ServerInfo, ComputerName, ConnectionId, MachineId, ADUserName, CallerInfoJson, CommandInfo, ScreenOpeningMode, ScreenVersion, ZfuContext, BankId, BranchCountryId, Environment, @version, _score, _type, _index.
 
 ### incidents ✅ (`incidents.json`, 700 geçmiş; demo kayıtları canlı)
-Karar (16.10): tüm çağrılar logların 30 gününe hizalı (16.09–17.10 08:30, CAG-1351…CAG-2050); her çağrı tek müşteri işlemine = tek loga bağlı. Dijital kanalda hata alan müşteri çağrı merkezini arar (9009). Mercek pilotu 15–16.10 (yalnızca çağrı önerisi; örüntü taraması demoda açılır) → `enriched_json`. C: 12 İSKİ çağrısı, 10'u SOL-005 ile yanlış kapatılmış, son 2 açık (pilotun yanlış SOL-005 önerisiyle). 39 açık çağrı. CAG-2051/-NN ve CAG-2052 demoda üretilir.
+Karar (16.10): tüm çağrılar logların 30 gününe hizalı (16.09–17.10 08:30, CAG-1351…CAG-2050); her çağrı tek müşteri işlemine = tek loga bağlı. Çağrıyı şube, çağrı merkezi (9009) ya da iş birimi açar. Mercek pilotu 15–16.10 (yalnızca çağrı önerisi; örüntü taraması demoda açılır) → `enriched_json`. C: 12 İSKİ çağrısı, 10'u SOL-005 ile yanlış kapatılmış, son 2 açık (pilotun yanlış SOL-005 önerisiyle). 32 açık çağrı; pilotta 62 öneri. CAG-2051/-NN ve CAG-2052 demoda üretilir.
 
 | Kolon | Açıklama | Örnek |
 |---|---|---|

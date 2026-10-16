@@ -7,7 +7,7 @@ Kararlar (16.10.2026):
   Servis kanalından (5) çağrı açılmaz.
 - C: 12 İSKİ çağrısı (Kadıköy 5, Levent 4, Çağrı Merkezi 3); 10'u SOL-005 "kullanıcı hatası" ile
   kapatılmış, son 2'si açık.
-- B: kurum zaman aşımı çağrıları SOL-031 (kesinti) / SOL-004 (gece bakımı) ile kapanmış.
+- B: 6 kurum zaman aşımı çağrısı SOL-031 ile kapanmış ("6 benzer geçmiş olay").
 - Telefon biçimi: logda hata numarası yok → mercek_assigned_error_code PHONE_FORMAT_INVALID, SOL-027.
 - Mercek pilotu 15–16.10: yalnızca çağrı önerisi; o günlerin çağrılarında enriched_json dolu.
 - Demo çağrıları (CAG-2051, CAG-2051-NN, CAG-2052) dosyada yok; demoda Mercek üretir.
@@ -43,6 +43,7 @@ CALL_RATE = {
     130102: 0.25, 140101: 0.30, 150101: 0.30,
 }
 PHONE_CALLS = 15
+B_HISTORY = 6  # SOL-031 ile kapanmış geçmiş kurum kesintisi (B: "6 benzer geçmiş olay")
 C_PLAN = {101: 5, 102: 4, 9009: 3}
 
 SUBCATEGORY = {
@@ -171,7 +172,8 @@ class IncidentFactory:
             picked += [(pool[i * step + rng.randrange(step)], "C") for i in range(count)]
 
         # Kurum zaman aşımları (B geçmişi)
-        picked += [(lg, "B") for lg in candidates if lg["app_exception_value"] == 110731]
+        timeouts = [lg for lg in candidates if lg["app_exception_value"] == 110731 and lg["channel_id"] != 5]
+        picked += [(lg, "B") for lg in rng.sample(timeouts, min(B_HISTORY, len(timeouts)))]
 
         # Telefon biçimi
         phone = [lg for lg in candidates if lg["mercek_assigned_error_number"]]

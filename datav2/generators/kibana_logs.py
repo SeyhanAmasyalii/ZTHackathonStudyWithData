@@ -7,6 +7,8 @@ Parçalar (seed 42, deterministik):
 - E  adres değişikliği   37  MUSTGUNC başarılı adres güncellemesi (customers.stats.json)
 - Telefon biçimi         60  MUSTGUNC kuralsız hata; app_exception_value boş, mercek_assigned 150130
 
+Kanallar: 9 ekran çalışan ekranıdır; loglar yalnızca 1 Şube, 2 Çağrı Merkezi, 5 Servis, 6 İş Birimi
+kanalından gelir (16.10 kararı: müşteri bu ekranları kullanmaz, İnternet Şube/Mobil logu yok).
 KVKK: IP, makine adı, bağlantı kimliği, AD kullanıcı adı üretilmez; mesaj alanlarında kişisel veri
 (ad, TCKN, telefon, e-posta, adres, abone numarasının kendisi) yoktur. Kullanıcılar sentetik koddur.
 
@@ -120,15 +122,18 @@ SCREEN_WEIGHTS = {
 }
 
 # Ekran -> kanal ağırlıkları (1 Şube, 2 Çağrı Merkezi, 3 İnternet, 4 Mobil, 5 Servis, 6 İş Birimi)
+# 9 ekran banka çalışanlarının ekranıdır; müşteri bu ekranları kullanmaz. Bu yüzden loglar yalnızca
+# çalışan kanallarından gelir: 1 Şube, 2 Çağrı Merkezi, 5 Servis (gece işi), 6 İş Birimi.
+# channels tablosundaki 3 İnternet Şube ve 4 Mobil bu loglarda kullanılmaz.
 CHANNEL_WEIGHTS = {
-    "KRTTBASV": {1: 45, 2: 10, 3: 15, 4: 30},
-    "KRTTGUNC": {1: 30, 2: 25, 3: 15, 4: 30},
-    "KRDTKULL": {1: 50, 2: 5, 3: 10, 4: 30, 6: 5},
-    "MUSTTANM": {1: 80, 4: 20},
-    "MUSTGUNC": {1: 40, 2: 25, 3: 10, 4: 25},
-    "HSPTVDSZ": {1: 50, 3: 15, 4: 35},
-    "ODMTTLMT": {1: 40, 2: 15, 3: 15, 4: 30},
-    "KRDTTAHS": {1: 35, 2: 20, 3: 10, 4: 15, 5: 10, 6: 10},
+    "KRTTBASV": {1: 75, 2: 25},
+    "KRTTGUNC": {1: 50, 2: 50},
+    "KRDTKULL": {1: 85, 2: 10, 6: 5},
+    "MUSTTANM": {1: 100},
+    "MUSTGUNC": {1: 60, 2: 40},
+    "HSPTVDSZ": {1: 85, 2: 15},
+    "ODMTTLMT": {1: 65, 2: 35},
+    "KRDTTAHS": {1: 50, 2: 30, 5: 10, 6: 10},
     "PRMTGENL": {6: 100},
 }
 
@@ -286,8 +291,6 @@ class LogFactory:
             return branch if branch != 9999 else rng.choice([101, 102, 601, 3501])
         if channel == 2:
             return 9009
-        if channel in (3, 4):
-            return 9999
         if channel == 5:
             return 9006
         if screen == "PRMTGENL":
@@ -295,8 +298,6 @@ class LogFactory:
         return rng.choice(G_UNIT_BY_SCREEN[screen])
 
     def user_for(self, unit_id: int, channel: int) -> str:
-        if channel in (3, 4):
-            return "MUSTERI"
         if channel == 5:
             return "BATCH_TAHSILAT"
         unit_type = self.units[unit_id]["unit_type"].lower()
@@ -474,7 +475,7 @@ class LogFactory:
         records = []
         for i in range(B_COUNT):
             ts = B_FROM + timedelta(seconds=rng.uniform(0, 29 * 60 + 59))
-            channel = rng.choices([1, 2, 4, 3], weights=[55, 15, 20, 10], k=1)[0]
+            channel = rng.choices([1, 2], weights=[70, 30], k=1)[0]
             customer = rng.choice(ankara)
             unit = 601 if channel == 1 else None
             user = "elif" if channel == 1 and i % 4 == 0 else None
@@ -511,7 +512,7 @@ class LogFactory:
         for change in changes:
             customer = self.by_no[change["customer_number"]]
             day = datetime.fromisoformat(change["changed_at"]).replace(tzinfo=TZ)
-            channel = rng.choice([1, 2, 4])
+            channel = rng.choice([1, 2])
             ts = random_time(day, min(day + timedelta(days=1), B_FROM), channel)
             records.append(self.build(
                 ts=ts, screen="MUSTGUNC", action=action, channel=channel, customer=customer,
