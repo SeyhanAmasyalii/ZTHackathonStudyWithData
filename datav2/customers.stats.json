@@ -1,0 +1,168 @@
+{
+  "total_customers": 40005,
+  "generated_customers": 40000,
+  "demo_customers": 5,
+  "D": {
+    "delinquent_12m_customers": 2340,
+    "delinquent_12m_loans": 3249,
+    "no_email_or_no_email_permission": 983,
+    "no_email_pct": 42.0,
+    "delinquent_today_loans": 1562
+  },
+  "E": {
+    "region_borrowers": 4870,
+    "region_sms_permitted": 3973,
+    "region_sms_or_email_permitted": 4516,
+    "address_changes_since_2026_10_10": 37,
+    "address_changes": [
+      {
+        "customer_number": "10013317",
+        "changed_at": "2026-10-11"
+      },
+      {
+        "customer_number": "10021502",
+        "changed_at": "2026-10-11"
+      },
+      {
+        "customer_number": "10026297",
+        "changed_at": "2026-10-11"
+      },
+      {
+        "customer_number": "10033804",
+        "changed_at": "2026-10-11"
+      },
+      {
+        "customer_number": "10039351",
+        "changed_at": "2026-10-11"
+      },
+      {
+        "customer_number": "10005870",
+        "changed_at": "2026-10-12"
+      },
+      {
+        "customer_number": "10005897",
+        "changed_at": "2026-10-12"
+      },
+      {
+        "customer_number": "10009383",
+        "changed_at": "2026-10-12"
+      },
+      {
+        "customer_number": "10010650",
+        "changed_at": "2026-10-12"
+      },
+      {
+        "customer_number": "10002120",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10009533",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10009707",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10010088",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10017085",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10017711",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10022870",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10028751",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10035561",
+        "changed_at": "2026-10-13"
+      },
+      {
+        "customer_number": "10002841",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10007123",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10017908",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10023836",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10027515",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10033956",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10034508",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10037662",
+        "changed_at": "2026-10-14"
+      },
+      {
+        "customer_number": "10004784",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10006657",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10007147",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10009087",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10021918",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10026867",
+        "changed_at": "2026-10-15"
+      },
+      {
+        "customer_number": "10005715",
+        "changed_at": "2026-10-16"
+      },
+      {
+        "customer_number": "10017070",
+        "changed_at": "2026-10-16"
+      },
+      {
+        "customer_number": "10022048",
+        "changed_at": "2026-10-16"
+      },
+      {
+        "customer_number": "10026099",
+        "changed_at": "2026-10-16"
+      },
+      {
+        "customer_number": "10036248",
+        "changed_at": "2026-10-16"
+      }
+    ]
+  }
+}
