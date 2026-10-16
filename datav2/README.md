@@ -2,6 +2,8 @@
 
 Şema gözden geçirmesinde kesinleşen tablolar için, demo senaryolarını (A–G) kapsayan sentetik veriler. Nihai şema yapıları: [`SCHEMA.md`](SCHEMA.md) · Yeni oturuma devir: [`HANDOFF.md`](HANDOFF.md).
 
+Modül 1 geliştirmesine başlangıç: [`M1-GELISTIRME-BASLANGIC.md`](M1-GELISTIRME-BASLANGIC.md) (Claude Code oturumu için; hedef repoya `CLAUDE.md` olarak da konabilir).
+
 Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betiklere ve veritabanına bağlanmadı; tüm şemalar netleşince tek seferde işlenecek.
 
 | Dosya | Tablo | Kayıt | Durum |
