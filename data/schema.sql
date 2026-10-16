@@ -93,6 +93,7 @@ CREATE TABLE announcements (
   effective_at DATE NOT NULL,
   title NVARCHAR(300) NOT NULL,
   body NVARCHAR(MAX) NOT NULL,
+  search_text AS (CONCAT_WS(NCHAR(10), institution, title, body)) PERSISTED,
   PRIMARY KEY (ann_id)
 );
 
@@ -179,6 +180,7 @@ CREATE TABLE solutions (
   steps NVARCHAR(MAX) CHECK (steps IS NULL OR ISJSON(steps) = 1),
   error_code NVARCHAR(40),
   service_id NVARCHAR(40),
+  search_text AS (CONCAT_WS(NCHAR(10), title, symptom, root_cause, steps)) PERSISTED,
   PRIMARY KEY (solution_id)
 );
 
@@ -227,6 +229,7 @@ CREATE TABLE requests (
   planned_service_id NVARCHAR(40),
   planned_from DATE,
   planned_to DATE,
+  search_text AS (CONCAT_WS(NCHAR(10), title, description)) PERSISTED,
   PRIMARY KEY (request_id)
 );
 
@@ -265,3 +268,10 @@ CREATE INDEX ix_loans_10 ON loans (customer_number);
 CREATE INDEX ix_customers_11 ON customers (region_affected);
 
 CREATE INDEX ix_banking_logs_12 ON banking_logs (source);
+
+
+-- AI Search indexer için değişiklik takibi (transaction dışında; load_all.py --sql kendisi çalıştırır)
+IF NOT EXISTS (SELECT 1 FROM sys.change_tracking_databases WHERE database_id = DB_ID()) ALTER DATABASE CURRENT SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON);
+ALTER TABLE solutions ENABLE CHANGE_TRACKING;
+ALTER TABLE requests ENABLE CHANGE_TRACKING;
+ALTER TABLE announcements ENABLE CHANGE_TRACKING;

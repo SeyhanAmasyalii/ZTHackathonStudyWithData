@@ -33,7 +33,7 @@ Tüm veri sentetiktir (gerçek müşteri verisi yok); seed 42, veri sonu 17.10.2
 | Geçmiş talep (TLP-0500…1037) | 95 | `data/out/requests.csv` |
 | Değerlendirme seti | 30 (10 / 10 / 10) | [`data/seed/eval_cases.json`](data/seed/eval_cases.json) |
 | Hepsi yüklü veritabanı (15 tablo) | ≈93.400 satır | `data/out/mercek.db` (SQLite) |
-| AI Search indeksleri (Azure'da yüklenir) | 37 · 95 · 20 belge | `load_all.py --search` |
+| AI Search indeksleri (SQL'den otomatik eşitlenir) | 37 · 95 · 20 belge | `load_all.py --search` · [eşitleme](docs/mercek-sql-search-esitleme.md) |
 
 **Senaryo rakamları:** A Elif geliri 38.000 · B 46 (+Mehmet = 47) log, CAG-2051 + 11 bağlı vaka · C 412 hata, İSKİ 400, 187 müşteri, 23 çağrı · D hedef 2.340, temas 71 / 64 / 51 · E 4.870 müşteri, 6.215 kredi, 612 gecikmede, 497 temas (418 erteleme). Kontrol: `python3 tools/mercek_data/validate_scenarios.py --sqlite data/out/mercek.db --now 2026-10-17T09:00:00+03:00`.
 
@@ -57,6 +57,7 @@ Tüm veri sentetiktir (gerçek müşteri verisi yok); seed 42, veri sonu 17.10.2
 | 12 | [`presentation/build_deck.py`](presentation/build_deck.py), [`presentation/sablon/`](presentation/sablon), [`presentation/mockups/`](presentation/mockups) | Sunumu şablondan yeniden üreten betik, kurum şablonu, taslak ekranların HTML kaynağı | Sunum sorumlusu |
 | 13 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikri tek cümlede ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes |
 | 14 | [`docs/mercek-sentetik-veri-kaynaklari.md`](docs/mercek-sentetik-veri-kaynaklari.md) | Her verinin kaynağı: **elle** yazılanlar, **betikle** üretilenler (betik açıklamalarıyla), **uygulamanın** ürettikleri; durum ve çalıştırma sırası | Veri sorumluları, geliştiriciler |
+| 14b | [`docs/mercek-sql-search-esitleme.md`](docs/mercek-sql-search-esitleme.md) | Azure SQL → AI Search otomatik eşitleme: temel bilgiler, kurulum ve yetki adımları, demo akışı, sorun giderme | Veri ve Search sorumluları |
 | 15 | [`data/seed/`](data/seed), [`tools/`](tools) | Hazır veri ve betikler: V2 katalog ve duyurular, V3 log üretici ve senaryo enjeksiyonu (testleriyle) | Veri sorumluları |
 
 **Dokümanlar arası ilişki**

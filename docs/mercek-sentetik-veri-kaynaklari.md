@@ -231,9 +231,9 @@ python3 tools/mercek_data/generate_portfolio.py
 2. **Yükleme sırası:** şema → katalog (6 tablo) → duyurular → müşteri/kredi → loglar (ECS kaydı düzleştirilir, tam kayıt `raw_json`'da, `source = 'seed'`) → temas → çözüm → çağrı → talep. Tek transaction; hata olursa hiçbir şey yazılmaz.
 3. **Toplu yazma:** parametreli `INSERT`, 1.000'lik paketler; Azure SQL'de `fast_executemany`.
 4. **Bağlantı:** `SQL_SERVER`, `SQL_DATABASE`; `SQL_USER` + `SQL_PASSWORD` varsa SQL kimlik doğrulama, yoksa Entra (`ActiveDirectoryDefault`, Managed Identity dahil). Şifre koda ve loga yazılmaz.
-5. **AI Search (`search.py`):** `solutions` (37), `requests` (95), `announcements` (20). Türkçe analizör, `content_vector` (boyut `EMBEDDING_DIM`, HNSW, cosine). Embedding'ler Foundry `embedding` deploy'uyla 50'şerli; model başka boyut döndürürse betik durur. Yalnızca standart kütüphane (REST).
+5. **AI Search (`search.py`) · otomatik eşitleme:** `solutions` (37), `requests` (95), `announcements` (20). Varsayılan mod **indexer**: AI Search bu 3 tabloyu SQL'den kendisi okur (değişiklik takibi, 5 dakikada bir ya da `--sync` ile hemen), embedding'i skillset içinde Foundry'ye kendisi ürettirir. Aranacak metin SQL'de hesaplanan `search_text` kolonudur. Yedek mod `--search-mode push`: betik embedding'i üretip belgeleri yükler. Türkçe analizör, `content_vector` (boyut `EMBEDDING_DIM`, HNSW, cosine). Ayrıntı ve yetki adımları: [`mercek-sql-search-esitleme.md`](mercek-sql-search-esitleme.md).
 
-**Komutlar:** `load_all.py --sqlite` (yerel) · `--sql` · `--search` · `--all` · `--write-schema`
+**Komutlar:** `load_all.py --sqlite` (yerel) · `--sql` · `--search` (indexer) · `--search --search-mode push` · `--sync` · `--all` · `--write-schema`
 
 **Ölçülen sonuç (SQLite):** 15 tablo, 10.415 log, 40.000 müşteri, 33.000 kredi, 8.322 temas, 1.400 çağrı, 37 çözüm, 95 talep, 20 duyuru. Süre yaklaşık 2 saniye.
 

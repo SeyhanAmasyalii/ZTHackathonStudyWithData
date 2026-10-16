@@ -102,6 +102,13 @@ TABLES: Dict[str, Dict] = {
                                ("screen_code", "s8", True), ("incident_id", "s16", True), ("duration_ms", "int", True),
                                ("tokens", "int", True), ("detail_json", "json", True)]},
 }
+# AI Search indexer'ının okuduğu tablolar (V7, otomatik eşitleme). search_text: embedding'e giden metin,
+# hesaplanan kolon olarak her lehçede veritabanı kendisi üretir; uygulama yazmaz.
+SEARCH_SOURCES: Dict[str, List[str]] = {
+    "solutions": ["title", "symptom", "root_cause", "steps"],
+    "requests": ["title", "description"],
+    "announcements": ["institution", "title", "body"],
+}
 LOAD_ORDER = ["services", "screens", "screen_services", "error_rules", "service_calendar", "scope_addons",
               "announcements", "customers", "loans", "banking_logs", "contacts", "solutions", "incidents", "requests",
               "mercek_events"]
@@ -141,6 +148,8 @@ def ddl(dialect: str) -> List[str]:
             if kind == "json" and dialect == "mssql":
                 line += f" CHECK ({col} IS NULL OR ISJSON({col}) = 1)"
             cols.append(line)
+        if name in SEARCH_SOURCES:
+            cols.append(search_text_column(SEARCH_SOURCES[name], dialect))
         if not (dialect == "sqlite" and spec.get("identity")):
             cols.append(f"PRIMARY KEY ({', '.join(spec['pk'])})")
         stmts.append(f"CREATE TABLE {name} (\n  " + ",\n  ".join(cols) + "\n)")
@@ -149,10 +158,38 @@ def ddl(dialect: str) -> List[str]:
     return stmts
 
 
+def search_text_column(fields: List[str], dialect: str) -> str:
+    if dialect == "sqlite":
+        expr = " || char(10) || ".join(f"COALESCE({f}, '')" for f in fields)
+        return f"search_text TEXT GENERATED ALWAYS AS ({expr}) VIRTUAL"
+    return f"search_text AS (CONCAT_WS(NCHAR(10), {', '.join(fields)})) PERSISTED"
+
+
+def change_tracking_statements() -> List[str]:
+    """Azure SQL değişiklik takibi: indexer yalnızca yeni/değişen/silinen satırı okur. Transaction dışında çalışır."""
+    return (["IF NOT EXISTS (SELECT 1 FROM sys.change_tracking_databases WHERE database_id = DB_ID()) "
+             "ALTER DATABASE CURRENT SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)"]
+            + [f"ALTER TABLE {t} ENABLE CHANGE_TRACKING" for t in SEARCH_SOURCES])
+
+
+def enable_change_tracking(database: Database) -> None:
+    if database.dialect != "mssql":
+        return  # SQLite'ta indexer yok; search_text kolonu yine de var (aynı metin)
+    previous = getattr(database.conn, "autocommit", False)
+    database.conn.autocommit = True  # ALTER DATABASE kullanıcı transaction'ı içinde çalışmaz
+    try:
+        for stmt in change_tracking_statements():
+            database.execute(stmt)
+    finally:
+        database.conn.autocommit = previous
+
+
 def write_schema_file(path: Path = SCHEMA_FILE) -> Path:
     header = ("-- Mercek veritabanı şeması (Azure SQL / T-SQL). tools/mercek_data/db.py tablo tanımlarından üretilir;\n"
               "-- elle düzenlemeyin: python3 tools/mercek_data/load_all.py --write-schema\n\n")
-    path.write_text(header + ";\n\n".join(ddl("mssql")) + ";\n", encoding="utf-8")
+    tail = ("\n\n-- AI Search indexer için değişiklik takibi (transaction dışında; load_all.py --sql kendisi çalıştırır)\n"
+            + ";\n".join(change_tracking_statements()) + ";\n")
+    path.write_text(header + ";\n\n".join(ddl("mssql")) + ";\n" + tail, encoding="utf-8")
     return path
 
 

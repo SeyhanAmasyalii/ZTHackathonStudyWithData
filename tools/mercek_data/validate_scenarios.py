@@ -51,8 +51,8 @@ class Ctx:
     def q(self, sql: str, *params) -> int:
         return self.db.scalar(sql, [db.utc_iso(p) if isinstance(p, datetime) else p for p in params])
 
-    def find(self, index: str, text: str, top: int = 5) -> List[Dict]:
-        return srch.query(self.search, self.embedder, index, text, top)
+    def find(self, index: str, text: str, top: int = 5, filter: Optional[str] = None) -> List[Dict]:
+        return srch.query(self.search, self.embedder, index, text, top, filter)
 
 
 class Skip(Exception):
@@ -143,6 +143,13 @@ def c_integrity(ctx):
                   "AND solution_id NOT IN (SELECT solution_id FROM solutions)")]
 
 
+def c_sync(ctx):
+    need_db(ctx)
+    need_search(ctx)
+    return [[ctx.q(f"SELECT COUNT(*) FROM {t}") for t in srch.SEARCH_SOURCES],
+            [ctx.search.count(t) for t in srch.SEARCH_SOURCES]]
+
+
 def c_elif(ctx):
     return next(u["monthlyIncome"] for u in ctx.catalog["demo_users"] if u["username"] == "elif")
 
@@ -225,7 +232,7 @@ def c_d_target(ctx):
 
 def c_d_search(ctx):
     need_search(ctx)
-    return sorted(r["id"] for r in ctx.find("requests", demo_reset.D_TEXT, 5))
+    return sorted(r["id"] for r in ctx.find("requests", demo_reset.D_TEXT, 5, srch.COMPLETED_REQUESTS))
 
 
 def c_d_plan(ctx):
@@ -254,7 +261,7 @@ def c_e_contacts(ctx):
 
 def c_e_search(ctx):
     need_search(ctx)
-    return sorted(r["id"] for r in ctx.find("requests", demo_reset.E_TEXT, 3))
+    return sorted(r["id"] for r in ctx.find("requests", demo_reset.E_TEXT, 3, srch.COMPLETED_REQUESTS))
 
 
 def c_e_plan(ctx):
@@ -280,6 +287,8 @@ CHECKS: List[Tuple[str, str, str, Callable, object]] = [
     ("Genel", "Kayıt sayıları (logs, customers, loans, contacts, incidents, solutions, requests, announcements)",
      "≈10.400 / 40.000 / 33.000 / ≈8.300 / 1.400 / 37 / 95 / 20", c_counts, counts_ok),
     ("Genel", "Bütünlük: sahipsiz kredi / ana kayıt / temas çağrısı / çözüm", "0 / 0 / 0 / 0", c_integrity, [0, 0, 0, 0]),
+    ("Genel", "SQL ↔ AI Search eşitliği: solutions / requests / announcements (SQL | indeks)", "aynı",
+     c_sync, lambda f, ctx: f[0] == f[1]),
     ("A", "Elif'in aylık geliri", "38.000", c_elif, 38_000),
     ("A", "loanPlan: 400.000 · 3 ay / 36 ay taksit; 36 ayda azami tutar", "144.185,92 / 22.754,17 / ≈334.004",
      c_loan, loan_ok),

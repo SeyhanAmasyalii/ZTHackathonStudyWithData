@@ -67,7 +67,9 @@ def loaded(out_dir):
 # ---------------------------------------------------------------------------
 def test_schema_file_is_in_sync():
     committed = (db.ROOT / "data" / "schema.sql").read_text(encoding="utf-8")
-    assert committed.split("\n\n", 1)[1] == ";\n\n".join(db.ddl("mssql")) + ";\n"
+    body = committed.split("\n\n", 1)[1]
+    assert body.startswith(";\n\n".join(db.ddl("mssql")) + ";\n")
+    assert all(stmt in committed for stmt in db.change_tracking_statements())
 
 
 def test_mssql_ddl_shape():
@@ -114,7 +116,7 @@ def test_reset_is_idempotent_and_validate_passes(loaded):
     failed = [r for r in results if r["status"] == "✗"]
     assert not failed, failed
     assert sum(r["status"] == "✓" for r in results) == 17
-    assert {r["scenario"] for r in results if r["status"] == "–"} == {"B", "C", "D", "E"}
+    assert {r["scenario"] for r in results if r["status"] == "–"} == {"Genel", "B", "C", "D", "E"}
 
 
 def test_linked_cases_come_from_window(loaded):
@@ -167,7 +169,7 @@ class FakeCursor:
 
 class FakeConn:
     def __init__(self):
-        self.log, self.committed, self.rolled_back = [], False, False
+        self.log, self.committed, self.rolled_back, self.autocommit = [], False, False, False
 
     def cursor(self):
         return FakeCursor(self.log)
@@ -233,8 +235,12 @@ class FakeSearch:
     def count(self, index):
         return len(self.docs[index])
 
-    def vector_search(self, index, vector, top=5):
-        scored = [(sum(a * b for a, b in zip(vector, d["content_vector"])), d["id"]) for d in self.docs[index]]
+    def vector_search(self, index, vector, top=5, filter=None):
+        docs = self.docs[index]
+        if filter:
+            field, value = re.match(r"(\w+) eq '([^']*)'", filter).groups()
+            docs = [d for d in docs if d.get(field) == value]
+        scored = [(sum(a * b for a, b in zip(vector, d["content_vector"])), d["id"]) for d in docs]
         return [{"id": i, "score": round(s, 4)} for s, i in sorted(scored, reverse=True)[:top]]
 
 
@@ -279,3 +285,100 @@ def test_eval_counting():
     res = vs.run_eval(ctx, cases)
     assert res[0]["found"] == "8/10" and res[0]["status"] == "✓"
     assert res[1]["found"] == "1/10" and res[1]["status"] == "✓"
+
+
+# ---------------------------------------------------------------------------
+# Otomatik eşitleme (indexer)
+# ---------------------------------------------------------------------------
+def test_sqlite_search_text_is_generated(loaded):
+    database, _ = loaded
+    row = database.query("SELECT title, symptom, search_text FROM solutions WHERE solution_id = 'SOL-031'")[0]
+    assert row[2].startswith(row[0] + "\n" + row[1])
+    assert "search_text" not in [c for c, _, _ in db.TABLES["solutions"]["cols"]]  # uygulama yazmaz
+
+
+def test_change_tracking_runs_outside_transaction():
+    conn = FakeConn()
+    db.enable_change_tracking(db.Database(conn, "mssql"))
+    stmts = [c[1] for c in conn.log if c[0] == "execute"]
+    assert "ALTER DATABASE CURRENT SET CHANGE_TRACKING = ON" in stmts[0]
+    assert stmts[1:] == [f"ALTER TABLE {t} ENABLE CHANGE_TRACKING" for t in db.SEARCH_SOURCES]
+    assert conn.autocommit is False  # eski hâline döndü
+
+
+class FakeIndexerSearch(FakeSearch):
+    def __init__(self, statuses=None):
+        super().__init__()
+        self.defs, self.calls = {}, []
+        self.statuses = statuses or []
+
+    def put(self, kind, definition):
+        self.defs[(kind, definition["name"])] = definition
+
+    def reset_indexer(self, name):
+        self.calls.append(("reset", name))
+
+    def run_indexer(self, name):
+        self.calls.append(("run", name))
+
+    def indexer_status(self, name):
+        return self.statuses.pop(0) if self.statuses else {"status": "success", "items": 1, "failed": 0, "error": None}
+
+
+def test_setup_indexers_definitions(monkeypatch):
+    monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://foundry.example/")
+    monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+    fake = FakeIndexerSearch()
+    names = srch.setup_indexers(fake, DIM, connection="Database=x;ResourceId=/sub/y;")
+    assert names == ["mercek-ix-solutions", "mercek-ix-requests", "mercek-ix-announcements"]
+    ds = fake.defs[("datasources", "mercek-sql-requests")]
+    assert ds["type"] == "azuresql" and ds["container"]["name"] == "requests"
+    assert ds["dataChangeDetectionPolicy"]["@odata.type"].endswith("SqlIntegratedChangeTrackingPolicy")
+    skill = fake.defs[("skillsets", srch.SKILLSET)]["skills"][0]
+    assert skill["inputs"][0]["source"] == "/document/search_text" and skill["dimensions"] == DIM
+    assert skill["resourceUri"] == "https://foundry.example" and "apiKey" not in skill  # Managed Identity
+    ix = fake.defs[("indexers", "mercek-ix-requests")]
+    assert ix["schedule"]["interval"] == "PT5M" and ix["skillsetName"] == srch.SKILLSET
+    assert {"sourceFieldName": "request_id", "targetFieldName": "id"} in ix["fieldMappings"]
+    assert ix["outputFieldMappings"][0]["targetFieldName"] == "content_vector"
+    idx = fake.indexes["requests"]
+    assert idx["vectorSearch"]["profiles"][0]["vectorizer"] == srch.VECTORIZER
+    assert any(f["name"] == "status" and f["filterable"] for f in idx["fields"])
+    assert fake.calls[:2] == [("reset", "mercek-ix-solutions"), ("run", "mercek-ix-solutions")]
+
+
+def test_connection_string_from_env(monkeypatch):
+    monkeypatch.delenv("SEARCH_SQL_CONNECTION", raising=False)
+    monkeypatch.setenv("SQL_RESOURCE_ID", "/subscriptions/s/resourceGroups/r/providers/Microsoft.Sql/servers/m")
+    monkeypatch.setenv("SQL_DATABASE", "mercek")
+    assert srch.sql_connection_string().startswith("Database=mercek;ResourceId=/subscriptions/")
+    monkeypatch.delenv("SQL_RESOURCE_ID")
+    with pytest.raises(SystemExit):
+        srch.sql_connection_string()
+
+
+def test_wait_indexers():
+    busy = {"status": "inProgress", "items": 0, "failed": 0, "error": None}
+    ok = {"status": "success", "items": 37, "failed": 0, "error": None}
+    fake = FakeIndexerSearch([busy, ok, ok, ok])
+    res = srch.wait_indexers(fake, ["a", "b"], sleep=lambda s: None)
+    assert res["b"]["items"] == 37
+    bad = FakeIndexerSearch([{"status": "persistentFailure", "items": 0, "failed": 3, "error": "x"}])
+    with pytest.raises(SystemExit):
+        srch.wait_indexers(bad, ["a"], sleep=lambda s: None)
+
+
+def test_completed_filter_and_sync_check(loaded, out_dir):
+    database, _ = loaded
+    demo_reset.reset(database, NOW, with_d_plan=True)  # TLP-1043 planli
+    search, emb = FakeSearch(), FakeEmbedder()
+    load_all.load_search(search, emb, DIM, out=out_dir)
+    plan = srch.request_doc({**demo_reset.D_PLAN, "components_json": "[]", "services_json": "[]"})
+    plan["content_vector"] = emb.embed([demo_reset.D_TEXT])[0]
+    search.docs["requests"].append(plan)  # indexer SQL'deki planlı talebi de alır
+    ctx = vs.Ctx(database, NOW, search, emb)
+    assert "TLP-1043" in [r["id"] for r in ctx.find("requests", demo_reset.D_TEXT, 5)]
+    assert "TLP-1043" not in [r["id"] for r in ctx.find("requests", demo_reset.D_TEXT, 5, srch.COMPLETED_REQUESTS)]
+    sync = {r["label"]: r for r in vs.run_checks(ctx, only=["Genel"])}
+    row = next(v for k, v in sync.items() if k.startswith("SQL ↔ AI Search"))
+    assert row["status"] == "✓", row

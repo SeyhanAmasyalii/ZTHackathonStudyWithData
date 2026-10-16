@@ -263,6 +263,7 @@ line(s, 2.05, 3.0, 2.3, 2.25)
 line(s, 3.45, 3.1, 3.45, 4.15)
 line(s, 4.6, 4.7, 5.0, 2.5)
 line(s, 4.6, 5.0, 5.0, 4.17)
+pill(s, 5.35, 3.22, 1.6, 0.3, "▲ indexer · otomatik", RED3, WHITE, 10)
 line(s, 7.3, 2.5, 7.55, 2.9, color=RED)
 line(s, 7.3, 4.17, 7.55, 3.7, color=RED)
 box(s, 0.45, 6.1, 8.35, 0.65)
@@ -275,7 +276,7 @@ text(s, 9.35, 1.45, 3.4, 2.4, [("AI ne yapar (Foundry)", {"size": 16, "bold": Tr
 box(s, 9.15, 4.1, 3.75, 2.65, fill=G3)
 text(s, 9.35, 4.2, 3.4, 2.5, [("Kod ne yapar (kurallar)", {"size": 16, "bold": True, "color": WHITE})] +
      [(t, {"size": 14, "color": WHITE}) for t in ["Log örüntüsü, kredi hesabı", "Eşik, servis ataması, ana kayıt", "Adam-gün medyanı, takvim", "Köprü sayıları", "AI çıktısındaki sayı ve satırları doğrulama"]], space=3)
-notes(s, "0:58–1:05 · Mercek hibrit RAG kullanır: AI Search geçmiş çözümleri, talepleri ve duyuruları anlam benzerliğiyle bulur (vektör + kelime, Türkçe analizör, Foundry embedding); Azure SQL o anki gerçek rakamları parametreli sorgularla getirir. Foundry ikisini bağlam olarak alıp cevabı yazar; rakam uydurmaz çünkü her sayı SQL'den gelir. Model SQL yazmaz (text-to-SQL yok). CI/CD her PR'da test ve güvenlik taraması yapıyor. Sağda AI'ın ve kuralların işi. (Yalnızca gerçekten çalışan servisler bu slaytta kalmalı.)")
+notes(s, "0:58–1:05 · Mercek hibrit RAG kullanır: AI Search geçmiş çözümleri, talepleri ve duyuruları anlam benzerliğiyle bulur (vektör + kelime, Türkçe analizör, Foundry embedding); Azure SQL o anki gerçek rakamları parametreli sorgularla getirir. SQL'e yazılan çözüm ve talepler AI Search indexer'ıyla birkaç dakikada kendiliğinden indekse girer; embedding'i Search, Foundry ile kendisi üretir. Foundry ikisini bağlam olarak alıp cevabı yazar; rakam uydurmaz çünkü her sayı SQL'den gelir. Model SQL yazmaz (text-to-SQL yok). CI/CD her PR'da test ve güvenlik taraması yapıyor. Sağda AI'ın ve kuralların işi. (Yalnızca gerçekten çalışan servisler bu slaytta kalmalı.)")
 
 # ---------- 7. Kullanım senaryoları ----------
 s = new_slide("Altı Kullanım Senaryosu")

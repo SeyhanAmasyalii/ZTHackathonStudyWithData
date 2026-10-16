@@ -129,6 +129,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     target.add_argument("--sqlite", nargs="?", const=str(db.DEFAULT_SQLITE), metavar="DOSYA", help="yerel SQLite")
     p.add_argument("--now", help="demo anı (ISO, saat dilimli); varsayılan şu an")
     p.add_argument("--with-d-plan", action="store_true", help="TLP-1043 planını ekle (E'yi tek başına oynatmak için)")
+    p.add_argument("--sync-search", action="store_true",
+                   help="sonra AI Search indexer'larını hemen çalıştır (silinen/eklenen talepler indekse yansısın)")
     a = p.parse_args(argv)
     now = parse_now(a.now)
     database = db.Database.azure() if a.sql else db.Database.sqlite(Path(a.sqlite))
@@ -137,6 +139,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"Demo sıfırlandı · now = {now.astimezone(TR).isoformat(timespec='minutes')}")
     for k, v in counts.items():
         print(f"  {k:<24} {v}")
+    if a.sync_search:
+        import search as srch
+
+        print("AI Search indexer'ları tetiklendi:", ", ".join(srch.sync_now(srch.AzureSearch())))
     return 0
 
 

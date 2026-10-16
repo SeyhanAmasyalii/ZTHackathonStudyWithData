@@ -463,15 +463,15 @@ Komutlar: `--sqlite` (yerel `data/out/mercek.db`), `--sql` (Azure SQL), `--searc
 3. `mercek-logs.ndjson` → `banking_logs` (toplu ekleme, parametreli).
 4. CSV'ler: customers, loans, incidents, solutions, requests.
 
-**Azure AI Search indeksleri:**
+**Azure AI Search indeksleri (SQL'den otomatik eşitlenir; ayrıntı `mercek-sql-search-esitleme.md`):**
 
 | İndeks | Alanlar | Vektör alanı |
 |---|---|---|
 | `solutions` | id, title, symptom, root_cause, steps, error_code (filtre), service_id (filtre) | `content_vector` |
-| `requests` | id, title, description, type (filtre), components, services, effort_md | `content_vector` |
+| `requests` | id, title, description, type (filtre), components, services, effort_md, status (filtre) | `content_vector` |
 | `announcements` | id, institution (filtre), published_at, effective_at, title, body | `content_vector` |
 
-Embedding'ler Foundry'deki `embedding` deploy'u ile 50'şerli partilerle üretilir. Türkçe analizör kullanılır (`tr.microsoft`). Vektör metriği cosine (HNSW). Doğrulamada skor, vektör sorgusunun `@search.score` değerinden 0–1 benzerliğe çevrilir (`cos = 2 − 1/score`); eşik (`MATCH_THRESHOLD = 0,75`) bu değerle karşılaştırılır.
+Varsayılan olarak AI Search indexer'ı SQL'deki `search_text` kolonunu okur ve embedding'i skillset içinde Foundry'deki `embedding` deploy'una ürettirir (yedek `--search-mode push`: betik 50'şerli partilerle üretir). Türkçe analizör kullanılır (`tr.microsoft`). Vektör metriği cosine (HNSW). Doğrulamada skor, vektör sorgusunun `@search.score` değerinden 0–1 benzerliğe çevrilir (`cos = 2 − 1/score`); eşik (`MATCH_THRESHOLD = 0,75`) bu değerle karşılaştırılır.
 
 ---
 

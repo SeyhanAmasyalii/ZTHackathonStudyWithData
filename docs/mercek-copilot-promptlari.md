@@ -364,7 +364,8 @@ Görev V7: Hazır yükleme betiğini Azure'a bağla. Bağlam: #file:tools/mercek
 #file:backend/app/config.py
 1. Ortam değişkenlerini backend config ile aynı adlarla hizala (SQL_SERVER, SQL_DATABASE, SEARCH_ENDPOINT,
    AZURE_OPENAI_ENDPOINT, EMBEDDING_DEPLOYMENT, EMBEDDING_DIM). Yeni secret ekleme; anahtar yoksa Entra kullanılır.
-2. `python3 tools/mercek_data/load_all.py --all` çalıştır; sayıları kontrol et (logs 10.415, customers 40.000,
+2. docs/mercek-sql-search-esitleme.md §3 adım 1–6 (Search kimliği, SQL izni, Foundry rolü). `python3 tools/mercek_data/load_all.py --all` çalıştır
+   (AI Search indexer'ları SQL'den kendisi çeker); sayıları kontrol et (logs 10.415, customers 40.000,
    loans 33.000, contacts 8.322, incidents 1.400, solutions 37, requests 95, announcements 20; indeksler 37/95/20).
 3. Hata olursa yalnızca bağlantı/yetki kısmını düzelt; tablo tanımı ve sıra değişmez.
 ```
@@ -686,7 +687,7 @@ Bağlam: #file:docs/contracts.md #file:data/seed/catalog.json #file:backend/app/
    sections[{name, content, reuse_from?}]}, target_template?, deadline_days?, confidence, rationale}.
    target_template enum: delinquent_last_12m | affected_region_active_loans | none.
 2. Kod doğrulama: change/related ekranlar katalogda; new_screen kodu M2.3 kuralı.
-3. Benzer talepler: requests indeksinde hibrit (talep metni), top 10, score ≥ 0.70, en fazla 5.
+3. Benzer talepler: requests indeksinde hibrit (talep metni), filter status eq 'tamamlandi', top 10, score ≥ 0.70, en fazla 5.
 4. M2.2-a çağrısı (sorular, servisler, çakışmalar).
 5. requests tablosuna TLP-<son+1> (status analiz), analiz JSON'u. Yanıt RequestAnalysis.
 Testler: D ve E için FakeLLM yanıtlarıyla kod doğrulamaları ve TLP numarası.
