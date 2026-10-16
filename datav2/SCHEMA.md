@@ -180,7 +180,9 @@ loan_id, customer_number, product, principal, remaining_principal, monthly_rate,
 
 Yok: kibana_index, request_id, source (demo kaydı = timestamp > 17.10 09:00), ClientIp, ServerInfo, ComputerName, ConnectionId, MachineId, ADUserName, CallerInfoJson, CommandInfo, ScreenOpeningMode, ScreenVersion, ZfuContext, BankId, BranchCountryId, Environment, @version, _score, _type, _index.
 
-### incidents 🟡 (1.400 + demo)
+### incidents ✅ (`incidents.json`, 700 geçmiş; demo kayıtları canlı)
+Karar (16.10): tüm çağrılar logların 30 gününe hizalı (16.09–17.10 08:30, CAG-1351…CAG-2050); her çağrı tek müşteri işlemine = tek loga bağlı. Dijital kanalda hata alan müşteri çağrı merkezini arar (9009). Mercek pilotu 15–16.10 (yalnızca çağrı önerisi; örüntü taraması demoda açılır) → `enriched_json`. C: 12 İSKİ çağrısı, 10'u SOL-005 ile yanlış kapatılmış, son 2 açık (pilotun yanlış SOL-005 önerisiyle). 39 açık çağrı. CAG-2051/-NN ve CAG-2052 demoda üretilir.
+
 | Kolon | Açıklama | Örnek |
 |---|---|---|
 | incident_id | Çağrı no | CAG-2051 |

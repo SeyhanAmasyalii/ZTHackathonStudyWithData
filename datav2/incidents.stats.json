@@ -1,0 +1,93 @@
+{
+  "total": 700,
+  "ids": [
+    "CAG-1351",
+    "CAG-2050"
+  ],
+  "period": [
+    "2026-09-16T09:39:17+03:00",
+    "2026-10-17T08:22:00+03:00"
+  ],
+  "status": {
+    "kapali": 661,
+    "acik": 39
+  },
+  "channel": {
+    "cagri_merkezi": 343,
+    "sube": 301,
+    "is_birimi": 56
+  },
+  "screens": {
+    "ODMTTLMT": 170,
+    "KRDTKULL": 123,
+    "KRDTTAHS": 101,
+    "HSPTVDSZ": 76,
+    "MUSTGUNC": 70,
+    "MUSTTANM": 46,
+    "KRTTBASV": 45,
+    "PRMTGENL": 42,
+    "KRTTGUNC": 27
+  },
+  "priority": {
+    "1": 24,
+    "2": 102,
+    "3": 372,
+    "4": 172,
+    "5": 30
+  },
+  "with_template": 421,
+  "linked_to_log": 700,
+  "A_affordability": 103,
+  "B_institution_timeout": {
+    "CAG-1356": [
+      "ELK03",
+      "SOL-031"
+    ],
+    "CAG-1494": [
+      "GAZ02",
+      "SOL-004"
+    ],
+    "CAG-1502": [
+      "SU03",
+      "SOL-031"
+    ],
+    "CAG-1506": [
+      "GAZ03",
+      "SOL-031"
+    ],
+    "CAG-1600": [
+      "GAZ02",
+      "SOL-004"
+    ],
+    "CAG-1675": [
+      "GAZ01",
+      "SOL-031"
+    ],
+    "CAG-1792": [
+      "ELK02",
+      "SOL-031"
+    ],
+    "CAG-1844": [
+      "INT03",
+      "SOL-031"
+    ]
+  },
+  "C_iski": {
+    "total": 12,
+    "by_unit": {
+      "102": 4,
+      "101": 5,
+      "9009": 3
+    },
+    "closed_with_SOL_005": 10,
+    "open": 2
+  },
+  "phone_format": 15,
+  "pilot_enriched": 53,
+  "pilot_accepted_and_closed": 20,
+  "demo_expected": {
+    "CAG-2051": "B ana kaydı; demoda Mercek açar (GAZ02, ODMTTLMT, 110731, priority 2, SOL-031)",
+    "CAG-2051-NN": "B bağlı vakaları; MUKERRER_CAGRI / ANA_KAYDA_BAGLANDI",
+    "CAG-2052": "C ana kaydı; demoda Mercek örüntüden açar (SU01, 110412)"
+  }
+}
