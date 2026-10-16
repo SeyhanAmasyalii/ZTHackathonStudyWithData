@@ -63,9 +63,10 @@ def answer(
         for call in reply.tool_calls:
             result = run_tool(call.name, call.arguments, context)
             logger.info(
-                "Araç çağrısı: tur=%d ad=%s sonuç=%s",
+                "Araç çağrısı: tur=%d ad=%s sorgu=%s sonuç=%s",
                 turn + 1,
                 call.name,
+                json.dumps(result.get("query", call.arguments), ensure_ascii=False),
                 result.get("total", result.get("error")),
             )
             messages.append(

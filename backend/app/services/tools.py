@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.config import TURKEY_TZ
-from app.repositories.datav2 import LogEntry
+from app.repositories.datav2 import LogEntry, normalize
 
 MAX_RANGE = timedelta(days=7)
 MAX_SAMPLES = 20
@@ -43,7 +43,11 @@ KIBANA_SORGULA = {
                 },
                 "keyword": {
                     "type": "string",
-                    "description": "Log mesajında aranacak kelime, ör. '13 hane'",
+                    "description": (
+                        "Log mesajı, ekran adı, hata kodu, kurum adı ve fatura türünde aranacak "
+                        "ayırt edici kelime(ler), ör. '13 hane', 'doğalgaz'. "
+                        "Tüm kelimeler geçmeli; kullanıcının cümlesinin tamamını yazma."
+                    ),
                 },
             },
         },
@@ -98,6 +102,8 @@ def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]
     if error_number is not None and not isinstance(error_number, int):
         raise ToolInputError("error_number tam sayı olmalı")
 
+    keyword_words = normalize(keyword).split() if keyword else []
+
     def matches(entry: LogEntry) -> bool:
         return (
             start <= entry.log_time <= end
@@ -105,7 +111,7 @@ def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]
             and (screen_code is None or entry.screen_code == screen_code.upper())
             and (institution_code is None or entry.institution_code == institution_code.upper())
             and (error_number is None or entry.error_number == error_number)
-            and (keyword is None or keyword.casefold() in entry.message.casefold())
+            and all(word in entry.search_text for word in keyword_words)
         )
 
     found = [entry for entry in context.logs if matches(entry)]

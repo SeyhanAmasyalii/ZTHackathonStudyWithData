@@ -135,3 +135,19 @@ def test_without_screen_filter_finds_own_recent_errors(context):
     )
     assert result["total"] == 7
     assert result["by_error"][0]["screen_code"] == "ODMTTLMT"
+
+
+@pytest.mark.parametrize(
+    "keyword", ["doğalgaz", "dogalgaz", "DOĞALGAZ", "başkentgaz", "GAZ02", "institution timeout"]
+)
+def test_keyword_matches_bill_type_institution_and_turkish_variants(context, keyword):
+    result = kibana_sorgula(
+        {
+            "start_time": "2026-10-17T08:45",
+            "end_time": "2026-10-17T09:15",
+            "only_mine": True,
+            "keyword": keyword,
+        },
+        context,
+    )
+    assert result["total"] == 7

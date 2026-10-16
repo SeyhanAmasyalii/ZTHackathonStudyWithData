@@ -8,6 +8,13 @@ from pathlib import Path
 
 ERROR_LEVELS = {"Warning", "Error"}
 
+_TR_ASCII = str.maketrans("ıİğĞüÜşŞöÖçÇ", "iigguussoocc")
+
+
+def normalize(text: str) -> str:
+    """Arama için: küçük harf, Türkçe karakterler sadeleşmiş ("Doğalgaz" → "dogalgaz")."""
+    return text.translate(_TR_ASCII).casefold()
+
 
 @dataclass(frozen=True)
 class LogEntry:
@@ -20,6 +27,7 @@ class LogEntry:
     error_code: str | None
     institution_code: str | None
     message: str
+    search_text: str  # normalize edilmiş: mesaj + ekran + hata kodu + kurum + fatura türü
 
 
 @dataclass(frozen=True)
@@ -47,19 +55,34 @@ def _json_field(raw: str | None) -> dict:
     return value if isinstance(value, dict) else {}
 
 
-def _to_entry(row: dict) -> LogEntry:
+def _to_entry(
+    row: dict, screen_names: dict[str, str], institution_names: dict[str, str]
+) -> LogEntry:
     fields = _json_field(row.get("message_fields"))
     response = _json_field(row.get("message_response"))
+    screen_code = row.get("screen_id") or ""
+    institution_code = fields.get("institutionCode")
+    message = row.get("exception_message") or row.get("message") or ""
+    searchable = [
+        message,
+        screen_code,
+        screen_names.get(screen_code, ""),
+        response.get("errorCode") or "",
+        institution_code or "",
+        institution_names.get(institution_code or "", ""),
+        fields.get("billType") or "",
+    ]
     return LogEntry(
         log_time=datetime.fromisoformat(row["log_time"]),
         log_level=row["log_level"],
         user_name=row.get("user_name") or "",
         customer_id=row.get("customer_id"),
-        screen_code=row.get("screen_id") or "",
+        screen_code=screen_code,
         error_number=row.get("app_exception_value"),
         error_code=response.get("errorCode"),
-        institution_code=fields.get("institutionCode"),
-        message=row.get("exception_message") or row.get("message") or "",
+        institution_code=institution_code,
+        message=message,
+        search_text=normalize(" ".join(searchable)),
     )
 
 
@@ -67,7 +90,13 @@ def _to_entry(row: dict) -> LogEntry:
 def load_error_logs(data_dir: Path) -> tuple[LogEntry, ...]:
     """kibana_logs.json içinden yalnızca Warning/Error kayıtları, zamana göre sıralı."""
     rows = json.loads((data_dir / "kibana_logs.json").read_text(encoding="utf-8"))
-    entries = [_to_entry(row) for row in rows if row.get("log_level") in ERROR_LEVELS]
+    screen_names = {screen.code: screen.name for screen in load_screens(data_dir)}
+    institution_names = {inst.code: inst.name for inst in load_institutions(data_dir)}
+    entries = [
+        _to_entry(row, screen_names, institution_names)
+        for row in rows
+        if row.get("log_level") in ERROR_LEVELS
+    ]
     return tuple(sorted(entries, key=lambda entry: entry.log_time))
 
 
