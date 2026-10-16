@@ -1,0 +1,32 @@
+[
+  {
+    "channel_id": 1,
+    "name": "Şube",
+    "incident_channel": "sube"
+  },
+  {
+    "channel_id": 2,
+    "name": "Çağrı Merkezi",
+    "incident_channel": "cagri_merkezi"
+  },
+  {
+    "channel_id": 3,
+    "name": "İnternet Şube",
+    "incident_channel": "dijital"
+  },
+  {
+    "channel_id": 4,
+    "name": "Mobil",
+    "incident_channel": "dijital"
+  },
+  {
+    "channel_id": 5,
+    "name": "Servis",
+    "incident_channel": null
+  },
+  {
+    "channel_id": 6,
+    "name": "İş Birimi",
+    "incident_channel": "is_birimi"
+  }
+]
