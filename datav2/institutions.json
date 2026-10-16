@@ -1,0 +1,114 @@
+[
+  {
+    "institution_code": "ELK01",
+    "name": "CK Boğaziçi Elektrik",
+    "bill_type": "Elektrik",
+    "timeout_ms": 8000,
+    "note": ""
+  },
+  {
+    "institution_code": "ELK02",
+    "name": "Enerjisa Başkent",
+    "bill_type": "Elektrik",
+    "timeout_ms": 8000,
+    "note": ""
+  },
+  {
+    "institution_code": "ELK03",
+    "name": "Gediz Elektrik",
+    "bill_type": "Elektrik",
+    "timeout_ms": 8000,
+    "note": ""
+  },
+  {
+    "institution_code": "SU01",
+    "name": "İSKİ",
+    "bill_type": "Su",
+    "timeout_ms": 6000,
+    "note": ""
+  },
+  {
+    "institution_code": "SU02",
+    "name": "ASKİ",
+    "bill_type": "Su",
+    "timeout_ms": 6000,
+    "note": ""
+  },
+  {
+    "institution_code": "SU03",
+    "name": "İZSU",
+    "bill_type": "Su",
+    "timeout_ms": 6000,
+    "note": ""
+  },
+  {
+    "institution_code": "GAZ01",
+    "name": "İGDAŞ",
+    "bill_type": "Doğalgaz",
+    "timeout_ms": 8000,
+    "note": ""
+  },
+  {
+    "institution_code": "GAZ02",
+    "name": "Başkentgaz",
+    "bill_type": "Doğalgaz",
+    "timeout_ms": 8000,
+    "note": "Gece 02:00–04:00 bakım penceresi"
+  },
+  {
+    "institution_code": "GAZ03",
+    "name": "İzmirgaz",
+    "bill_type": "Doğalgaz",
+    "timeout_ms": 8000,
+    "note": ""
+  },
+  {
+    "institution_code": "INT01",
+    "name": "Türk Telekom",
+    "bill_type": "İnternet",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "INT02",
+    "name": "Superonline",
+    "bill_type": "İnternet",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "INT03",
+    "name": "Turknet",
+    "bill_type": "İnternet",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "GSM01",
+    "name": "Turkcell",
+    "bill_type": "GSM",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "GSM02",
+    "name": "Vodafone",
+    "bill_type": "GSM",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "GSM03",
+    "name": "Türk Telekom Mobil",
+    "bill_type": "GSM",
+    "timeout_ms": 5000,
+    "note": ""
+  },
+  {
+    "institution_code": "VRG01",
+    "name": "Gelir İdaresi",
+    "bill_type": "Vergi",
+    "timeout_ms": 10000,
+    "note": ""
+  }
+]
