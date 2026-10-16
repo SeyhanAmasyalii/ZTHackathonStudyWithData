@@ -127,6 +127,36 @@ PRM_DEPARTMENT = {"KREDI": "KREDI_KULLANDIRIM", "TAHSILAT": "KREDI_TAKIP", "KART
                   "ODEME": "FATURA_ODEME", "HESAP": "HESAP_YONETIM", "MUSTERI": "MUSTERI_YONETIM"}
 BACKLOG_FROM = datetime(2026, 10, 13, 0, 0, tzinfo=TZ)
 BACKLOG_RATE = 0.27
+# Joyride senaryo eşleşmesi (datav2/ui/scenarios.ts). Eşleşme, çağrı türünün (ekran + hata + alt kategori)
+# senaryonun `description` alanıyla anlamca karşılaştırılmasıyla belirlendi (17.10 kararı):
+#  - aynı hatayı/reddi anlatan senaryo varsa o (ör. 120218 → krd-gelir-orani),
+#  - doğrulama hatalarında, hatalı alanı doğru dolduran işlem turu (ör. 120101 → krd-36-ay),
+#  - karşılığı olmayan türlerde (19xx teknik hatalar, 110520, 110610, 150220) boş.
+SCENARIO_BASE_URL = "https://webapp-test-dev-frontend-eycfa5hpakcvg4ak.westus3-01.azurewebsites.net/tour/bankacilik"
+SCENARIO_BY_TYPE = {  # (ekran, hata no | "PHONE", alt kategori | None) -> senaryo id
+    ("KRTTBASV", 130305, None): "krt-gelir-yetersiz",
+    ("KRTTBASV", 130101, None): "krt-gold-onay",
+    ("KRTTGUNC", 130412, None): "krt-limit-red",
+    ("KRTTGUNC", 130102, None): "krt-kart-guncelle",
+    ("KRDTKULL", 120218, None): "krd-gelir-orani",
+    ("KRDTKULL", 120101, None): "krd-36-ay",
+    ("KRDTTAHS", 120640, None): "tah-bakiye-yetersiz",
+    ("KRDTTAHS", 120102, None): "tah-taksit-tahsilat",
+    ("HSPTVDSZ", 140101, None): "hsp-usd",
+    ("MUSTTANM", 150210, None): "mtn-yeni-musteri",
+    ("MUSTGUNC", 150101, None): "mus-adres",
+    ("MUSTGUNC", "PHONE", None): "mus-telefon-bicim",
+    ("ODMTTLMT", 110731, None): "odm-baskentgaz-zaman-asimi",
+    ("ODMTTLMT", 110412, None): "odm-iski-13-hane",
+    ("PRMTGENL", 160110, None): "prm-dort-goz",
+}
+
+
+def scenario_path(screen: str, error_key: int | str | None) -> str | None:
+    scenario_id = SCENARIO_BY_TYPE.get((screen, error_key, None))
+    return f"{SCENARIO_BASE_URL}/{screen}/{scenario_id}" if scenario_id else None
+
+
 PRIORITY = {1: 3, 2: 12, 3: 55, 4: 25, 5: 5}
 
 
@@ -316,6 +346,7 @@ class IncidentFactory:
             "resolution_note": resolution,
             "resolved_at": fmt(resolved),
             "enriched_json": None,
+            "scenario_path": scenario_path(log["screen_id"], "PHONE" if kind == "PHONE" else log["app_exception_value"]),
         }
         if created >= PILOT_FROM:
             enrichment = self.enrichment(incident, template_id, code)
@@ -362,6 +393,8 @@ def stats(incidents: list[dict]) -> dict:
                    "closed_with_SOL_005": sum(1 for i in c if i["solution_template_id"] == "SOL-005"),
                    "open": sum(1 for i in c if i["status"] == "acik")},
         "phone_format": count(lambda i: i["mercek_assigned_error_code"] == "PHONE_FORMAT_INVALID"),
+        "scenario_path": dict(Counter(i["scenario_path"].rsplit("/", 1)[-1] if i["scenario_path"] else None
+                                      for i in incidents).most_common()),
         "pilot_enriched": len(pilot),
         "pilot_accepted_and_closed": len(accepted),
         "demo_expected": {

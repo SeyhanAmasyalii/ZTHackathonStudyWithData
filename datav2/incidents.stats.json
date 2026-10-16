@@ -75,6 +75,24 @@
     "open": 2
   },
   "phone_format": 15,
+  "scenario_path": {
+    "null": 258,
+    "krd-gelir-orani": 90,
+    "tah-bakiye-yetersiz": 56,
+    "hsp-usd": 53,
+    "mus-adres": 52,
+    "krt-gelir-yetersiz": 44,
+    "mtn-yeni-musteri": 23,
+    "krt-gold-onay": 21,
+    "prm-dort-goz": 16,
+    "krt-limit-red": 16,
+    "krd-36-ay": 16,
+    "krt-kart-guncelle": 15,
+    "mus-telefon-bicim": 15,
+    "odm-iski-13-hane": 12,
+    "tah-taksit-tahsilat": 7,
+    "odm-baskentgaz-zaman-asimi": 6
+  },
   "pilot_enriched": 62,
   "pilot_accepted_and_closed": 28,
   "demo_expected": {

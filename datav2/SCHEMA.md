@@ -205,6 +205,7 @@ Karar (16.10): tüm çağrılar logların 30 gününe hizalı (16.09–17.10 08:
 | resolution_note | O çağrının çözüm metni | |
 | resolved_at | Kapanış | |
 | enriched_json | Mercek zenginleştirmesi | |
+| scenario_path | Eşleşen Joyride turu (`datav2/ui/scenarios.ts`): `https://webapp-test-dev-frontend-eycfa5hpakcvg4ak.westus3-01.azurewebsites.net/tour/bankacilik/{screen}/{id}`; eşleşme yoksa null | …/tour/bankacilik/KRDTKULL/krd-gelir-orani |
 
 Yok: subscriber_no, city, resolution_minutes. Kapanış ekranındaki "belirti", "Çağrı Konusu", "Çözüm Açıklaması" gerçek alan değil / doldurulmuyor.
 
