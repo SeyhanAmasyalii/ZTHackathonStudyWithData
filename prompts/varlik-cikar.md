@@ -4,7 +4,7 @@ Amaç: Mercek sohbetinde kullanıcının serbest metninden log aramada filtre ol
 Girdiler (kod doldurur): now, today, user_role, user_unit, message (KVKK maskeli)
 Araç: `get_catalog()` → SQL `screens` + `institutions` (ilk turda zorunlu çağrılır)
 Çıktı şeması: `ExtractedClues` — intent, date, date_range_days, time_from, time_to, screen_codes[], institution_code, customer_number, search_text, summary, confidence
-Model: Foundry deploy `chat`, temperature 0; 1. tur `tool_choice = get_catalog`, 2. tur `response_format = json_schema (strict)`
+Model: Foundry deploy `chat`, Responses API, temperature 0. Konuşmanın ilk mesajında 1. tur `tool_choice = get_catalog`, 2. tur `text.format = json_schema (strict)`; sonraki mesajlar `previous_response_id` ile (katalog geçmişte)
 Kullanan: `backend/app/services/clues.py`
 Tasarım: `docs/m1-adim-1-varlik-cikar.md`
 

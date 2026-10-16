@@ -8,13 +8,18 @@
 Kullanıcı Mercek sohbetine yazar ("bugün sabah 10 civarı bir müşterinin kredisinde sorun yaşadım"). `correlation_id` bilinmez. Bu adım metni, log aramada kullanılacak **filtre ipuçlarına** çevirir. Log aramaz, karar vermez, cevap yazmaz.
 
 ```
-Kullanıcı metni
+Konuşmanın İLK mesajı
   → [kod] ön kontrol + KVKK maskeleme
-  → [Foundry `chat`] 1. tur: get_catalog aracını çağırır
+  → [Foundry Responses API] 1. tur: get_catalog aracını çağırır (zorunlu)
   → [kod] aracı çalıştırır: SQL screens + institutions (önbellekten)
-  → [Foundry `chat`] 2. tur: varlik-cikar (JSON şeması)
-  → [kod] doğrulama
+  → [Foundry Responses API] 2. tur: varlik-cikar (JSON şeması) → response_id
+  → [kod] doğrulama + conversation_id → response_id kaydı
   → Clues  ──►  2. adım: filtre (user_name, tarih/saat, ekran, kurum, müşteri) + AI Search kibana_logs
+
+Aynı konuşmanın SONRAKİ mesajları
+  → [kod] KVKK maskeleme
+  → [Foundry Responses API] yeni mesaj + previous_response_id (geçmiş ve katalog Azure'da) → fiş
+  → [kod] doğrulama → Clues
 ```
 
 "Sorun yaşıyorum" butonundan gelen istekte `correlation_id` olduğu için bu adım **çalışmaz**; log doğrudan SQL'den alınır.
@@ -43,10 +48,11 @@ Ekran ve kurum listeleri prompt'a yazılmaz; model **`get_catalog` aracıyla** i
 | Kota | ≥ 30K TPM |
 | Kimlik | İdeal: `mercek-api` Managed Identity + **Cognitive Services OpenAI User**. Yedek: `AZURE_OPENAI_API_KEY` App Settings'te |
 | Ayarlar | `AZURE_OPENAI_ENDPOINT=<PLACEHOLDER>`, `CHAT_DEPLOYMENT=chat` |
-| İstemci | `OpenAI(base_url=f"{endpoint}/openai/v1")`, `model=CHAT_DEPLOYMENT` |
-| Parametreler | `temperature=0`, `max_tokens=300`, zaman aşımı 10 sn (iki tur toplamı) |
-| 1. tur | `tools=[get_catalog]`, `tool_choice={"type":"function","function":{"name":"get_catalog"}}` (zorunlu) |
-| 2. tur | araç sonucu `role: tool` mesajıyla eklenir; `tool_choice="none"`, `response_format = json_schema (strict)` |
+| İstemci | `OpenAI(base_url=f"{endpoint}/openai/v1")`, **Responses API** (`client.responses.create`), `model=CHAT_DEPLOYMENT` |
+| Parametreler | `instructions` = system prompt (her istekte), `temperature=0`, `max_output_tokens=300`, `store=true`, zaman aşımı 10 sn (iki tur toplamı) |
+| İlk mesaj · 1. tur | `tools=[get_catalog]`, `tool_choice={"type":"function","name":"get_catalog"}` (zorunlu) |
+| İlk mesaj · 2. tur | `previous_response_id` = 1. tur, `input` = `function_call_output` (katalog), `tool_choice="none"`, `text.format` = json_schema (strict) |
+| Sonraki mesajlar | `previous_response_id` = konuşmanın son cevabı, `input` = yeni maskeli mesaj, `tool_choice="none"`, `text.format` = json_schema (strict) |
 | Yeniden deneme | Şema/Pydantic doğrulaması başarısızsa 1 kez; yine olmazsa yedek yol (§7) |
 
 Runtime Foundry çağrıları Copilot bütçesine (LLM maliyeti puanı) sayılmaz; seçim doğruluk ve hıza göre yapılmıştır.
@@ -55,17 +61,19 @@ Runtime Foundry çağrıları Copilot bütçesine (LLM maliyeti puanı) sayılma
 
 Tool calling (function calling): model aracı çağırır, **backend çalıştırır**, sonucu modele döner. Model SQL'e kendisi bağlanmaz.
 
+Responses API biçimi:
+
 ```json
 {
   "type": "function",
-  "function": {
-    "name": "get_catalog",
-    "description": "Mercek'in bildiği bankacılık ekranlarını (SQL screens) ve fatura kurumlarını (SQL institutions) döner. Ekran ve kurum kodu seçmeden önce çağır.",
-    "parameters": {"type": "object", "properties": {}, "additionalProperties": false},
-    "strict": true
-  }
+  "name": "get_catalog",
+  "description": "Mercek'in bildiği bankacılık ekranlarını (SQL screens) ve fatura kurumlarını (SQL institutions) döner. Ekran ve kurum kodu seçmeden önce çağır.",
+  "parameters": {"type": "object", "properties": {}, "additionalProperties": false},
+  "strict": true
 }
 ```
+
+Araç sonucu 2. turda `{"type": "function_call_output", "call_id": "<1. turdaki call_id>", "output": "<katalog JSON>"}` olarak gönderilir.
 
 Dönen içerik (örnek, kısaltılmış):
 
@@ -87,6 +95,36 @@ Dönen içerik (örnek, kısaltılmış):
 **Bedeli ve kazancı:** +1 tur (yaklaşık 1 sn). Aynı yapıya sonraki adımlarda yeni araçlar eklenir (`search_logs`, `analyze_pattern`, `match_solution`); Mercek sohbeti modelin araç seçtiği bir agent'a dönüşür, hesabı yine kod yapar.
 
 **Güvenlik:** araç yalnızca önbellekteki katalog listesini döner; parametre almaz, SQL sorgusu modelden gelmez. Bilinmeyen araç adı ya da beklenmeyen araç çağrısı kodda reddedilir.
+
+## 3b. Konuşma geçmişi (Responses API)
+
+Model hafızasızdır; geçmişi **Azure sunucusu** tutar. Her cevap Azure'da saklanır (`store=true`) ve bir `response_id` döner. Sonraki istekte yalnızca yeni mesaj ve `previous_response_id` gönderilir; Azure önceki mesajları, araç çağrısını ve katalog sonucunu kendisi ekler.
+
+```python
+client.responses.create(
+    model=settings.chat_deployment,          # "chat"
+    instructions=system_prompt,              # her istekte (önceki istekten devralınmaz)
+    input=masked_message,                    # yalnızca yeni mesaj
+    previous_response_id=last_response_id,   # yeni konuşmada None
+    tools=[GET_CATALOG],
+    tool_choice=FORCE_GET_CATALOG if last_response_id is None else "none",
+    text={"format": VARLIK_CIKAR_SCHEMA},    # json_schema, strict (araç turunda verilmez)
+    temperature=0,
+    max_output_tokens=300,
+    store=True,
+)
+```
+
+| Konu | Karar |
+|---|---|
+| Backend ne saklar | Yalnızca `conversation_id → last_response_id` (+ `user_name`, `updated_at`). Yazışma dökümü tutulmaz |
+| Nerede | SQL tablosu `mercek_conversations` (App Service'te birden fazla worker olduğu için bellekte değil). **SCHEMA.md'ye eklenecek** |
+| Neden frontend'e verilmez | `response_id` istemciden gelseydi başka bir kullanıcının konuşmasına bağlanılabilirdi. Frontend yalnızca `conversation_id` bilir; backend kullanıcıyla eşleşmesini kontrol eder |
+| "Yeni sohbet" | Yeni `conversation_id`; `last_response_id` boş → katalog tekrar istenir |
+| KVKK | Azure'a yalnızca maskeli metin gider; veri kendi kaynağımızda, aynı bölgede. Konuşma kapanınca (ya da `demo_reset.py`) `responses.delete` ile silinebilir |
+| Token | Geçmiş her istekte modele yine okutulur (taşıyan Azure); prompt önbelleği bu kısmı hızlandırır |
+| Ön koşul | Seçilen bölgede ve modelde Responses API açık olmalı; Foundry kurulumunda ilk kontrol |
+| Yedek | Responses API yoksa backend son 10 maskeli mesajı `mercek_conversations` içinde tutar ve Chat Completions ile her istekte gönderir |
 
 ## 4. Çıktı şeması
 
@@ -197,6 +235,8 @@ Regex ile basit çıkarım; yanıtta `extraction_method: "fallback"`, arayüzde 
 | 11 | "Saat 15'te sorun oldu" | saat aralığı kodda null (henüz 12:10) |
 | 12 | (FakeLLM) 1. turda `get_catalog` çağrısı | backend katalog döner; 2. turda şemalı cevap alınır |
 | 13 | (FakeLLM) model tanımsız bir araç çağırır | çağrı reddedilir, yedek yola geçilir |
+| 14 | (FakeLLM) aynı konuşmada 2. mesaj: "Pardon, İSKİ olacaktı" | `previous_response_id` gönderilir, araç çağrılmaz; kurum SU01'e güncellenir |
+| 15 | Başka kullanıcının `conversation_id`'si ile istek | reddedilir (403) |
 
 ## 9. Dosyalar
 
@@ -206,6 +246,7 @@ Regex ile basit çıkarım; yanıtta `extraction_method: "fallback"`, arayüzde 
 | `backend/app/models/clues.py` | `ExtractedClues` (AI çıktısı), `Clues` (doğrulanmış) |
 | `backend/app/clients/llm.py` | `chat_json(prompt_name, variables, schema, tools=None)`; prompt dosyasını yükler, değişkenleri doldurur, araç turunu yürütür, şemalı ister, 1 kez yeniden dener |
 | `backend/app/services/tools.py` | araç kayıt defteri: ad → fonksiyon (`get_catalog`); bilinmeyen araç reddedilir |
+| `backend/app/repositories/conversations.py` | `mercek_conversations`: `conversation_id → last_response_id`, kullanıcı eşleşmesi |
 | `backend/app/repositories/catalog.py` | `screens`, `institutions`, `institution_screens` okuma + önbellek |
 | `backend/app/services/kvkk.py` | tarama + maskeleme |
 | `backend/app/services/clues.py` | ön kontrol → AI → doğrulama → yedek yol |
