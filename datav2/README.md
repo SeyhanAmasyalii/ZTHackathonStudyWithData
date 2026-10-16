@@ -5,3 +5,4 @@
 | Dosya | Tablo | Kayıt | Durum |
 |---|---|---|---|
 | `screens.json` | screens | 9 | ✅ onaylandı |
+| `departments.json` | departments | 6 | ✅ onaylandı |

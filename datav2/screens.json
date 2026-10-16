@@ -277,9 +277,9 @@
     "name": "Parametre Yönetimi",
     "module": "PRM",
     "type": "T",
-    "description": "Ürün ve işlem kurallarına ait parametrelerin görüntülenmesi ve dört göz onayıyla değiştirilmesi",
+    "description": "Ürün ve işlem kurallarına ait parametrelerin görüntülenmesi ve dört göz onayıyla değiştirilmesi; her departman kendi grubundaki parametreleri yönetir",
     "components_json": [
-      "parametre grubu (kredi, kart, ödeme, müşteri)",
+      "parametre grubu ve sahibi departman (kredi kullandırım: KREDI_KULLANDIRIM, kredi takip: KREDI_TAKIP, kart: KART_YONETIM, ödeme ve kurum: FATURA_ODEME, hesap: HESAP_YONETIM, müşteri: MUSTERI_YONETIM)",
       "parametre listesi (anahtar, değer, geçerlilik tarihi)",
       "değer değişikliği",
       "dört göz onayı",

@@ -1,0 +1,32 @@
+[
+  {
+    "department_id": "KREDI_KULLANDIRIM",
+    "name": "Kredi Kullandırım Departmanı",
+    "description": "Yeni kredi kullandırım, ödeme planı hesaplama, kredi uygunluk kuralları ve bunlara ait parametreler"
+  },
+  {
+    "department_id": "KREDI_TAKIP",
+    "name": "Kredi Takip ve Tahsilat Departmanı",
+    "description": "Kullandırılmış kredilerin taksit takibi, gecikme faizi, tahsilat ve hatırlatma işleri ve bunlara ait parametreler"
+  },
+  {
+    "department_id": "KART_YONETIM",
+    "name": "Kart Yönetim Departmanı",
+    "description": "Kredi kartı başvurusu, limit ve kart bilgisi güncellemeleri, ekstre ve kart otomatik ödeme ve bunlara ait parametreler"
+  },
+  {
+    "department_id": "FATURA_ODEME",
+    "name": "Fatura Ödeme ve Talimat Departmanı",
+    "description": "Kurum entegrasyonları, abone doğrulama, fatura ödeme talimatları, tahsilat ve kurum parametreleri"
+  },
+  {
+    "department_id": "HESAP_YONETIM",
+    "name": "Hesap Yönetim Departmanı",
+    "description": "Vadesiz hesap açılışı, hesap bakiyesi ve hesaptan tahsilat işlemleri ve bunlara ait parametreler"
+  },
+  {
+    "department_id": "MUSTERI_YONETIM",
+    "name": "Müşteri Yönetim Departmanı",
+    "description": "Müşteri tanımlama, kimlik doğrulama, iletişim bilgileri ve izinleri, SMS ve e-posta altyapısı ve bunlara ait parametreler"
+  }
+]
