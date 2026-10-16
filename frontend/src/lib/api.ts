@@ -3,6 +3,11 @@ import type { Session, User } from "@/lib/session";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export const MAX_MESSAGE_LENGTH = 2000;
+/** Konuşma hafızası: modele gönderilen önceki mesaj sayısı (backend sınırı 20). */
+export const MAX_HISTORY = 20;
+const MAX_HISTORY_CONTENT = 8000;
+
+export type HistoryMessage = { role: "user" | "assistant"; content: string };
 
 /** Oturum geçersiz ya da süresi dolmuş (401). */
 export class UnauthorizedError extends Error {}
@@ -43,12 +48,21 @@ export function login(userName: string): Promise<Session> {
   });
 }
 
-/** Mesajı backend'e (POST /api/chat) gönderir ve Mercek'in cevabını döner. */
-export async function sendChat(message: string, token: string): Promise<string> {
+/** Mesajı ve aynı sohbetin önceki mesajlarını backend'e (POST /api/chat) gönderir. */
+export async function sendChat(
+  message: string,
+  history: HistoryMessage[],
+  token: string,
+): Promise<string> {
   const data = await request<{ reply: string }>("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({
+      message,
+      history: history
+        .slice(-MAX_HISTORY)
+        .map((item) => ({ ...item, content: item.content.slice(0, MAX_HISTORY_CONTENT) })),
+    }),
   });
   return data.reply;
 }

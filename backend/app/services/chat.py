@@ -2,12 +2,14 @@
 
 import json
 import logging
+from collections.abc import Sequence
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from app.clients.llm import LLMClient, LLMError
+from app.models.chat import HistoryMessage
 from app.repositories.datav2 import Institution, Screen
 from app.services.tools import TOOLS, ToolContext, run_tool
 
@@ -51,12 +53,15 @@ def answer(
     context: ToolContext,
     screens: tuple[Screen, ...],
     institutions: tuple[Institution, ...],
+    history: Sequence[HistoryMessage] = (),
 ) -> str:
     messages: list[dict[str, Any]] = [
         {
             "role": "system",
             "content": build_system_prompt(context.now, screens, institutions, context.user_role),
         },
+        # Konuşma hafızası: önceki kullanıcı mesajları ve Mercek'in son cevapları.
+        *({"role": item.role, "content": item.content} for item in history),
         {"role": "user", "content": message.strip()},
     ]
     for turn in range(MAX_TURNS):

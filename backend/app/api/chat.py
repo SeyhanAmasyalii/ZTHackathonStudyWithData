@@ -52,6 +52,7 @@ def chat(
             context,
             load_screens(settings.data_dir),
             load_institutions(settings.data_dir),
+            request.history,
         )
     except LLMError as exc:
         logger.error("Sohbet yanıtı üretilemedi: %s", exc)

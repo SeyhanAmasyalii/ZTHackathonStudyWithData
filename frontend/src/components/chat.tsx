@@ -29,12 +29,14 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
     const text = input.trim();
     if (!text || loading) return;
 
+    // Hafıza: bu mesajdan önceki konuşma (hata mesajları dahil değil).
+    const history = messages.map(({ role, text: content }) => ({ role, content }));
     addMessage("user", text);
     setInput("");
     setError(null);
     setLoading(true);
     try {
-      addMessage("assistant", await sendChat(text, token));
+      addMessage("assistant", await sendChat(text, history, token));
     } catch (err) {
       if (err instanceof UnauthorizedError) {
         onUnauthorized();
@@ -44,6 +46,11 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function newConversation() {
+    setMessages([]);
+    setError(null);
   }
 
   function onSubmit(event: FormEvent) {
@@ -91,6 +98,18 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
         <div ref={bottomRef} />
       </div>
 
+      {messages.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={newConversation}
+            disabled={loading}
+            className="text-sm text-violet-600 hover:underline disabled:opacity-40"
+          >
+            Yeni sohbet
+          </button>
+        </div>
+      )}
       <form onSubmit={onSubmit} className="flex gap-2 border-t border-black/10 py-4 dark:border-white/15">
         <textarea
           value={input}

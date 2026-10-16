@@ -97,3 +97,18 @@ def test_system_prompt_has_user_role_but_not_user_code(screens, institutions):
     prompt = build_system_prompt(NOW, screens, institutions, "L2 Destek · 9010 BT Destek (L2)")
     assert "Kullanıcının görevi: L2 Destek · 9010 BT Destek (L2)." in prompt
     assert "kerem" not in prompt
+
+
+def test_history_is_sent_before_new_message(make_fake, context, screens, institutions):
+    from app.models.chat import HistoryMessage
+
+    fake = make_fake([LLMReply(content="SOL-031 ile çözülmüş.")])
+    history = [
+        HistoryMessage(role="user", content="ODMTTLMT ekranında hata alıyorum"),
+        HistoryMessage(role="assistant", content="7 Başkentgaz zaman aşımı hatası var."),
+    ]
+    answer("peki nasıl çözerim?", fake, context, screens, institutions, history)
+    sent = fake.calls[0]
+    assert [m["role"] for m in sent] == ["system", "user", "assistant", "user"]
+    assert sent[1]["content"] == "ODMTTLMT ekranında hata alıyorum"
+    assert sent[-1]["content"] == "peki nasıl çözerim?"
