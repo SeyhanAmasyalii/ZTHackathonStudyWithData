@@ -1,0 +1,79 @@
+[
+  {
+    "demand_id": "TLP-1021",
+    "department_id": "KREDI_TAKIP",
+    "date_from": "2026-10-12",
+    "date_to": "2026-11-08",
+    "allocation_pct": 100
+  },
+  {
+    "demand_id": "TLP-1022",
+    "department_id": "KREDI_KULLANDIRIM",
+    "date_from": "2026-10-12",
+    "date_to": "2026-10-30",
+    "allocation_pct": 50
+  },
+  {
+    "demand_id": "TLP-1023",
+    "department_id": "FATURA_ODEME",
+    "date_from": "2026-10-19",
+    "date_to": "2026-10-23",
+    "allocation_pct": 40
+  },
+  {
+    "demand_id": "TLP-1024",
+    "department_id": "KREDI_TAKIP",
+    "date_from": "2026-12-21",
+    "date_to": "2026-12-31",
+    "allocation_pct": 50
+  },
+  {
+    "demand_id": "TLP-1025",
+    "department_id": "KREDI_KULLANDIRIM",
+    "date_from": "2026-11-16",
+    "date_to": "2026-11-27",
+    "allocation_pct": 60
+  },
+  {
+    "demand_id": "TLP-1026",
+    "department_id": "MUSTERI_YONETIM",
+    "date_from": "2026-10-26",
+    "date_to": "2026-11-06",
+    "allocation_pct": 30
+  },
+  {
+    "demand_id": "TLP-1027",
+    "department_id": "MUSTERI_YONETIM",
+    "date_from": "2026-11-23",
+    "date_to": "2026-12-04",
+    "allocation_pct": 20
+  },
+  {
+    "demand_id": "TLP-1028",
+    "department_id": "FATURA_ODEME",
+    "date_from": "2026-11-02",
+    "date_to": "2026-11-20",
+    "allocation_pct": 50
+  },
+  {
+    "demand_id": "TLP-1029",
+    "department_id": "HESAP_YONETIM",
+    "date_from": "2026-10-12",
+    "date_to": "2026-11-13",
+    "allocation_pct": 70
+  },
+  {
+    "demand_id": "TLP-1030",
+    "department_id": "KART_YONETIM",
+    "date_from": "2026-10-19",
+    "date_to": "2026-11-27",
+    "allocation_pct": 80
+  },
+  {
+    "demand_id": "TLP-1031",
+    "department_id": "HESAP_YONETIM",
+    "date_from": "2026-10-12",
+    "date_to": "2026-12-18",
+    "allocation_pct": 30
+  }
+]
