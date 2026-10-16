@@ -1,0 +1,312 @@
+[
+  {
+    "code": "ATM_KAYNAKLI",
+    "name": "ATM Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "ATM_DONANIM",
+    "name": "ATM Donanım Arızası",
+    "parent_code": "ATM_KAYNAKLI"
+  },
+  {
+    "code": "ATM_YAZILIM",
+    "name": "ATM Yazılım Hatası",
+    "parent_code": "ATM_KAYNAKLI"
+  },
+  {
+    "code": "BANKA_MUSTERISI_KAYNAKLI",
+    "name": "Banka Müşterisi Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "MUSTERI_EKSIK_BILGI",
+    "name": "Müşteri Eksik / Hatalı Bilgi",
+    "parent_code": "BANKA_MUSTERISI_KAYNAKLI"
+  },
+  {
+    "code": "MUSTERI_ISLEM_IPTALI",
+    "name": "Müşteri İşlemden Vazgeçti",
+    "parent_code": "BANKA_MUSTERISI_KAYNAKLI"
+  },
+  {
+    "code": "BANKSOFT_KAYNAKLI",
+    "name": "Banksoft Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "BANKSOFT_HATA",
+    "name": "Banksoft Uygulama Hatası",
+    "parent_code": "BANKSOFT_KAYNAKLI"
+  },
+  {
+    "code": "BILGE",
+    "name": "Bilge",
+    "parent_code": null
+  },
+  {
+    "code": "BILGE_YONLENDIRME",
+    "name": "Bilge Makalesiyle Yönlendirildi",
+    "parent_code": "BILGE"
+  },
+  {
+    "code": "DESTEK_EKRANLI_GUNCELLEME",
+    "name": "Destek Ekranlı Güncelleme",
+    "parent_code": null
+  },
+  {
+    "code": "DESTEK_EKRANI_VERI",
+    "name": "Destek Ekranından Veri Düzeltme",
+    "parent_code": "DESTEK_EKRANLI_GUNCELLEME"
+  },
+  {
+    "code": "DIS_KURUM_KAYNAKLI",
+    "name": "Dış Kurum Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "KURUM_SERVIS_KESINTISI",
+    "name": "Kurum Servis Kesintisi / Zaman Aşımı",
+    "parent_code": "DIS_KURUM_KAYNAKLI"
+  },
+  {
+    "code": "KURUM_FORMAT_DEGISIKLIGI",
+    "name": "Kurum Veri Formatı Değişikliği",
+    "parent_code": "DIS_KURUM_KAYNAKLI"
+  },
+  {
+    "code": "KURUM_BAKIM",
+    "name": "Kurum Planlı Bakımı",
+    "parent_code": "DIS_KURUM_KAYNAKLI"
+  },
+  {
+    "code": "INCELEME_CAGRISI",
+    "name": "İnceleme Çağrısı",
+    "parent_code": null
+  },
+  {
+    "code": "INCELEME_SORUN_YOK",
+    "name": "İnceleme Sonucu Sorun Yok",
+    "parent_code": "INCELEME_CAGRISI"
+  },
+  {
+    "code": "IS_BIRIMLERI_KAYNAKLI",
+    "name": "İş Birimleri Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "IS_BIRIMI_KURAL",
+    "name": "İş Kuralı Kaynaklı Ret",
+    "parent_code": "IS_BIRIMLERI_KAYNAKLI"
+  },
+  {
+    "code": "IS_BIRIMI_PROSEDUR",
+    "name": "Prosedür Bilgilendirmesi",
+    "parent_code": "IS_BIRIMLERI_KAYNAKLI"
+  },
+  {
+    "code": "KULLANICI_KAYNAKLI",
+    "name": "Kullanıcı Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "KULLANICI_HATASI",
+    "name": "Kullanıcı Hatası",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "KULLANICI_BILGI_EKSIKLIGI",
+    "name": "Kullanıcı Bilgi Eksikliği",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "UYGULAMA_KULLANIM_GUCLUGU",
+    "name": "Uygulama Kullanım Güçlüğü",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "KULLANICI_DEGISIKLIK_TALEBI",
+    "name": "Kullanıcı Uygulama Değişiklik Talebi",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "SSS_ILE_CEVAPLANDI",
+    "name": "SSS ile Cevaplandı",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "YETKI_TALEBI",
+    "name": "Yetki Talebi",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "KAMERA_IZLEME_TALEBI",
+    "name": "Kamera İzleme Talebi",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "KULLANICI_HESAP_AYARLARI",
+    "name": "Kullanıcı Hesap Ayarları",
+    "parent_code": "KULLANICI_KAYNAKLI"
+  },
+  {
+    "code": "KULLANICI_TALEBI",
+    "name": "Kullanıcı Talebi",
+    "parent_code": null
+  },
+  {
+    "code": "YENI_OZELLIK_TALEBI",
+    "name": "Yeni Özellik Talebi",
+    "parent_code": "KULLANICI_TALEBI"
+  },
+  {
+    "code": "RAPOR_TALEBI",
+    "name": "Rapor Talebi",
+    "parent_code": "KULLANICI_TALEBI"
+  },
+  {
+    "code": "MUKERRER_CAGRI",
+    "name": "Mükerrer Çağrı",
+    "parent_code": null
+  },
+  {
+    "code": "ANA_KAYDA_BAGLANDI",
+    "name": "Ana Kayda Bağlandı",
+    "parent_code": "MUKERRER_CAGRI"
+  },
+  {
+    "code": "PARAMETRE_KAYNAKLI",
+    "name": "Parametre Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "IS_BIRIMI_PARAMETRESI",
+    "name": "İş Birimleri Sorumluluğundaki Parametre",
+    "parent_code": "PARAMETRE_KAYNAKLI"
+  },
+  {
+    "code": "BT_PARAMETRESI",
+    "name": "Teknoloji Sorumluluğundaki Parametre",
+    "parent_code": "PARAMETRE_KAYNAKLI"
+  },
+  {
+    "code": "PORTAL_GUNCELLEME",
+    "name": "Portal Güncelleme",
+    "parent_code": null
+  },
+  {
+    "code": "PORTAL_ICERIK",
+    "name": "Portal İçerik Güncellemesi",
+    "parent_code": "PORTAL_GUNCELLEME"
+  },
+  {
+    "code": "SISTEM_PERFORMANSI",
+    "name": "Sistem Performansı",
+    "parent_code": null
+  },
+  {
+    "code": "YAVASLIK",
+    "name": "Yavaşlık",
+    "parent_code": "SISTEM_PERFORMANSI"
+  },
+  {
+    "code": "YOGUNLUK",
+    "name": "Anlık Yoğunluk",
+    "parent_code": "SISTEM_PERFORMANSI"
+  },
+  {
+    "code": "TEDARIKCI_FIRMA_KAYNAKLI",
+    "name": "Tedarikçi Firma Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "TEDARIKCI_HATA",
+    "name": "Tedarikçi Ürün Hatası",
+    "parent_code": "TEDARIKCI_FIRMA_KAYNAKLI"
+  },
+  {
+    "code": "TEKNIK_SORUN",
+    "name": "Teknik Sorun",
+    "parent_code": null
+  },
+  {
+    "code": "DONANIM",
+    "name": "Donanım",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "ISLETIM_SISTEMI",
+    "name": "İşletim Sistemi",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "YAZILIM",
+    "name": "Yazılım",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "MERKEZI_SISTEM",
+    "name": "Merkezi Sistem",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "ENERJI",
+    "name": "Enerji",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "NETWORK",
+    "name": "Network",
+    "parent_code": "TEKNIK_SORUN"
+  },
+  {
+    "code": "UYGULAMA_GELISTIRME_KAYNAKLI",
+    "name": "Uygulama Geliştirme Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "KOD_HATASI",
+    "name": "Kod Hatası",
+    "parent_code": "UYGULAMA_GELISTIRME_KAYNAKLI"
+  },
+  {
+    "code": "VALIDASYON_HATASI",
+    "name": "Hatalı Ekran Validasyonu",
+    "parent_code": "UYGULAMA_GELISTIRME_KAYNAKLI"
+  },
+  {
+    "code": "VERI_GUNCELLEME",
+    "name": "Veri Güncelleme",
+    "parent_code": null
+  },
+  {
+    "code": "KULLANICI_ISTEGI",
+    "name": "Kullanıcı İsteği",
+    "parent_code": "VERI_GUNCELLEME"
+  },
+  {
+    "code": "VERI_TABANI_KAYNAKLI",
+    "name": "Veri Tabanı Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "DB_BAGLANTI",
+    "name": "Veri Tabanı Bağlantı Sorunu",
+    "parent_code": "VERI_TABANI_KAYNAKLI"
+  },
+  {
+    "code": "DB_KILITLENME",
+    "name": "Kilitlenme / Uzun Sorgu",
+    "parent_code": "VERI_TABANI_KAYNAKLI"
+  },
+  {
+    "code": "YAYGINLASTIRMA_KAYNAKLI",
+    "name": "Yaygınlaştırma Kaynaklı",
+    "parent_code": null
+  },
+  {
+    "code": "YAYGINLASTIRMA_HATASI",
+    "name": "Sürüm Geçişi Hatası",
+    "parent_code": "YAYGINLASTIRMA_KAYNAKLI"
+  }
+]
