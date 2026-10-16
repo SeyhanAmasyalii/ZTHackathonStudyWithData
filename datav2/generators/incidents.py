@@ -328,6 +328,7 @@ class IncidentFactory:
             "created_at": fmt(created),
             "channel": channel,
             "reporter_unit_id": self.reporter(log),
+            "reporter_user_name": log["user_name"],  # çağrıyı açan çalışan (bağlı logdaki kullanıcı)
             "screen_code": log["screen_id"],
             "category": category,
             "subcategory": sub,

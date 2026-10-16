@@ -189,6 +189,7 @@ Karar (16.10): tüm çağrılar logların 30 gününe hizalı (16.09–17.10 08:
 | created_at | Açılış | |
 | channel | sube / cagri_merkezi / dijital / is_birimi | sube |
 | reporter_unit_id | org_units.unit_id | 601 |
+| reporter_user_name | Çağrıyı açan çalışan (bağlı logdaki `user_name`) | elif |
 | screen_code | Ekran | ODMTTLMT |
 | category, subcategory | incident_categories | Fatura ödeme / kurumdan yanıt alınamadı |
 | note | Bildirim notu (kişisel veri yok) | |
