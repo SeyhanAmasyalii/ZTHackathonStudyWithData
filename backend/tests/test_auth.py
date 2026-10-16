@@ -27,7 +27,7 @@ def login(user_name: str):
 
 def test_users_list_has_demo_users():
     users = client.get("/api/users").json()
-    assert [u["user_name"] for u in users][:2] == ["elif", "zeynep"]
+    assert [u["user_name"] for u in users] == ["elif", "zeynep", "kerem"]
     assert users[0] == {
         "user_name": "elif",
         "name": "Elif Demir",
