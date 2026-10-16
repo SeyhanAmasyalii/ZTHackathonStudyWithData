@@ -206,13 +206,13 @@ Yok: kibana_index, request_id, source (demo kaydı = timestamp > 17.10 09:00), C
 
 Yok: subscriber_no, city, resolution_minutes. Kapanış ekranındaki "belirti", "Çağrı Konusu", "Çözüm Açıklaması" gerçek alan değil / doldurulmuyor.
 
-### solution_templates 🟡 (eski solutions, 37)
+### solution_templates ✅ (`solution_templates.json`, 37; eski solutions)
 | Kolon | Açıklama | Örnek |
 |---|---|---|
 | solution_template_id | Şablon no | SOL-031 |
 | solution_text | Service Manager hazır çözüm metni | |
 | closure_code, sub_closure_code | Önerilen kapanış | |
-| department_id | Departman | FATURA_ODEME |
+| department_id | Departman; teknik (`*`) ve PRMTGENL şablonlarında boş | FATURA_ODEME |
 | mercek_assigned_title / _symptom / _root_cause / _steps (JSON) / _error_code | Mercek'in metinden çıkardıkları | |
 | search_text | Hesaplanan (indexer) | |
 

@@ -19,3 +19,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `customers.json` | customers | 40.005 (40.000 + 5 demo) | ✅ onaylandı · üretici `generators/customers.py` · sayılar `customers.stats.json` (D 2.340/3.249/%42 · E 4.870/3.973/4.516 · 37 adres değişikliği) |
 | `loans.json` | loans | 33.000 | ✅ onaylandı · üretici `generators/loans.py` · collection_account kaldırıldı · demo: Zeynep KRD00006571 gecikmede, Kerem KRD00006218 normal, Elif kredisiz (A) |
 | `kibana_logs.json` | kibana_logs | 10.555 (10.000 gündelik + B 46 + C 412 + E 37 + telefon 60) | ✅ onaylandı · üretici `generators/kibana_logs.py` · sayılar `kibana_logs.stats.json` · C: 01.10 öncesi 0, sonrası 412 (%97,1 İSKİ, hepsi 13 hane) |
+| `solution_templates.json` | solution_templates | 37 | ✅ onaylandı · SOL-031 = B (kurum kesintisi) · SOL-005 C için yanıltıcı "kullanıcı hatası" şablonu · SOL-027 telefon biçimi (kuralsız) · teknik ve PRMTGENL şablonlarında department_id boş |
