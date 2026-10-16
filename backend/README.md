@@ -5,7 +5,11 @@ FastAPI. Mercek sohbet mesajını Azure AI Foundry'deki modele (`gpt-5.5`) ileti
 | Uç | Ne yapar |
 |---|---|
 | `GET /api/health` | `{"status": "ok"}` |
-| `POST /api/chat` | `{"message": "..."}` → `{"reply": "..."}` |
+| `GET /api/users` | Giriş ekranındaki demo kullanıcıları |
+| `POST /api/login` | `{"user_name": "elif"}` → `{"token": "...", "user": {...}}` |
+| `POST /api/chat` | `Authorization: Bearer <token>` + `{"message": "..."}` → `{"reply": "..."}`; token yoksa 401 |
+
+**Oturum:** şifresiz demo girişi; backend imzalı ve süreli (12 saat) bir token verir (HMAC-SHA256, `SESSION_SECRET`). Sohbetteki kullanıcı adı yalnızca token'dan okunur; model kullanıcı adını görmez, `only_mine=true` filtresini backend uygular.
 
 Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `app/repositories` (`datav2` JSON) / `app/clients` (model). System prompt: `../prompts/mercek-chat.md`.
 
@@ -15,7 +19,7 @@ Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `a
 
 **Hata ayıklama:** `.env`'de `LLM_DEBUG=true` → modele giden ve dönen her şey terminale yazılır (yalnızca yerelde).
 
-**Demo ayarları** (varsayılanlar; `.env`'de değiştirilebilir): `DEMO_NOW=2026-10-17T09:15:00+03:00` (veri 09:00'da biter), `DEMO_USER=elif` (giriş ekranı gelene kadar).
+**Demo ayarları** (varsayılanlar; `.env`'de değiştirilebilir): `DEMO_NOW=2026-10-17T09:15:00+03:00` (veri 09:00'da biter), `SESSION_SECRET` (boşsa her açılışta geçici anahtar; Azure'da App Settings'te tanımlanır).
 
 ## Kurulum
 

@@ -31,8 +31,10 @@ class Settings(BaseSettings):
     # Veri 2026-10-17 09:00'da bitiyor; demoda "şu an" 09:15'e sabitlenir.
     # Gerçek saat için ortamda DEMO_NOW boş bırakılır (DEMO_NOW=).
     demo_now: datetime | None = datetime(2026, 10, 17, 9, 15, tzinfo=TURKEY_TZ)
-    # Giriş ekranı gelene kadar sohbeti yapan demo kullanıcısı (kibana_logs.user_name).
-    demo_user: str = "elif"
+    # Oturum token'larını imzalayan anahtar. Boşsa açılışta geçici bir anahtar üretilir
+    # (yeniden başlatmada oturumlar düşer). Azure'da App Settings'te tanımlanır.
+    session_secret: str = ""
+    session_ttl_hours: int = 12
 
     @field_validator("demo_now", mode="before")
     @classmethod

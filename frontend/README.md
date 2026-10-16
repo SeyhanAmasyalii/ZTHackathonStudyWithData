@@ -13,7 +13,10 @@ copy .env.example .env.local      # macOS/Linux: cp .env.example .env.local
 npm run dev
 ```
 
-Tarayıcıda http://localhost:3000 → mesaj yaz → Enter.
+Tarayıcıda http://localhost:3000 → giriş ekranında bir demo kullanıcısı seç → mesaj yaz → Enter.
+
+- **Giriş:** `/giris` sayfası backend'den demo kullanıcılarını alır (`GET /api/users`); seçilince `POST /api/login` ile token alınır ve tarayıcıda (`localStorage`) saklanır.
+- **Sohbet:** her istekte `Authorization: Bearer <token>`. Oturum geçersizse (401) giriş sayfasına dönülür. Sağ üstte **Çıkış**.
 
 | Ekranda | Anlamı |
 |---|---|

@@ -13,6 +13,12 @@ client = TestClient(app)
 
 
 @pytest.fixture
+def auth():
+    token = client.post("/api/login", json={"user_name": "elif"}).json()["token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
 def fake_llm():
     fake = FakeLLMClient()
     app.dependency_overrides[get_llm] = lambda: fake
@@ -26,8 +32,8 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
-def test_chat_returns_model_reply(fake_llm):
-    response = client.post("/api/chat", json={"message": "  merhaba  "})
+def test_chat_returns_model_reply(fake_llm, auth):
+    response = client.post("/api/chat", json={"message": "  merhaba  "}, headers=auth)
     assert response.status_code == 200
     assert response.json() == {"reply": "Merhaba, ben Mercek."}
     system, user = fake_llm.calls[0]
@@ -36,25 +42,25 @@ def test_chat_returns_model_reply(fake_llm):
 
 
 @pytest.mark.parametrize("message", ["", "x" * 2001])
-def test_chat_rejects_invalid_message(fake_llm, message):
-    response = client.post("/api/chat", json={"message": message})
+def test_chat_rejects_invalid_message(fake_llm, auth, message):
+    response = client.post("/api/chat", json={"message": message}, headers=auth)
     assert response.status_code == 422
     assert fake_llm.calls == []
 
 
-def test_chat_model_error_returns_502(fake_llm):
+def test_chat_model_error_returns_502(fake_llm, auth):
     fake_llm.fail = True
-    response = client.post("/api/chat", json={"message": "merhaba"})
+    response = client.post("/api/chat", json={"message": "merhaba"}, headers=auth)
     assert response.status_code == 502
     assert response.json() == {"detail": "Şu an yanıt üretilemiyor."}
 
 
-def test_chat_without_configuration_returns_503(monkeypatch):
+def test_chat_without_configuration_returns_503(monkeypatch, auth):
     monkeypatch.setattr(
         "app.api.chat.get_settings",
         lambda: Settings(azure_openai_endpoint="", azure_openai_api_key=""),
     )
-    response = client.post("/api/chat", json={"message": "merhaba"})
+    response = client.post("/api/chat", json={"message": "merhaba"}, headers=auth)
     assert response.status_code == 503
 
 

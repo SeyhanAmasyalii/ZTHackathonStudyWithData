@@ -2,11 +2,13 @@
 
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
-import { MAX_MESSAGE_LENGTH, sendChat } from "@/lib/api";
+import { MAX_MESSAGE_LENGTH, sendChat, UnauthorizedError } from "@/lib/api";
 
 type Message = { id: number; role: "user" | "assistant"; text: string };
 
-export function Chat() {
+type ChatProps = { token: string; onUnauthorized: () => void };
+
+export function Chat({ token, onUnauthorized }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,8 +34,12 @@ export function Chat() {
     setError(null);
     setLoading(true);
     try {
-      addMessage("assistant", await sendChat(text));
+      addMessage("assistant", await sendChat(text, token));
     } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        onUnauthorized();
+        return;
+      }
       setError(err instanceof Error ? err.message : "Bir hata oluştu.");
     } finally {
       setLoading(false);

@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.auth import get_current_user
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.config import Settings, get_settings
 from app.models.chat import ChatRequest, ChatResponse
@@ -12,6 +13,7 @@ from app.repositories.datav2 import (
     load_institutions,
     load_screens,
 )
+from app.repositories.users import DemoUser
 from app.services.chat import answer
 from app.services.tools import ToolContext
 
@@ -31,11 +33,13 @@ def get_llm() -> LLMClient:
 @router.post("/chat", response_model=ChatResponse)
 def chat(
     request: ChatRequest,
+    # Sıra önemli: önce oturum kontrolü (401), sonra model bağlantısı (503).
+    user: Annotated[DemoUser, Depends(get_current_user)],
     llm: Annotated[LLMClient, Depends(get_llm)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> ChatResponse:
     context = ToolContext(
-        user_name=settings.demo_user,
+        user_name=user.user_name,
         now=settings.now(),
         logs=load_error_logs(settings.data_dir),
         incidents=load_incidents(settings.data_dir),

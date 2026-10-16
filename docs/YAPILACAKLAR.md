@@ -9,6 +9,7 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] Ekran ve kurumu anlamca seçme (açıklamalar + kurum listesi prompt'ta)
 - [x] `LLM_DEBUG=true` ile modele giden/dönen içeriğin loglanması
 - [x] `cagri_ara` aracı: geçmiş kapanmış çağrılar ve çözümleri → çözüm önerisi
+- [x] Giriş ekranı: demo kullanıcı seçimi, imzalı oturum token'ı; sohbetteki kullanıcı token'dan
 
 ## Sırada
 - [ ] Frontend: cevaplardaki Markdown'ı biçimlendirme (`**kalın**`, madde işaretleri şu an düz metin görünüyor)
@@ -16,5 +17,4 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 ## Sonra
 - [ ] Azure SQL: `datav2` JSON'larını SQL'e taşıma (`backend/app/repositories/datav2.py` yerine SQL deposu)
 - [ ] Azure'a yükleme (App Service: `mercek-web`, `mercek-api`) ve `.github/workflows/ci-cd.yml`
-- [ ] Giriş ekranı: `DEMO_USER` yerine oturumdaki kullanıcı
 - [ ] KVKK: modele gitmeden önce kişisel veri maskeleme
