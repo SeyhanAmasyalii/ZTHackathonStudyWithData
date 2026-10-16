@@ -1,0 +1,9 @@
+[
+  {"department_id": "KREDI_KULLANDIRIM", "name": "Kredi Kullandırım Departmanı", "description": "Yeni kredi kullandırım, ödeme planı hesaplama, uygunluk kuralları"},
+  {"department_id": "KREDI_TAKIP",       "name": "Kredi Takip Departmanı",       "description": "Aktif krediler, taksit vadeleri, gecikme takibi, zamanlanmış kredi işleri"},
+  {"department_id": "MUSTERI_YONETIM",   "name": "Müşteri Yönetim Departmanı",   "description": "Müşteri bilgileri, adres, iletişim kanalları ve izinler, kimlik doğrulama"},
+  {"department_id": "FATURA_ODEME",      "name": "Fatura Ödeme Departmanı",      "description": "Fatura sorgulama ve ödeme, kurum entegrasyonları"},
+  {"department_id": "HESAP_YONETIM",     "name": "Hesap Yönetim Departmanı",     "description": "Hesap açılışı, bakiye, hesap hareketleri, IBAN"},
+  {"department_id": "KART_BASVURU",      "name": "Kart Başvuru Departmanı",      "description": "Kredi kartı başvurusu, limit kararı, kart listesi"},
+  {"department_id": "ODEME_SISTEMLERI",  "name": "Ödeme Sistemleri Departmanı",  "description": "Havale, EFT ve para transferi altyapısı"}
+]
