@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.config import TURKEY_TZ
-from app.repositories.datav2 import LogEntry, normalize
+from app.repositories.datav2 import Incident, LogEntry, normalize
 
 MAX_RANGE = timedelta(days=7)
 MAX_SAMPLES = 20
@@ -54,7 +54,33 @@ KIBANA_SORGULA = {
     },
 }
 
-TOOLS = [KIBANA_SORGULA]
+CAGRI_ARA = {
+    "type": "function",
+    "function": {
+        "name": "cagri_ara",
+        "description": (
+            "Aynı ekran ve hata numarasıyla geçmişte açılmış çağrıları döner: kapanan çağrıların "
+            "hangi hazır çözümle kapatıldığı (çözüm metniyle), açık çağrı sayısı ve en yeni 5 "
+            "örnek çağrı."
+        ),
+        "parameters": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["screen_code", "error_number"],
+            "properties": {
+                "screen_code": {"type": "string", "description": "Ekran kodu, ör. ODMTTLMT"},
+                "error_number": {"type": "integer", "description": "Hata numarası, ör. 110731"},
+                "institution_code": {
+                    "type": "string",
+                    "description": "İsteğe bağlı kurum filtresi; önce bunsuz arayın",
+                },
+            },
+        },
+    },
+}
+
+TOOLS = [KIBANA_SORGULA, CAGRI_ARA]
+MAX_INCIDENT_SAMPLES = 5
 
 
 class ToolInputError(ValueError):
@@ -66,6 +92,7 @@ class ToolContext:
     user_name: str
     now: datetime
     logs: tuple[LogEntry, ...]
+    incidents: tuple[Incident, ...] = ()
 
 
 def _parse_time(value: Any, name: str) -> datetime:
@@ -155,7 +182,67 @@ def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]
     }
 
 
-_HANDLERS = {"kibana_sorgula": kibana_sorgula}
+def cagri_ara(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    screen_code = _optional_str(args, "screen_code")
+    if screen_code is None:
+        raise ToolInputError("screen_code gerekli")
+    error_number = args.get("error_number")
+    if not isinstance(error_number, int) or isinstance(error_number, bool):
+        raise ToolInputError("error_number tam sayı olmalı")
+    institution_code = _optional_str(args, "institution_code")
+
+    found = [
+        incident
+        for incident in context.incidents
+        if incident.created_at <= context.now
+        and incident.screen_code == screen_code.upper()
+        and incident.error_number == error_number
+        and (institution_code is None or incident.institution_code == institution_code.upper())
+    ]
+    closed = [incident for incident in found if incident.status == "kapali"]
+    by_solution: dict[str | None, list[Incident]] = {}
+    for incident in closed:
+        by_solution.setdefault(incident.solution_template_id, []).append(incident)
+
+    return {
+        "query": {
+            "screen_code": screen_code,
+            "error_number": error_number,
+            "institution_code": institution_code,
+        },
+        "total": len(found),
+        "closed": len(closed),
+        "open": len(found) - len(closed),
+        "by_solution": [
+            {
+                "solution_template_id": template_id,
+                "title": group[0].solution_title,
+                "count": len(group),
+                "institutions": sorted({i.institution_code for i in group if i.institution_code}),
+                "closure_code": group[0].closure_code,
+                "sub_closure_code": group[0].sub_closure_code,
+                "solution_text": group[0].solution_text,
+            }
+            for template_id, group in sorted(
+                by_solution.items(), key=lambda item: len(item[1]), reverse=True
+            )
+        ],
+        "samples": [
+            {
+                "incident_id": incident.incident_id,
+                "created_at": incident.created_at.strftime("%Y-%m-%d"),
+                "status": incident.status,
+                "institution_code": incident.institution_code,
+                "note": incident.note,
+                "solution_template_id": incident.solution_template_id,
+                "resolution_note": incident.resolution_note,
+            }
+            for incident in reversed(found[-MAX_INCIDENT_SAMPLES:])
+        ],
+    }
+
+
+_HANDLERS = {"kibana_sorgula": kibana_sorgula, "cagri_ara": cagri_ara}
 
 
 def run_tool(name: str, arguments: str, context: ToolContext) -> dict[str, Any]:

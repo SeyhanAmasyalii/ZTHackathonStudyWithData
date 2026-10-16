@@ -151,3 +151,55 @@ def test_keyword_matches_bill_type_institution_and_turkish_variants(context, key
         context,
     )
     assert result["total"] == 7
+
+
+@pytest.fixture
+def incident_context(data_dir):
+    from app.repositories.datav2 import load_incidents
+
+    return ToolContext(
+        user_name="elif",
+        now=NOW,
+        logs=load_error_logs(data_dir),
+        incidents=load_incidents(data_dir),
+    )
+
+
+def test_cagri_ara_baskentgaz_timeout_history(incident_context):
+    result = run_tool(
+        "cagri_ara", '{"screen_code": "ODMTTLMT", "error_number": 110731}', incident_context
+    )
+    assert (result["total"], result["closed"], result["open"]) == (6, 6, 0)
+    [solution] = result["by_solution"]
+    assert solution["solution_template_id"] == "SOL-031"
+    assert solution["count"] == 6
+    assert solution["closure_code"] == "DIS_KURUM_KAYNAKLI"
+    assert "Kesinti bitince bekleyen işlemleri tekrar ettir" in solution["solution_text"]
+    assert "GAZ02" not in solution["institutions"]  # geçmiş kesintiler başka kurumlarda
+    assert len(result["samples"]) == 5
+
+
+def test_cagri_ara_iski_subscriber_history(incident_context):
+    result = run_tool(
+        "cagri_ara",
+        '{"screen_code": "ODMTTLMT", "error_number": 110412, "institution_code": "su01"}',
+        incident_context,
+    )
+    assert (result["total"], result["closed"], result["open"]) == (12, 10, 2)
+    assert [s["solution_template_id"] for s in result["by_solution"]] == ["SOL-005"]
+    assert result["by_solution"][0]["title"] == "Abone numarası hatalı girilmiş"
+
+
+def test_cagri_ara_no_history(incident_context):
+    result = run_tool(
+        "cagri_ara", '{"screen_code": "ODMTTLMT", "error_number": 999999}', incident_context
+    )
+    assert (result["total"], result["by_solution"], result["samples"]) == (0, [], [])
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    ['{"error_number": 110731}', '{"screen_code": "ODMTTLMT", "error_number": "110731"}'],
+)
+def test_cagri_ara_invalid_arguments(incident_context, arguments):
+    assert "error" in run_tool("cagri_ara", arguments, incident_context)

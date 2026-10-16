@@ -31,6 +31,24 @@ class LogEntry:
 
 
 @dataclass(frozen=True)
+class Incident:
+    incident_id: str
+    created_at: datetime
+    status: str  # acik / kapali
+    screen_code: str
+    error_number: int | None  # bağlı logdan
+    error_code: str | None
+    institution_code: str | None
+    note: str
+    resolution_note: str
+    closure_code: str | None
+    sub_closure_code: str | None
+    solution_template_id: str | None
+    solution_title: str
+    solution_text: str
+
+
+@dataclass(frozen=True)
 class Screen:
     code: str
     name: str
@@ -86,10 +104,19 @@ def _to_entry(
     )
 
 
+def _read(data_dir: Path, name: str) -> list[dict]:
+    return json.loads((data_dir / name).read_text(encoding="utf-8"))
+
+
+@lru_cache
+def _kibana_rows(data_dir: Path) -> tuple[dict, ...]:
+    return tuple(_read(data_dir, "kibana_logs.json"))
+
+
 @lru_cache
 def load_error_logs(data_dir: Path) -> tuple[LogEntry, ...]:
     """kibana_logs.json içinden yalnızca Warning/Error kayıtları, zamana göre sıralı."""
-    rows = json.loads((data_dir / "kibana_logs.json").read_text(encoding="utf-8"))
+    rows = _kibana_rows(data_dir)
     screen_names = {screen.code: screen.name for screen in load_screens(data_dir)}
     institution_names = {inst.code: inst.name for inst in load_institutions(data_dir)}
     entries = [
@@ -125,3 +152,41 @@ def load_institutions(data_dir: Path) -> tuple[Institution, ...]:
         for row in rows
     )
     return tuple(sorted(institutions, key=lambda institution: institution.code))
+
+
+@lru_cache
+def load_incidents(data_dir: Path) -> tuple[Incident, ...]:
+    """Çağrılar; hata numarası bağlı logdan, çözüm metni hazır çözüm şablonundan."""
+    log_errors = {
+        row["correlation_id"]: (
+            row.get("app_exception_value"),
+            _json_field(row.get("message_response")).get("errorCode"),
+        )
+        for row in _kibana_rows(data_dir)
+    }
+    templates = {
+        row["solution_template_id"]: row for row in _read(data_dir, "solution_templates.json")
+    }
+    incidents = []
+    for row in _read(data_dir, "incidents.json"):
+        error_number, error_code = log_errors.get(row.get("kibana_correlation_id"), (None, None))
+        template = templates.get(row.get("solution_template_id") or "", {})
+        incidents.append(
+            Incident(
+                incident_id=row["incident_id"],
+                created_at=datetime.fromisoformat(row["created_at"]),
+                status=row["status"],
+                screen_code=row.get("screen_code") or "",
+                error_number=error_number,
+                error_code=error_code or row.get("mercek_assigned_error_code"),
+                institution_code=row.get("institution_code"),
+                note=row.get("note") or "",
+                resolution_note=row.get("resolution_note") or "",
+                closure_code=row.get("closure_code"),
+                sub_closure_code=row.get("sub_closure_code"),
+                solution_template_id=row.get("solution_template_id"),
+                solution_title=template.get("mercek_assigned_title") or "",
+                solution_text=template.get("solution_text") or "",
+            )
+        )
+    return tuple(sorted(incidents, key=lambda incident: incident.created_at))
