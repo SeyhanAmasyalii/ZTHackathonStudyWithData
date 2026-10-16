@@ -38,9 +38,9 @@ Portal → **Kaynak oluştur** → **Web App**
 - Ad: `<api>` · Yayımla: **Kod** · Çalışma zamanı yığını: **Python 3.12** · İşletim sistemi: Linux · Plan: `mercek-plan`
 - **Oluştur** → kaynağa git
 
-**Ayarlar → Yapılandırma → Genel ayarlar**
-- Başlangıç komutu: `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`
-- Always On: **Açık** · HTTPS Only: **Açık** → Kaydet
+**Ayarlar → Yapılandırma → Yığın ayarları** → **Önyükleme komutu** (başlangıç komutu): `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000` → Uygula
+
+**Ayarlar → Yapılandırma → Genel ayarlar** → Always On: **Açık** · Yalnızca HTTPS: **Açık** → Uygula
 
 **Ayarlar → Ortam değişkenleri → Uygulama ayarları** (her biri ayrı satır, sonra **Uygula**)
 
@@ -55,16 +55,15 @@ Portal → **Kaynak oluştur** → **Web App**
 
 İsteğe bağlı: `DEMO_NOW` (varsayılan `2026-10-17T09:15:00+03:00`), `LLM_DEBUG` (**Azure'da `false` kalmalı**).
 
-**İzleme → Sistem durumu denetimi** → Etkinleştir → Yol: `/api/health` → Kaydet
+**Yapılandırma → Sistem durumu denetimi** (ya da İzleme → Sistem durumu denetimi) → Etkinleştir → Yol: `/api/health` → Kaydet
 
 ## 3. Frontend uygulaması `<web>` (5 dk)
 
 Portal → **Kaynak oluştur** → **Web App**
 - Ad: `<web>` · Yayımla: **Kod** · Çalışma zamanı yığını: **Node 22 LTS** · Linux · Plan: `mercek-plan`
 
-**Genel ayarlar**
-- Başlangıç komutu: `node server.js`
-- Always On: **Açık** · HTTPS Only: **Açık**
+**Yapılandırma → Yığın ayarları** → Önyükleme komutu: `node server.js`
+**Yapılandırma → Genel ayarlar** → Always On: **Açık** · Yalnızca HTTPS: **Açık**
 
 **Ortam değişkenleri**
 
