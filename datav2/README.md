@@ -13,3 +13,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `closure_codes.json` | closure_codes | 62 (20 ana + 42 alt) | ✅ onaylandı |
 | `org_units.json` | org_units | 19 (5 S + 4 B + 10 G) | ✅ onaylandı · demo birimleri: Elif 601, Zeynep 9009, Kerem 9010, Fatma 9001, Hakan 9002 |
 | `institutions.json` | institutions | 16 (15 fatura + VRG01 Gelir İdaresi) | ✅ onaylandı · B: GAZ02 · C: SU01 · G: SU02; abone no uzunluğu bilerek yok |
+| `institution_screens.json` | institution_screens | 16 (tüm kurumlar → ODMTTLMT / talimat) | ✅ onaylandı · VRG01: MTV vb. vergi talimatı; usage enum: odeme/sorgu/gecmis/talimat |

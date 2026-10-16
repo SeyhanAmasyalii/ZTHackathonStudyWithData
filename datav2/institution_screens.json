@@ -1,0 +1,82 @@
+[
+  {
+    "institution_code": "ELK01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "ELK02",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "ELK03",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "SU01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "SU02",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "SU03",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GAZ01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GAZ02",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GAZ03",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "INT01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "INT02",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "INT03",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GSM01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GSM02",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "GSM03",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  },
+  {
+    "institution_code": "VRG01",
+    "screen_code": "ODMTTLMT",
+    "usage": "talimat"
+  }
+]
