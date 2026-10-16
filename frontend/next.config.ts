@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Azure App Service: .next/standalone + `node server.js` (scripts/package_azure.py paketler).
+  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

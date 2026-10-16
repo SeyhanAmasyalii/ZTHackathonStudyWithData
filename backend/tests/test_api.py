@@ -179,3 +179,18 @@ def test_chat_rejects_invalid_history(fake_llm, auth, history):
     response = client.post("/api/chat", json={"message": "x", "history": history}, headers=auth)
     assert response.status_code == 422
     assert fake_llm.calls == []
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ('["https://a.azurewebsites.net"]', ["https://a.azurewebsites.net"]),
+        (
+            "https://a.azurewebsites.net, http://localhost:3000",
+            ["https://a.azurewebsites.net", "http://localhost:3000"],
+        ),
+    ],
+)
+def test_cors_origins_json_or_comma(monkeypatch, raw, expected):
+    monkeypatch.setenv("CORS_ORIGINS", raw)
+    assert Settings().cors_origins == expected

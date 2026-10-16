@@ -5,23 +5,23 @@ import logging
 from collections.abc import Sequence
 from datetime import datetime
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
 from app.clients.llm import LLMClient, LLMError
+from app.config import get_settings
 from app.models.chat import HistoryMessage
 from app.repositories.datav2 import Institution, Screen
 from app.services.tools import TOOLS, ToolContext, run_tool
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = Path(__file__).resolve().parents[3] / "prompts" / "mercek-chat.md"
 MAX_TURNS = 5
 
 
 @lru_cache
 def _prompt_template() -> str:
-    return PROMPT_PATH.read_text(encoding="utf-8").strip()
+    path = get_settings().prompts_dir / "mercek-chat.md"
+    return path.read_text(encoding="utf-8").strip()
 
 
 def build_system_prompt(
