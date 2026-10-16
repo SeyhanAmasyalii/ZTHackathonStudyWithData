@@ -1,0 +1,90 @@
+[
+  {
+    "calendar_id": "CAL-0001",
+    "department_id": "KREDI_TAKIP",
+    "demand_id": "TLP-1021",
+    "date_from": "2026-10-12",
+    "date_to": "2026-11-08",
+    "allocation_pct": 100
+  },
+  {
+    "calendar_id": "CAL-0002",
+    "department_id": "KREDI_KULLANDIRIM",
+    "demand_id": "TLP-1022",
+    "date_from": "2026-10-12",
+    "date_to": "2026-10-30",
+    "allocation_pct": 50
+  },
+  {
+    "calendar_id": "CAL-0003",
+    "department_id": "FATURA_ODEME",
+    "demand_id": "TLP-1023",
+    "date_from": "2026-10-19",
+    "date_to": "2026-10-23",
+    "allocation_pct": 40
+  },
+  {
+    "calendar_id": "CAL-0004",
+    "department_id": "KREDI_TAKIP",
+    "demand_id": "TLP-1024",
+    "date_from": "2026-12-21",
+    "date_to": "2026-12-31",
+    "allocation_pct": 50
+  },
+  {
+    "calendar_id": "CAL-0005",
+    "department_id": "KREDI_KULLANDIRIM",
+    "demand_id": "TLP-1025",
+    "date_from": "2026-11-16",
+    "date_to": "2026-11-27",
+    "allocation_pct": 60
+  },
+  {
+    "calendar_id": "CAL-0006",
+    "department_id": "MUSTERI_YONETIM",
+    "demand_id": "TLP-1026",
+    "date_from": "2026-10-26",
+    "date_to": "2026-11-06",
+    "allocation_pct": 30
+  },
+  {
+    "calendar_id": "CAL-0007",
+    "department_id": "MUSTERI_YONETIM",
+    "demand_id": "TLP-1027",
+    "date_from": "2026-11-23",
+    "date_to": "2026-12-04",
+    "allocation_pct": 20
+  },
+  {
+    "calendar_id": "CAL-0008",
+    "department_id": "FATURA_ODEME",
+    "demand_id": "TLP-1028",
+    "date_from": "2026-11-02",
+    "date_to": "2026-11-20",
+    "allocation_pct": 50
+  },
+  {
+    "calendar_id": "CAL-0009",
+    "department_id": "HESAP_YONETIM",
+    "demand_id": "TLP-1029",
+    "date_from": "2026-10-12",
+    "date_to": "2026-11-13",
+    "allocation_pct": 70
+  },
+  {
+    "calendar_id": "CAL-0010",
+    "department_id": "KART_YONETIM",
+    "demand_id": "TLP-1030",
+    "date_from": "2026-10-19",
+    "date_to": "2026-11-27",
+    "allocation_pct": 80
+  },
+  {
+    "calendar_id": "CAL-0011",
+    "department_id": "HESAP_YONETIM",
+    "demand_id": "TLP-1031",
+    "date_from": "2026-10-12",
+    "date_to": "2026-12-18",
+    "allocation_pct": 30
+  }
+]

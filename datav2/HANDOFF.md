@@ -75,7 +75,7 @@ Tüm JSON'lar bitince: `datav2` → `data/seed` ve üreticiler; kod (db.py, sche
 - **D:** KRDTTAHS'a hatırlatma butonu (Kredi Takip ana, Müşteri Yönetim etkileşimli) → TLP-1043, ADD-SMS önerisi (%42 e-postasız), 18→20 a/g, takvim 09.11→04.12. Kanıt: 12 ayda 2.340 müşteri / 3.249 kredi gecikme; bugün 1.562 gecikmede.
 - **E:** Erteleme ekranı (KRDTERTL katalogda yok) → TLP-1044, bölgede 4.870 kredili müşteri, 3.973 SMS izinli (en az bir kanal 4.516) → ADD-PROAKTIF-SMS; kapasite çatışması TLP-1021. Gerçek afet/il/tarih gösterilmez.
 - **F:** Günün en sorunlu ekranı.
-- **G:** ASKİ Ocak 2027 duyurusu (DUY-0419) → hata olmadan proaktif talep TLP-1045 (origin mercek, status oneri, ~4 a/g, FATURA_ODEME 09.11→20.11).
+- **G:** ASKİ Ocak 2027 duyurusu (DUY-0419) → hata olmadan proaktif talep TLP-1045 (origin mercek, status oneri, ~4 a/g, FATURA_ODEME 19.10→23.10 — 16.10 kararı; eski '09.11→20.11' E'den yanlış kopyalanmıştı).
 - Demo kullanıcıları: Elif (şube), Zeynep (çağrı merkezi), Kerem (L2/kural onayı), Fatma (analist/talep), Hakan.
 
 ## 7. Kesin kurallar
