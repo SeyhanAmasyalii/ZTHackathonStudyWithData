@@ -29,7 +29,7 @@ Aşağıda `<api>` = `mercek-api-<takım>`, `<web>` = `mercek-web-<takım>`.
 Portal → **Kaynak oluştur** → **App Service planı**
 - Resource group: takımınki · Ad: `mercek-plan` · İşletim sistemi: **Linux** · Bölge: Foundry ile aynı
 - Fiyat: **Basic B1** (izin verilen en düşük ücretli plan; Free F1'de "Always On" yok)
-  - Deneme için **Free F1** de olur: Always On yok (bir süre istek gelmezse uygulama uyur, ilk açılış 20–60 sn), günlük CPU kotası 60 dk. Bu durumda aşağıdaki "Always On" adımlarını atlayın.
+  - Deneme için **Free F1** de olur: Always On yok (bir süre istek gelmezse uygulama uyur, ilk açılış 20–60 sn), günlük CPU kotası 60 dk. Sistem durumu denetimi de B1 ister. Bu durumda aşağıdaki "Always On" ve "Sistem durumu denetimi" adımlarını atlayın (`/api/health` yine çalışır).
 - **Gözden geçir + oluştur**
 
 ## 2. Backend uygulaması `<api>` (5 dk)
