@@ -130,7 +130,7 @@ Mevcut: addon_id, name, effort_md, main_share, customer_mgmt_share. 5 kayıt (AD
 
 ## B. Ana tablolar
 
-### customers 🟡 (40.000)
+### customers ✅ (`customers.json`, 40.000 + 5 demo)
 | Kolon | Açıklama | Örnek |
 |---|---|---|
 | customer_number | Müşteri no | `10000101` |
@@ -145,8 +145,8 @@ Mevcut: addon_id, name, effort_md, main_share, customer_mgmt_share. 5 kayıt (AD
 
 Kaldırılanlar: age, region_affected (bölge = city ∈ affected_region), address_changed_at (37 adres değişikliği MUSTGUNC loglarına taşınır), in_logs.
 
-### loans 🟡 (33.000) — değişmedi
-loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, installment, paid_installments, next_due_date, status (normal/gecikmede), delinquent_12m, collection_account.
+### loans ✅ (`loans.json`, 33.000)
+loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, installment, paid_installments, next_due_date, status (normal/gecikmede), delinquent_12m. `collection_account` **kaldırıldı** (senaryoda kullanılmıyor, IBAN KVKK taramasına takılır). Demo kredileri: Zeynep KRD00006571 gecikmede, Kerem KRD00006218 normal; Elif'in kredisi yok (A).
 
 ### kibana_logs 🟡 (eski banking_logs)
 | Kolon | Açıklama |

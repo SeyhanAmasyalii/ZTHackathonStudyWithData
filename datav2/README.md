@@ -17,3 +17,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `channels.json` | channels | 6 | ✅ onaylandı · 5 Servis → çağrı açılmaz · 6 İş Birimi (G birimleri, branch_type G) → is_birimi · dijitalde (3, 4) çağrıyı Mercek açar, reporter 9999 |
 | `incident_categories.json` | incident_categories | 19 (7 kategori) | ✅ onaylandı · screen_code kolonu eklendi (Diğer: `*`) · "Fatura ödeme" → "Fatura talimatı" · temas ve ekranı olmayan alt kategoriler çıkarıldı |
 | `customers.json` | customers | 40.005 (40.000 + 5 demo) | ✅ onaylandı · üretici `generators/customers.py` · sayılar `customers.stats.json` (D 2.340/3.249/%42 · E 4.870/3.973/4.516 · 37 adres değişikliği) |
+| `loans.json` | loans | 33.000 | ✅ onaylandı · üretici `generators/loans.py` · collection_account kaldırıldı · demo: Zeynep KRD00006571 gecikmede, Kerem KRD00006218 normal, Elif kredisiz (A) |
