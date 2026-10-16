@@ -148,7 +148,7 @@ Kaldırılanlar: age, region_affected (bölge = city ∈ affected_region), addre
 ### loans ✅ (`loans.json`, 33.000)
 loan_id, customer_number, product, principal, remaining_principal, monthly_rate, term, installment, paid_installments, next_due_date, status (normal/gecikmede), delinquent_12m. `collection_account` **kaldırıldı** (senaryoda kullanılmıyor, IBAN KVKK taramasına takılır). Demo kredileri: Zeynep KRD00006571 gecikmede, Kerem KRD00006218 normal; Elif'in kredisi yok (A).
 
-### kibana_logs 🟡 (eski banking_logs)
+### kibana_logs ✅ (`kibana_logs.json`, 10.555; eski banking_logs)
 | Kolon | Açıklama |
 |---|---|
 | log_id | Kayıt no (IDENTITY) |
@@ -176,7 +176,7 @@ loan_id, customer_number, product, principal, remaining_principal, monthly_rate,
 | customer_id, customer_branch_id | Müşteri no ve şubesi |
 | session_id, session_start_date | Oturum |
 | event_original | Ham kayıt (kişisel veri ve altyapı bilgisi temizlenmiş) |
-| mercek_assigned_error_number | Mercek'in çözdüğü hata numarası |
+| mercek_assigned_error_number | Mercek'in çözdüğü hata numarası (kuralsız telefon hatalarında 150130 PHONE_FORMAT_INVALID) |
 
 Yok: kibana_index, request_id, source (demo kaydı = timestamp > 17.10 09:00), ClientIp, ServerInfo, ComputerName, ConnectionId, MachineId, ADUserName, CallerInfoJson, CommandInfo, ScreenOpeningMode, ScreenVersion, ZfuContext, BankId, BranchCountryId, Environment, @version, _score, _type, _index.
 
