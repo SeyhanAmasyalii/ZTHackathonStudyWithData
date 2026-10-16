@@ -124,7 +124,7 @@ export EMBEDDING_DEPLOYMENT=embedding EMBEDDING_MODEL=text-embedding-3-small EMB
 | Belirti | Olası neden | Çözüm |
 |---|---|---|
 | Indexer `persistentFailure`: "Change tracking is not enabled" | Tablolar yeniden yaratıldı, takip kapandı | `load_all.py --sql` tekrar (takibi kendisi açar), sonra `--search` |
-| "Login failed for user '<token-identified principal>'" | Adım 3 yapılmadı ya da Search kimliği kapalı | Adım 1 ve 3 |
+| `Login failed for user '<token-identified principal>'` | Adım 3 yapılmadı ya da Search kimliği kapalı | Adım 1 ve 3 |
 | Skillset hatası 401/403 | Foundry rolü yok ya da anahtar yanlış | Adım 4 veya `AZURE_OPENAI_API_KEY` |
 | "Vector dimension mismatch" | `EMBEDDING_DIM` modelle uyuşmuyor | Deploy'daki modele göre düzelt, `--search` tekrar |
 | İndekste yeni kayıt yok | 5 dakika dolmadı | `load_all.py --sync` |
