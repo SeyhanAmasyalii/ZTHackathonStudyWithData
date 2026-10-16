@@ -1,0 +1,116 @@
+[
+  {
+    "unit_id": 101,
+    "name": "Kadıköy",
+    "unit_type": "S",
+    "city": "İstanbul"
+  },
+  {
+    "unit_id": 102,
+    "name": "Levent",
+    "unit_type": "S",
+    "city": "İstanbul"
+  },
+  {
+    "unit_id": 601,
+    "name": "Kızılay",
+    "unit_type": "S",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 3501,
+    "name": "Alsancak",
+    "unit_type": "S",
+    "city": "İzmir"
+  },
+  {
+    "unit_id": 9999,
+    "name": "Dijital Şube",
+    "unit_type": "S",
+    "city": null
+  },
+  {
+    "unit_id": 8001,
+    "name": "İstanbul Avrupa Bölge Müdürlüğü",
+    "unit_type": "B",
+    "city": "İstanbul"
+  },
+  {
+    "unit_id": 8002,
+    "name": "İstanbul Anadolu Bölge Müdürlüğü",
+    "unit_type": "B",
+    "city": "İstanbul"
+  },
+  {
+    "unit_id": 8006,
+    "name": "Ankara Bölge Müdürlüğü",
+    "unit_type": "B",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 8035,
+    "name": "İzmir Bölge Müdürlüğü",
+    "unit_type": "B",
+    "city": "İzmir"
+  },
+  {
+    "unit_id": 9001,
+    "name": "Kredi Tahsilatları",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9002,
+    "name": "Bireysel Krediler",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9003,
+    "name": "Kart Ürünleri",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9004,
+    "name": "Ödeme Sistemleri",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9005,
+    "name": "Şube Operasyonları",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9006,
+    "name": "Dijital Bankacılık",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9007,
+    "name": "Müşteri Deneyimi",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9008,
+    "name": "Uyum ve İç Kontrol",
+    "unit_type": "G",
+    "city": "Ankara"
+  },
+  {
+    "unit_id": 9009,
+    "name": "Çağrı Merkezi",
+    "unit_type": "G",
+    "city": "İstanbul"
+  },
+  {
+    "unit_id": 9010,
+    "name": "BT Destek (L2)",
+    "unit_type": "G",
+    "city": "İstanbul"
+  }
+]
