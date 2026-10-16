@@ -58,6 +58,7 @@ Tüm veri sentetiktir (gerçek müşteri verisi yok); seed 42, veri sonu 17.10.2
 | 13 | [`docs/mercek-takim-anlatim-cumleleri.md`](docs/mercek-takim-anlatim-cumleleri.md) | Her dokümanın ana fikri tek cümlede ve akılda kalacak rakamlar | Toplantıyı yöneten, herkes |
 | 14 | [`docs/mercek-sentetik-veri-kaynaklari.md`](docs/mercek-sentetik-veri-kaynaklari.md) | Her verinin kaynağı: **elle** yazılanlar, **betikle** üretilenler (betik açıklamalarıyla), **uygulamanın** ürettikleri; durum ve çalıştırma sırası | Veri sorumluları, geliştiriciler |
 | 14b | [`docs/mercek-sql-search-esitleme.md`](docs/mercek-sql-search-esitleme.md) | Azure SQL → AI Search otomatik eşitleme: temel bilgiler, kurulum ve yetki adımları, demo akışı, sorun giderme | Veri ve Search sorumluları |
+| 14c | [`docs/mercek-azure-kurulum.md`](docs/mercek-azure-kurulum.md) ([PDF](docs/mercek-azure-kurulum.pdf)) | Azure kurulum adımları: SQL, Foundry, AI Search, yetkiler, yükleme ve eşitleme | Altyapı, veri ve Search sorumluları |
 | 15 | [`data/seed/`](data/seed), [`tools/`](tools) | Hazır veri ve betikler: V2 katalog ve duyurular, V3 log üretici ve senaryo enjeksiyonu (testleriyle) | Veri sorumluları |
 
 **Dokümanlar arası ilişki**

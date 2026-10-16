@@ -2,6 +2,8 @@
 
 Bu doküman, Azure SQL'deki çözüm, talep ve duyuru kayıtlarının **AI Search'e kendiliğinden nasıl aktığını** anlatır: temel bilgiler, kurulum adımları, yetkiler, demo akışı ve sorun giderme.
 
+Azure'da kurulacak kaynaklar ve adım adım kurulum: [`mercek-azure-kurulum.md`](mercek-azure-kurulum.md).
+
 Kod: `tools/mercek_data/search.py` (`setup_indexers`, `sync_now`), `load_all.py --search`, `db.py` (`search_text`, değişiklik takibi). Testler: `tools/mercek_data/tests/test_v7_v8.py`.
 
 ---
