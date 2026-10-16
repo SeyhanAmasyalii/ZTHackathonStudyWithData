@@ -1,4 +1,6 @@
-# M1 · 1. adım — Serbest metinden ipucu çıkarma (önce bunu yapın)
+# M1 · 1. adım — Serbest metinden ipucu çıkarma (genişletilmiş fiş)
+
+> **Önce [`m1-basit-akis.md`](m1-basit-akis.md) yapılır** (7 alanlı fiş, KVKK yok). Bu doküman sonraki sürümdür: müşteri no, `search_text`, `date_range_days`, KVKK maskeleme.
 
 > Backend ve Foundry geliştiricileri için. Prompt: [`prompts/varlik-cikar.md`](../prompts/varlik-cikar.md).
 > Vakit kalırsa eklenecekler (araç çağrısı, konuşma geçmişi): [`m1-adim-1-varlik-cikar.md`](m1-adim-1-varlik-cikar.md).
