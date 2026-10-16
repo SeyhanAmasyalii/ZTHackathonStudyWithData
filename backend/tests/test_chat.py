@@ -26,7 +26,10 @@ def screens(data_dir):
 def test_system_prompt_has_now_and_screens(screens):
     prompt = build_system_prompt(NOW, screens)
     assert "Şu an: 2026-10-17 09:15" in prompt
-    assert "ODMTTLMT · Fatura Talimat Bilgileri Giriş" in prompt
+    assert (
+        "ODMTTLMT · Fatura Talimat Bilgileri Giriş — Kurum ve abone numarasıyla otomatik fatura"
+        in prompt
+    )
     assert "{{" not in prompt
 
 

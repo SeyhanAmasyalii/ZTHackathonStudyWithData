@@ -26,6 +26,7 @@ class LogEntry:
 class Screen:
     code: str
     name: str
+    description: str
 
 
 def _json_field(raw: str | None) -> dict:
@@ -65,4 +66,5 @@ def load_error_logs(data_dir: Path) -> tuple[LogEntry, ...]:
 @lru_cache
 def load_screens(data_dir: Path) -> tuple[Screen, ...]:
     rows = json.loads((data_dir / "screens.json").read_text(encoding="utf-8"))
-    return tuple(sorted((Screen(row["code"], row["name"]) for row in rows), key=lambda s: s.code))
+    screens = (Screen(row["code"], row["name"], row.get("description") or "") for row in rows)
+    return tuple(sorted(screens, key=lambda screen: screen.code))

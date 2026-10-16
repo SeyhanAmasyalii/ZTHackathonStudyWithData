@@ -125,3 +125,13 @@ def test_invalid_arguments_return_error(context, arguments, error):
 
 def test_unknown_tool(context):
     assert run_tool("sil_her_seyi", "{}", context) == {"error": "Bilinmeyen araç: sil_her_seyi"}
+
+
+def test_without_screen_filter_finds_own_recent_errors(context):
+    """ "fatura ödemede sorun yaşıyorum": ekran filtresi olmadan kendi son 30 dakikası."""
+    result = kibana_sorgula(
+        {"start_time": "2026-10-17T08:45", "end_time": "2026-10-17T09:15", "only_mine": True},
+        context,
+    )
+    assert result["total"] == 7
+    assert result["by_error"][0]["screen_code"] == "ODMTTLMT"

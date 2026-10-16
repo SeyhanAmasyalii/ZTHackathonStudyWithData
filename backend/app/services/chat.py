@@ -23,7 +23,9 @@ def _prompt_template() -> str:
 
 
 def build_system_prompt(now: datetime, screens: tuple[Screen, ...]) -> str:
-    screen_lines = "\n".join(f"{screen.code} · {screen.name}" for screen in screens)
+    screen_lines = "\n".join(
+        f"{screen.code} · {screen.name} — {screen.description}" for screen in screens
+    )
     return (
         _prompt_template()
         .replace("{{now}}", now.strftime("%Y-%m-%d %H:%M"))
