@@ -111,7 +111,7 @@ AI'a ham log değil, **kodun ürettiği özet** verilir. Kullanıcı metni ve lo
 | Faz | İş | Kabul |
 |---|---|---|
 | **F0** | Monorepo iskeleti (rebuild Faz 1) + `.github/workflows/ci-cd.yml` (lint → test → build → deploy, OIDC ya da publish profile) + `/api/health` | PR'da quality yeşil, main'de deploy + smoke test yeşil, CodeQL dosyası değişmemiş |
-| **F1** | `db/schema.sql` (SCHEMA.md'den) + `tools/load_datav2.py` (JSON → SQL, parametreli toplu yükleme; customers 40.005, loans 33.000, kibana_logs 10.555) + `search_text` hesaplanan kolonlar + change tracking | Satır sayıları README tablosuyla aynı |
+| **F1** | `db/schema.sql` (SCHEMA.md'den) + `scripts/load_datav2.py` (JSON → SQL, parametreli toplu yükleme; customers 40.005, loans 33.000, kibana_logs 10.555) + `search_text` hesaplanan kolonlar + change tracking | Satır sayıları README tablosuyla aynı |
 | **F2** | AI Search: 3 indeks, SQL indexer + embedding (integrated vectorization ya da push betiği) | `solution_templates` 37 · `announcements` 18 · `inbound_emails` 34 belge |
 | **F3** | `clients/llm.py` (`chat_json` şemalı + 1 yeniden deneme, `embed`), `prompts/` dosyaları, KVKK tarama/maskeleme yardımcısı | Birim testleri (FakeLLM) yeşil; KVKK taraması `datav2`'de yalnızca EML-0032'yi bulur |
 | **F4** | Temel uygulama (rebuild Faz 2–4): demo kullanıcıları, 9 bankacılık ekranı (ekran kodu çubuğu), `POST /api/logs` → `kibana_logs` | Ekran işlemi SQL'de yeni log satırı üretir |
@@ -121,7 +121,7 @@ AI'a ham log değil, **kodun ürettiği özet** verilir. Kullanıcı metni ve lo
 | **F8** | **M1.4** eşleştirme (eşik kodda), duyuru araması, **e-posta araması** (işlenmemiş kurum e-postaları), kod analizi (`files_json` haritası, path traversal korumalı), proaktif bulgu | B ≥ %90 eşleşme (SOL-031), C eşleşme yok → EML-0022 + kod konumu |
 | **F9** | **M1.5** Joyride "Bana göster" (KRDTKULL, 330.000 TL / 36 ay) | Tur ekranı doldurur |
 | **F10** | **M1.6** etki kartları, **M1.7** günlük özet | Sayılar SQL'den |
-| **F11** | `tools/demo_reset.py` (demo kayıtlarını siler: `log_time > 2026-10-17 09:00`, CAG-2051*, CAG-2052, prevented_calls) + `tools/validate_scenarios.py` (§6 tablosu) | Doğrulama raporu tamamen yeşil |
+| **F11** | `scripts/demo_reset.py` (demo kayıtlarını siler: `log_time > 2026-10-17 09:00`, CAG-2051*, CAG-2052, prevented_calls) + `scripts/validate_scenarios.py` (§6 tablosu) | Doğrulama raporu tamamen yeşil |
 
 ---
 

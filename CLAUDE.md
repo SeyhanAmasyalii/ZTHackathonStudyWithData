@@ -9,7 +9,7 @@ Ayrıntılı plan, fazlar (F0–F11) ve senaryo kabul kriterleri: **`datav2/M1-G
 
 ## Veri
 - Veri kaynağı **yalnızca `datav2/`** (JSON + `generators/`). `data/seed`, `data/out`, `tools/`, `tools/output` eski şemada: yalnızca fikir için okunabilir; **veri ya da kod kaynağı olarak kullanma, değiştirme.**
-- Uygulama kodu yeni klasörlerde: `frontend/`, `backend/`, `db/`, `prompts/`, `tools/mercek/` (yeni betikler).
+- Uygulama kodu yeni klasörlerde: `frontend/`, `backend/`, `db/`, `prompts/`, `scripts/` (yeni betikler).
 
 ## Mimari
 - Next.js 16 (`mercek-web`) + FastAPI (`mercek-api`, `/api/health` → 200), Azure SQL, Azure AI Search (hibrit RAG), Azure AI Foundry (`chat`, `embedding`).
