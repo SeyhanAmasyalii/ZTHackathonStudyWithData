@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from app.clients.llm import LLMClient, LLMError
-from app.repositories.datav2 import Screen
+from app.repositories.datav2 import Institution, Screen
 from app.services.tools import TOOLS, ToolContext, run_tool
 
 logger = logging.getLogger(__name__)
@@ -22,14 +22,22 @@ def _prompt_template() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8").strip()
 
 
-def build_system_prompt(now: datetime, screens: tuple[Screen, ...]) -> str:
+def build_system_prompt(
+    now: datetime, screens: tuple[Screen, ...], institutions: tuple[Institution, ...]
+) -> str:
     screen_lines = "\n".join(
         f"{screen.code} · {screen.name} — {screen.description}" for screen in screens
+    )
+    institution_lines = "\n".join(
+        f"{inst.code} · {inst.name} ({inst.bill_type}) → ekran: "
+        f"{', '.join(inst.screen_codes) or '-'}"
+        for inst in institutions
     )
     return (
         _prompt_template()
         .replace("{{now}}", now.strftime("%Y-%m-%d %H:%M"))
         .replace("{{screens}}", screen_lines)
+        .replace("{{institutions}}", institution_lines)
     )
 
 
@@ -38,9 +46,10 @@ def answer(
     llm: LLMClient,
     context: ToolContext,
     screens: tuple[Screen, ...],
+    institutions: tuple[Institution, ...],
 ) -> str:
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": build_system_prompt(context.now, screens)},
+        {"role": "system", "content": build_system_prompt(context.now, screens, institutions)},
         {"role": "user", "content": message.strip()},
     ]
     for turn in range(MAX_TURNS):

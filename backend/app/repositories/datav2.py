@@ -29,6 +29,14 @@ class Screen:
     description: str
 
 
+@dataclass(frozen=True)
+class Institution:
+    code: str
+    name: str
+    bill_type: str
+    screen_codes: tuple[str, ...]
+
+
 def _json_field(raw: str | None) -> dict:
     if not raw:
         return {}
@@ -68,3 +76,23 @@ def load_screens(data_dir: Path) -> tuple[Screen, ...]:
     rows = json.loads((data_dir / "screens.json").read_text(encoding="utf-8"))
     screens = (Screen(row["code"], row["name"], row.get("description") or "") for row in rows)
     return tuple(sorted(screens, key=lambda screen: screen.code))
+
+
+@lru_cache
+def load_institutions(data_dir: Path) -> tuple[Institution, ...]:
+    """Fatura kurumları ve işlem gördükleri ekranlar (institution_screens)."""
+    rows = json.loads((data_dir / "institutions.json").read_text(encoding="utf-8"))
+    links = json.loads((data_dir / "institution_screens.json").read_text(encoding="utf-8"))
+    screens_by_code: dict[str, list[str]] = {}
+    for link in links:
+        screens_by_code.setdefault(link["institution_code"], []).append(link["screen_code"])
+    institutions = (
+        Institution(
+            code=row["institution_code"],
+            name=row["name"],
+            bill_type=row.get("bill_type") or "",
+            screen_codes=tuple(sorted(set(screens_by_code.get(row["institution_code"], [])))),
+        )
+        for row in rows
+    )
+    return tuple(sorted(institutions, key=lambda institution: institution.code))
