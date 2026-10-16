@@ -7,7 +7,11 @@ FastAPI. Mercek sohbet mesajını Azure AI Foundry'deki modele (`gpt-5.5`) ileti
 | `GET /api/health` | `{"status": "ok"}` |
 | `POST /api/chat` | `{"message": "..."}` → `{"reply": "..."}` |
 
-Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı) → `app/clients` (model). System prompt: `../prompts/mercek-chat.md`.
+Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `app/repositories` (`datav2` JSON) / `app/clients` (model). System prompt: `../prompts/mercek-chat.md`.
+
+**Araç:** `kibana_sorgula`. Model kapsamı seçer (ekran, kurum, hata no, zaman aralığı, yalnızca kullanıcının logları mı, anahtar kelime); backend sorguyu `datav2/kibana_logs.json` (Warning/Error) üzerinde çalıştırır. En fazla 7 gün, en fazla 5 tur.
+
+**Demo ayarları** (varsayılanlar; `.env`'de değiştirilebilir): `DEMO_NOW=2026-10-17T09:15:00+03:00` (veri 09:00'da biter), `DEMO_USER=elif` (giriş ekranı gelene kadar).
 
 ## Kurulum
 

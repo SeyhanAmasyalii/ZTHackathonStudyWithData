@@ -1,17 +1,67 @@
-"""Mercek sohbeti: kullanıcı mesajını modele iletir."""
+"""Mercek sohbeti: model gerektiğinde araç çağırır, sonunda kullanıcıya cevap yazar."""
 
+import json
+import logging
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
-from app.clients.llm import LLMClient
+from app.clients.llm import LLMClient, LLMError
+from app.repositories.datav2 import Screen
+from app.services.tools import TOOLS, ToolContext, run_tool
+
+logger = logging.getLogger(__name__)
 
 PROMPT_PATH = Path(__file__).resolve().parents[3] / "prompts" / "mercek-chat.md"
+MAX_TURNS = 5
 
 
 @lru_cache
-def load_system_prompt() -> str:
+def _prompt_template() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8").strip()
 
 
-def answer(message: str, llm: LLMClient) -> str:
-    return llm.complete(load_system_prompt(), message.strip())
+def build_system_prompt(now: datetime, screens: tuple[Screen, ...]) -> str:
+    screen_lines = "\n".join(f"{screen.code} · {screen.name}" for screen in screens)
+    return (
+        _prompt_template()
+        .replace("{{now}}", now.strftime("%Y-%m-%d %H:%M"))
+        .replace("{{screens}}", screen_lines)
+    )
+
+
+def answer(
+    message: str,
+    llm: LLMClient,
+    context: ToolContext,
+    screens: tuple[Screen, ...],
+) -> str:
+    messages: list[dict[str, Any]] = [
+        {"role": "system", "content": build_system_prompt(context.now, screens)},
+        {"role": "user", "content": message.strip()},
+    ]
+    for turn in range(MAX_TURNS):
+        reply = llm.chat(messages, TOOLS)
+        if not reply.tool_calls:
+            if not reply.content:
+                raise LLMError("Model boş yanıt döndü")
+            return reply.content
+
+        messages.append(reply.as_message())
+        for call in reply.tool_calls:
+            result = run_tool(call.name, call.arguments, context)
+            logger.info(
+                "Araç çağrısı: tur=%d ad=%s sonuç=%s",
+                turn + 1,
+                call.name,
+                result.get("total", result.get("error")),
+            )
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": call.id,
+                    "content": json.dumps(result, ensure_ascii=False),
+                }
+            )
+    raise LLMError(f"{MAX_TURNS} turda cevap üretilemedi")

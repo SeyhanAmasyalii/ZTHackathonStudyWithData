@@ -1,6 +1,7 @@
 """Azure AI Foundry'deki sohbet modeline erişim."""
 
-from typing import Protocol
+from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 from openai import OpenAI, OpenAIError
 
@@ -11,8 +12,35 @@ class LLMError(Exception):
     """Model çağrısı başarısız oldu ya da yapılandırma eksik."""
 
 
+@dataclass(frozen=True)
+class ToolCall:
+    id: str
+    name: str
+    arguments: str  # model JSON metni olarak verir
+
+
+@dataclass(frozen=True)
+class LLMReply:
+    content: str | None
+    tool_calls: list[ToolCall] = field(default_factory=list)
+
+    def as_message(self) -> dict[str, Any]:
+        """Konuşma geçmişine eklenecek asistan mesajı."""
+        message: dict[str, Any] = {"role": "assistant", "content": self.content}
+        if self.tool_calls:
+            message["tool_calls"] = [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {"name": call.name, "arguments": call.arguments},
+                }
+                for call in self.tool_calls
+            ]
+        return message
+
+
 class LLMClient(Protocol):
-    def complete(self, system_prompt: str, user_message: str) -> str: ...
+    def chat(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> LLMReply: ...
 
 
 def _base_url(endpoint: str) -> str:
@@ -45,19 +73,22 @@ class AzureLLMClient:
             max_retries=1,
         )
 
-    def complete(self, system_prompt: str, user_message: str) -> str:
+    def chat(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> LLMReply:
         try:
             response = self._client.chat.completions.create(
                 model=self._deployment,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
+                messages=messages,
+                tools=tools,
             )
         except OpenAIError as exc:
             raise LLMError(f"Model çağrısı başarısız: {type(exc).__name__}") from exc
 
-        content = response.choices[0].message.content if response.choices else None
-        if not content:
+        if not response.choices:
             raise LLMError("Model boş yanıt döndü")
-        return content
+        message = response.choices[0].message
+        calls = [
+            ToolCall(id=call.id, name=call.function.name, arguments=call.function.arguments)
+            for call in (message.tool_calls or [])
+            if call.type == "function"
+        ]
+        return LLMReply(content=message.content, tool_calls=calls)

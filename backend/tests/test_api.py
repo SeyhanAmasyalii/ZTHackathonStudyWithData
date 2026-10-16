@@ -1,23 +1,15 @@
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 
 from app.api.chat import get_llm
 from app.clients.llm import AzureLLMClient, LLMError, _base_url
-from app.config import Settings
+from app.config import TURKEY_TZ, Settings
 from app.main import app
+from tests.conftest import FakeLLMClient
 
-
-class FakeLLMClient:
-    def __init__(self, reply: str = "Merhaba, size nasıl yardımcı olabilirim?", fail: bool = False):
-        self.reply = reply
-        self.fail = fail
-        self.calls: list[tuple[str, str]] = []
-
-    def complete(self, system_prompt: str, user_message: str) -> str:
-        self.calls.append((system_prompt, user_message))
-        if self.fail:
-            raise LLMError("sahte hata")
-        return self.reply
+client = TestClient(app)
 
 
 @pytest.fixture
@@ -26,9 +18,6 @@ def fake_llm():
     app.dependency_overrides[get_llm] = lambda: fake
     yield fake
     app.dependency_overrides.clear()
-
-
-client = TestClient(app)
 
 
 def test_health():
@@ -40,10 +29,10 @@ def test_health():
 def test_chat_returns_model_reply(fake_llm):
     response = client.post("/api/chat", json={"message": "  merhaba  "})
     assert response.status_code == 200
-    assert response.json() == {"reply": "Merhaba, size nasıl yardımcı olabilirim?"}
-    system_prompt, user_message = fake_llm.calls[0]
-    assert "Mercek" in system_prompt
-    assert user_message == "merhaba"
+    assert response.json() == {"reply": "Merhaba, ben Mercek."}
+    system, user = fake_llm.calls[0]
+    assert "Mercek" in system["content"]
+    assert user == {"role": "user", "content": "merhaba"}
 
 
 @pytest.mark.parametrize("message", ["", "x" * 2001])
@@ -87,3 +76,66 @@ def test_azure_client_requires_endpoint_and_key():
 )
 def test_base_url(endpoint, expected):
     assert _base_url(endpoint) == expected
+
+
+def test_demo_now_default_and_empty():
+    assert Settings().now() == datetime(2026, 10, 17, 9, 15, tzinfo=TURKEY_TZ)
+    assert Settings(demo_now="").demo_now is None
+    assert Settings(demo_now="2026-10-17T10:00").now().tzinfo == TURKEY_TZ
+
+
+def test_azure_client_parses_tool_calls():
+    """OpenAI SDK'sının gerçek cevap biçimini, ağa çıkmadan sahte HTTP cevabıyla dener."""
+    import httpx
+    from openai import OpenAI
+
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["url"] = str(request.url)
+        seen["body"] = request.read().decode()
+        return httpx.Response(
+            200,
+            json={
+                "id": "x",
+                "object": "chat.completion",
+                "created": 0,
+                "model": "gpt-5.5",
+                "choices": [
+                    {
+                        "index": 0,
+                        "finish_reason": "tool_calls",
+                        "message": {
+                            "role": "assistant",
+                            "content": None,
+                            "tool_calls": [
+                                {
+                                    "id": "call_9",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "kibana_sorgula",
+                                        "arguments": '{"only_mine": true}',
+                                    },
+                                }
+                            ],
+                        },
+                    }
+                ],
+            },
+        )
+
+    llm = AzureLLMClient(
+        Settings(azure_openai_endpoint="https://ornek.openai.azure.com", azure_openai_api_key="k")
+    )
+    llm._client = OpenAI(
+        base_url="https://ornek.openai.azure.com/openai/v1",
+        api_key="k",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    reply = llm.chat([{"role": "user", "content": "x"}], [{"type": "function", "function": {}}])
+
+    assert seen["url"] == "https://ornek.openai.azure.com/openai/v1/chat/completions"
+    assert '"model":"gpt-5.5"' in seen["body"].replace(" ", "")
+    assert reply.content is None
+    assert reply.tool_calls[0].name == "kibana_sorgula"
+    assert reply.as_message()["tool_calls"][0]["id"] == "call_9"
