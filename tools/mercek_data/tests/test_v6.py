@@ -99,3 +99,21 @@ def test_eval_set(chain):
     assert all(c["leak_check"] for c in cases)
     sol_ids = {s["solution_id"] for s in chain["solutions"]}
     assert all(c["expected_solution_id"] in sol_ids for c in cases if c["group"] == "match")
+
+
+def test_incident_subcategory_matches_error(chain):
+    """Arka plan çağrılarında alt kategori hata koduyla tutarlı olmalı (ör. yetersiz bakiye ≠ dekont)."""
+    allowed = {
+        "INSUFFICIENT_BALANCE": {"yetersiz bakiye", "havale/EFT gerçekleşmedi"},
+        "INSTITUTION_TIMEOUT": {"kurumdan yanıt alınamadı"},
+        "AFFORDABILITY_EXCEEDED": {"kullandırım yapılamadı"},
+        "INSUFFICIENT_INCOME": {"başvuru reddedildi"},
+        "KYC_CHECK_FAILED": {"kimlik doğrulama başarısız", "hesap açılamadı"},
+    }
+    for r in chain["incidents"]:
+        if r["error_code"] in allowed:
+            assert r["subcategory"] in allowed[r["error_code"]], (r["incident_id"], r["error_code"], r["subcategory"])
+    pairs = {(r["subcategory"], r["note"]) for r in chain["incidents"]}
+    assert all("dekont" not in note.lower() for sub, note in pairs if sub == "yetersiz bakiye")
+    contact_subs = {r["subcategory"] for r in chain["contacts"]}
+    assert not contact_subs & gi.INCIDENT_ONLY_SUBCATS

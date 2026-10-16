@@ -9,6 +9,22 @@
       "Şubeye gelen müşteri yeni aboneliğinin su faturasını ödeyemediğini söyledi. Ekran numaranın geçersiz olduğunu gösteriyor.",
       "Müşteri internet şubesinden su faturasını ödeyemediğini, abone numarasının kabul edilmediğini belirtti. Son ödeme tarihi yaklaşıyormuş.",
       "Müşteri mobil uygulamada İSKİ abone numarasını girince hata aldığını, kurumun numarayı doğruladığını söyledi. Başka kanaldan ödemeyi denemek istemiyor."
+    ],
+    "Fatura ödeme|yetersiz bakiye": [
+      "Müşteri faturasını ödemek istedi, işlem hesapta yeterli bakiye olmadığı için reddedildi. Maaşının yarın yatacağını söyledi.",
+      "Fatura ödemesi yetersiz bakiye uyarısıyla tamamlanmadı. Müşteri hesabında para olduğunu düşünüyordu, bloke tutarı sordu.",
+      "Şubeye gelen müşteri elektrik faturasını ödeyemediğini belirtti; seçtiği hesabın bakiyesi fatura tutarını karşılamıyor.",
+      "Müşteri mobilde doğalgaz faturasını öderken bakiye yetersiz hatası aldı. Başka hesabından ödeme yapmayı denemek istiyor.",
+      "Arayan müşteri su faturasının ödenmediğini, ekranda bakiyenin yetersiz olduğunun yazdığını söyledi. Ek hesap kullanımını sordu.",
+      "Müşteri birden fazla faturayı birlikte ödemek istedi, toplam tutar bakiyeyi aştığı için işlem gerçekleşmedi."
+    ],
+    "Kart|başvuru tamamlanamadı": [
+      "Müşteri kredi kartı başvurusunu son adımda tamamlayamadığını, ekranın hata verip başa döndüğünü söyledi.",
+      "Şubede kart başvurusu girilirken form kaydedilemedi. Müşteri başvurusunun alınıp alınmadığını öğrenmek istiyor.",
+      "Mobil uygulamadan yapılan kart başvurusu onay ekranında takıldı. Müşteri tekrar denediğinde de aynı sorunu yaşadı.",
+      "Müşteri başvuru formunda gelir ve işyeri bilgilerini girdiğini ama formun geçersiz alan uyarısı verdiğini belirtti.",
+      "Arayan müşteri kart başvurusunun yarıda kaldığını, sonuç ekranının hiç gelmediğini söyledi. Geri dönüş bekliyor.",
+      "Kart başvurusu sırasında teslimat adresi alanı kabul edilmedi; müşteri adresinin doğru olduğundan emin."
     ]
   },
   "solutions": [

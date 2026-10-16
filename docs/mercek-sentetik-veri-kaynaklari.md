@@ -49,7 +49,7 @@ Elle yazılan veri, demodaki cevapların doğrudan dayandığı kesin bilgidir. 
 | `scope_addons` | 5 | Köprü önerilerinin eforu (+2 a/g) |
 | `institutions` | 15 | Fatura kurumları, metinden kurum çıkarma ve normalize etme |
 | `branches` | 5 | Şube kodları |
-| `incident_categories` | 6 kategori, 30 alt kategori | Çağrı üretimi ve zenginleştirme |
+| `incident_categories` | 6 kategori, 32 alt kategori | Çağrı üretimi ve zenginleştirme (yetersiz bakiye ve başvuru tamamlanamadı yalnızca teknoloji çağrılarında) |
 | `demo_users` | 5 | Elif, Zeynep, Kerem, Fatma, Hakan |
 | `affected_region` | 3 il | E (il adları V5'te seçilir, arayüzde gösterilmez) |
 

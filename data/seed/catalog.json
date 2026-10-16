@@ -1233,7 +1233,8 @@
         "abone numarası kabul edilmiyor",
         "fatura bulunamadı",
         "mükerrer ödeme şüphesi",
-        "dekont alınamadı"
+        "dekont alınamadı",
+        "yetersiz bakiye"
       ]
     },
     {
@@ -1254,7 +1255,8 @@
         "limit sorusu",
         "şifre belirleyemiyorum",
         "ekstre görüntülenemiyor",
-        "kart teslim edilmedi"
+        "kart teslim edilmedi",
+        "başvuru tamamlanamadı"
       ]
     },
     {

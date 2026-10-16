@@ -18,7 +18,7 @@ Nereden geldiği: `mercek-sentetik-veri-kaynaklari.md` · Değerlerin ayrıntıs
 | Kapsam eki | 5 (ADD-SMS, ADD-PROAKTIF-SMS dahil) |
 | Fatura kurumu | 15 |
 | Şube | 5 |
-| Çağrı kategorisi | 6 kategori, 30 alt kategori |
+| Çağrı kategorisi | 6 kategori, 32 alt kategori (2'si yalnızca teknoloji çağrılarında: yetersiz bakiye, başvuru tamamlanamadı) |
 | Demo kullanıcısı | 5 (Elif, Zeynep, Kerem, Fatma, Hakan) |
 | Etkilenen il (E) | 3 (arayüzde ve sunumda gösterilmez) |
 | Kurum duyurusu (`announcements.json`) | 20 (kritik olanlar DUY-0412 İSKİ ve DUY-0419 ASKİ) |
@@ -68,7 +68,7 @@ Foundry açılınca `generate_texts.py --force` ile şablon metinlerin yerine mo
 | Veri | Adet |
 |---|---|
 | Çağrı (`incidents`) | **1.400** (CAG-0651…CAG-2050 · kapalı 1.357 · açık 43) |
-| Kategori | Fatura ödeme 359 · Kredi 325 · Kart 268 · Hesap 256 · Müşteri bilgileri 192 |
+| Kategori | Fatura ödeme 361 · Kredi 319 · Kart 281 · Hesap 257 · Müşteri bilgileri 182 (alt kategori hata koduyla tutarlı) |
 | B geçmişi | SOL-031 ile kapanmış 6 olay |
 | C | 23 açık İSKİ çağrısı |
 | Demo (`demo_reset.py`) | CAG-2051 + 11 bağlı vaka (CAG-2051-01…-11) |

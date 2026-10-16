@@ -208,7 +208,7 @@ Katalogun tamamı `data/seed/catalog.json` ve `announcements.json` dosyalarında
 | Kapsam ekleri | 5 | SMS, proaktif SMS, gönderim raporu, rol bazlı yetki, kuralı parametreye taşıma |
 | Kurumlar | 15 | Fatura türü, kurum kodu, zaman aşımı süresi |
 | Şubeler | 5 | 0101 Kadıköy, 0102 Levent, 0601 Kızılay, 3501 Alsancak, 9999 Dijital Şube |
-| Çağrı kategorileri | 6 kategori, 30 alt kategori | Çağrı üretimi (V6) ve zenginleştirme bu listeyi kullanır |
+| Çağrı kategorileri | 6 kategori, 32 alt kategori (2'si yalnızca teknoloji çağrılarında: yetersiz bakiye, başvuru tamamlanamadı) | Çağrı üretimi (V6) ve zenginleştirme bu listeyi kullanır |
 | Kurum duyuruları | 20 | 8 duyuruya 12 ilgisiz duyuru eklendi |
 
 **Bu eklerde korunan yasak kurallar:**

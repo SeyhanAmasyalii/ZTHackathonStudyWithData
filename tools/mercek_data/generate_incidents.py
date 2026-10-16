@@ -74,20 +74,24 @@ TECH_SCREENS = ["ODMTFATR", "KRDTKULL", "KRTTBASV", "MUSTGUNC", "HSPTVDSZ"]
 SCREEN_CATEGORY = {"ODM": "Fatura ödeme", "KRD": "Kredi", "KRT": "Kart", "HSP": "Hesap", "MUS": "Müşteri bilgileri"}
 SUBCAT_FOR = {
     ("Fatura ödeme", "INSTITUTION_TIMEOUT"): "kurumdan yanıt alınamadı",
-    ("Fatura ödeme", "INSUFFICIENT_BALANCE"): "dekont alınamadı",
+    ("Fatura ödeme", "INSUFFICIENT_BALANCE"): "yetersiz bakiye",
     ("Fatura ödeme", "VALIDATION_ERROR"): "fatura bulunamadı",
     ("Kredi", "AFFORDABILITY_EXCEEDED"): "kullandırım yapılamadı",
     ("Kredi", "VALIDATION_ERROR"): "kullandırım yapılamadı",
     ("Kart", "INSUFFICIENT_INCOME"): "başvuru reddedildi",
-    ("Kart", "VALIDATION_ERROR"): "limit sorusu",
-    ("Müşteri bilgileri", "VALIDATION_ERROR"): "telefon numarası hatalı",
+    ("Kart", "VALIDATION_ERROR"): "başvuru tamamlanamadı",
+    ("Müşteri bilgileri", "VALIDATION_ERROR"): ["telefon numarası hatalı", "adres güncellenemiyor",
+                                                "iletişim izni değiştirilemiyor"],
     ("Müşteri bilgileri", "KYC_CHECK_FAILED"): "kimlik doğrulama başarısız",
     ("Hesap", "KYC_CHECK_FAILED"): "hesap açılamadı",
     ("Hesap", "VALIDATION_ERROR"): "hesap açılamadı",
     ("Hesap", "INSUFFICIENT_BALANCE"): "havale/EFT gerçekleşmedi",
 }
-TECH_SUBCAT = {"Fatura ödeme": "kurumdan yanıt alınamadı", "Kredi": "kullandırım yapılamadı", "Kart": "başvuru reddedildi",
+TECH_SUBCAT = {"Fatura ödeme": "kurumdan yanıt alınamadı", "Kredi": "kullandırım yapılamadı", "Kart": "başvuru tamamlanamadı",
                "Hesap": "hesap açılamadı", "Müşteri bilgileri": "adres güncellenemiyor"}
+
+# Yalnızca teknoloji çağrılarında kullanılan alt kategoriler (müşteri temaslarının dağılımı değişmesin)
+INCIDENT_ONLY_SUBCATS = {"yetersiz bakiye", "başvuru tamamlanamadı"}
 
 CONTACT_FIELDS = ["contact_id", "created_at", "channel", "customer_number", "city", "region_affected", "category",
                   "subcategory", "note", "incident_id"]
@@ -155,7 +159,7 @@ def background_subcategory(rng: random.Random, catalog: Dict, category: str, reg
     banned = set(D_SUBCATS) | {C_SUBCAT}
     if region:
         banned.add(E_SUBCAT)  # bölgede erteleme yalnızca senaryodan gelir
-    allowed = [s for s in subs if s not in banned]
+    allowed = [s for s in subs if s not in banned and s not in INCIDENT_ONLY_SUBCATS]
     return rng.choice(allowed)
 
 
@@ -261,6 +265,8 @@ def build_incidents(rng: random.Random, catalog: Dict, customers: List[Dict], no
         error_type = "technical" if error in ("CORE_BANKING_TIMEOUT", "SERVICE_UNAVAILABLE", "DB_CONNECTION_ERROR") else "business"
         sub = subcat or (TECH_SUBCAT[category] if error_type == "technical" else SUBCAT_FOR.get((category, error),
                                                                                                 TECH_SUBCAT[category]))
+        if isinstance(sub, list):
+            sub = rng.choice(sub)
         if status is None:
             status = "acik" if (END - ts).days < 3 and rng.random() < 0.4 else "kapali"
         if solution is None and status == "kapali" and rng.random() < 0.6:

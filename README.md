@@ -17,7 +17,7 @@ Tüm veri sentetiktir (gerçek müşteri verisi yok); seed 42, veri sonu 17.10.2
 |---|---|---|
 | Ekran · servis · ekran–servis ilişkisi | 20 · 7 · 30 | [`data/seed/catalog.json`](data/seed/catalog.json) |
 | Hata–servis kuralı · servis takvimi · kapsam eki | 17 · 11 · 5 | `catalog.json` |
-| Fatura kurumu · şube · çağrı kategorisi | 15 · 5 · 6 (30 alt kategori) | `catalog.json` |
+| Fatura kurumu · şube · çağrı kategorisi | 15 · 5 · 6 (32 alt kategori) | `catalog.json` |
 | Demo kullanıcısı · etkilenen il (E) | 5 · 3 | `catalog.json` |
 | Kurum duyurusu | 20 | [`data/seed/announcements.json`](data/seed/announcements.json) |
 | Kesin senaryo metinleri | 1 çözüm · 8 talep · 5 çağrı notu | [`data/seed/fixed_texts.json`](data/seed/fixed_texts.json) |
