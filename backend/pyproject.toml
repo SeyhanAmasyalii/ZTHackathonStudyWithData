@@ -1,0 +1,27 @@
+[project]
+name = "mercek-api"
+version = "0.1.0"
+description = "Mercek backend: sohbet API'si (FastAPI + Azure AI Foundry)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.143.3",
+    "openai==3.32.0",
+    "pydantic-settings==2.16.0",
+    "uvicorn[standard]==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx==0.28.1",
+    "pytest==9.1.1",
+    "ruff==0.17.1",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
