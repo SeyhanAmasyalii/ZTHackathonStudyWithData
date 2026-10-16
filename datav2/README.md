@@ -28,3 +28,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `demands.json` | demands | 116 (95 geçmiş + 11 takvim + 3 duyuru + 7 bekleyen) | ✅ onaylandı · üretici `generators/demands.py` · D/E/G (TLP-1043/1044/1045) demoda · TLP-1023 = DUY-0415 · FAST → HESAP_YONETIM %30 |
 | `department_calendar.json` | department_calendar | 11 (CAL-0001…0011, TLP-1021…1031) | ✅ onaylandı · D/E sonuçları aynı · G = 19.10→23.10 (HANDOFF düzeltildi) |
 | `prevented_calls.json` | prevented_calls | 0 | ✅ onaylandı · boş başlar; ilk kayıt A senaryosunda demoda |
+| `kibana_logs_part01…07.json` | kibana_logs (parçalı) | 10.555 (7 parça) | `kibana_logs.json`'un her biri 4 milyon karakterin altındaki bölümleri; üretici `generators/split_kibana_logs.py` |
