@@ -1,0 +1,101 @@
+[
+  {
+    "code": "KRTTBASV",
+    "name": "Kredi Kartı Başvurusu",
+    "module": "KRT",
+    "type": "T",
+    "simulated": 1,
+    "description": "Kart tipi seçimi, gelir ve limit bilgisiyle kredi kartı başvurusu",
+    "components_json": ["kart tipi seçimi", "çalışma durumu, meslek, işyeri", "aylık net gelir", "talep edilen limit", "hesap kesim günü", "teslimat adresi", "KVKK ve ön bilgilendirme onayları", "sonuç paneli"],
+    "flow_json": ["Müşteri seç", "Kart tipi seç", "Gelir ve iş bilgisi gir", "Limit talep et", "Hesap kesim günü seç", "Onayları al", "Başvuruyu gönder", "Sonucu gör"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/krttbasv/page.tsx", "frontend/src/app/(dashboard)/bankacilik/krttbasv/card-application-form.tsx"], "backend": ["backend/app/api/krt.py"]}
+  },
+  {
+    "code": "KRTTGUNC",
+    "name": "Kredi Kartı Bilgileri Güncelleme",
+    "module": "KRT",
+    "type": "T",
+    "simulated": 1,
+    "description": "Mevcut kartın limit, hesap kesim günü, ekstre tercihi ve otomatik ödeme bilgilerinin güncellenmesi",
+    "components_json": ["kart seçimi", "limit artırım / azaltım talebi", "hesap kesim günü değişikliği", "ekstre gönderim tercihi (e-posta / posta)", "otomatik ödeme talimatı", "değişiklik özeti ve onay"],
+    "flow_json": ["Müşteri seç", "Kart seç", "Değiştirilecek bilgiyi seç", "Yeni değeri gir", "Özeti kontrol et", "Onayla"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/krttgunc/page.tsx", "frontend/src/app/(dashboard)/bankacilik/krttgunc/card-update-form.tsx"], "backend": ["backend/app/api/krt.py"]}
+  },
+  {
+    "code": "KRDTKULL",
+    "name": "Bireysel Kredi Kullandırım",
+    "module": "KRD",
+    "type": "T",
+    "simulated": 1,
+    "description": "İhtiyaç kredisi kullandırım, ödeme planı ve uygunluk kontrolü",
+    "components_json": ["tutar", "vade", "alacak hesabı", "özet kutuları (taksit, toplam, faiz, yıllık maliyet)", "ödeme planı (loanPlan)", "uygunluk uyarısı (taksit > gelirin %50'si)", "sözleşme onayı", "sonuç paneli"],
+    "flow_json": ["Müşteri seç", "Tutar ve vade gir", "Ödeme planını gör", "Uygunluk kontrolü", "Alacak hesabını seç", "Sözleşmeyi onayla", "Krediyi kullandır"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/krdtkull/page.tsx", "frontend/src/app/(dashboard)/bankacilik/krdtkull/loan-form.tsx"], "backend": ["backend/app/api/krd.py"]}
+  },
+  {
+    "code": "MUSTTANM",
+    "name": "Müşteri Tanımlama",
+    "module": "MUS",
+    "type": "T",
+    "simulated": 1,
+    "description": "Yeni bireysel müşterinin kimlik doğrulamasıyla tanımlanması ve müşteri numarası verilmesi",
+    "components_json": ["kimlik bilgileri", "kimlik doğrulama (KPS)", "iletişim bilgileri", "adres", "meslek ve aylık gelir", "iletişim izinleri (SMS, e-posta, telefon)", "KVKK aydınlatma onayı", "müşteri numarası üretimi"],
+    "flow_json": ["Kimlik bilgisini gir", "Kimliği doğrula", "İletişim ve adres gir", "Meslek ve gelir gir", "İzinleri al", "KVKK onayını al", "Müşteriyi kaydet"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/musttanm/page.tsx", "frontend/src/app/(dashboard)/bankacilik/musttanm/customer-create-form.tsx"], "backend": ["backend/app/api/mus.py"]}
+  },
+  {
+    "code": "MUSTGUNC",
+    "name": "Müşteri Bilgileri Güncelleme",
+    "module": "MUS",
+    "type": "T",
+    "simulated": 1,
+    "description": "İletişim, adres, gelir ve iletişim izinlerinin güncellenmesi",
+    "components_json": ["e-posta, cep telefonu", "il, ilçe, açık adres", "eğitim, meslek, işyeri, gelir", "iletişim izinleri (SMS, e-posta, telefon)", "değişiklik özeti"],
+    "flow_json": ["Müşteri seç", "Değiştirilecek bölümü seç", "Yeni bilgiyi gir", "Değişiklik özetini kontrol et", "Kaydet"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/mustgunc/page.tsx", "frontend/src/app/(dashboard)/bankacilik/mustgunc/customer-update-form.tsx"], "backend": ["backend/app/api/mus.py"]}
+  },
+  {
+    "code": "HSPTVDSZ",
+    "name": "Vadesiz Hesap Açılışı",
+    "module": "HSP",
+    "type": "T",
+    "simulated": 1,
+    "description": "Döviz cinsi ve şube seçerek vadesiz hesap açılışı",
+    "components_json": ["müşteri özeti", "döviz cinsi", "şube", "hesap adı, amaç, fon kaynağı", "sözleşme ve ön bilgilendirme onayları", "IBAN üretimi", "sonuç paneli"],
+    "flow_json": ["Müşteri seç", "Döviz cinsi seç", "Şube seç", "Hesap bilgilerini gir", "Onayları al", "Hesabı aç", "IBAN'ı gör"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/hsptvdsz/page.tsx", "frontend/src/app/(dashboard)/bankacilik/hsptvdsz/account-open-form.tsx"], "backend": ["backend/app/api/hsp.py"]}
+  },
+  {
+    "code": "ODMTTLMT",
+    "name": "Fatura Talimat Bilgileri Giriş",
+    "module": "ODM",
+    "type": "T",
+    "simulated": 1,
+    "description": "Kurum ve abone numarasıyla otomatik fatura ödeme talimatı tanımlama; abone numarası kurumdan doğrulanır",
+    "components_json": ["fatura türü ve kurum", "abone numarası (6–12 hane)", "kurumdan abone doğrulama", "ödeme hesabı", "talimat başlangıç tarihi", "üst limit tutarı", "bildirim tercihi (SMS / e-posta)", "talimat özeti ve onay"],
+    "flow_json": ["Müşteri seç", "Tür ve kurum seç", "Abone numarasını gir", "Kurumdan doğrula", "Ödeme hesabını seç", "Başlangıç tarihi ve üst limiti gir", "Bildirim tercihini seç", "Talimatı onayla"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/odmttlmt/page.tsx", "frontend/src/app/(dashboard)/bankacilik/odmttlmt/bill-order-form.tsx"], "backend": ["backend/app/api/odm.py"]}
+  },
+  {
+    "code": "KRDTTAHS",
+    "name": "Kredi Tahsilat",
+    "module": "KRD",
+    "type": "T",
+    "simulated": 1,
+    "description": "Müşterinin kredi taksitlerinin listelenmesi, gecikme faizinin hesaplanması ve taksit tahsilatı",
+    "components_json": ["müşteri numarası ile arama", "kredi listesi", "taksit listesi (vade, tutar, durum, gecikme günü)", "gecikme faizi hesaplama", "tahsilat hesabı seçimi", "tam / kısmi tahsilat", "tahsilat dekontu"],
+    "flow_json": ["Müşteri ara", "Krediyi seç", "Taksitleri gör", "Tahsil edilecek taksiti seç", "Gecikme faizini gör", "Tahsilat hesabını seç", "Tahsil et", "Dekontu gör"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/krdttahs/page.tsx", "frontend/src/app/(dashboard)/bankacilik/krdttahs/collection-form.tsx"], "backend": ["backend/app/api/krd.py"]}
+  },
+  {
+    "code": "PRMTGENL",
+    "name": "Parametre Yönetimi",
+    "module": "PRM",
+    "type": "T",
+    "simulated": 1,
+    "description": "Ürün ve işlem kurallarına ait parametrelerin görüntülenmesi ve dört göz onayıyla değiştirilmesi",
+    "components_json": ["parametre grubu (kredi, kart, ödeme, müşteri)", "parametre listesi (anahtar, değer, geçerlilik tarihi)", "değer değişikliği", "dört göz onayı", "değişiklik geçmişi"],
+    "flow_json": ["Parametre grubunu seç", "Parametreyi bul", "Yeni değeri ve geçerlilik tarihini gir", "Onaya gönder", "Onaylayan kişi onaylar", "Değişiklik geçmişinde gör"],
+    "files_json": {"frontend": ["frontend/src/app/(dashboard)/bankacilik/prmtgenl/page.tsx", "frontend/src/app/(dashboard)/bankacilik/prmtgenl/parameter-form.tsx"], "backend": ["backend/app/api/prm.py"]}
+  }
+]
