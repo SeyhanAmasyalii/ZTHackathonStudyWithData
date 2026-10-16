@@ -16,6 +16,14 @@
 
 Aşağıda `<api>` = `mercek-api-<takım>`, `<web>` = `mercek-web-<takım>`.
 
+> **Adres:** Oluştururken "Güvenli benzersiz varsayılan ana bilgisayar adı" **Etkin** ise (varsayılan) adres
+> `mercek-api-<takım>-<rastgele>.<bölge>-01.azurewebsites.net` biçiminde olur. Gerçek adresi uygulamanın
+> **Genel Bakış → Varsayılan etki alanı** satırından kopyalayın; aşağıda `<api>.azurewebsites.net` yazan her yerde
+> (CORS, `--api-url`, `scm` adresi) bu adresi kullanın. Kudu adresi: `https://<ad>-<rastgele>.scm.<bölge>-01.azurewebsites.net`.
+>
+> **Temel kimlik doğrulaması kapalı** uyarısı sorun değil: ZipDeployUI ve `az webapp deploy` Azure hesabıyla girer.
+> (CI/CD publish profile kullanacaksa bu ayar açılmalı ya da OIDC kullanılmalı.)
+
 ## 1. App Service planı (3 dk)
 
 Portal → **Kaynak oluştur** → **App Service planı**
