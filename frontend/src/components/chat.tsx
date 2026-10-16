@@ -2,6 +2,7 @@
 
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
+import { Markdown } from "@/components/markdown";
 import { MAX_MESSAGE_LENGTH, sendChat, UnauthorizedError } from "@/lib/api";
 
 type Message = { id: number; role: "user" | "assistant"; text: string };
@@ -78,15 +79,15 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
             key={message.id}
             className={message.role === "user" ? "flex justify-end" : "flex justify-start"}
           >
-            <p
-              className={
-                message.role === "user"
-                  ? "max-w-[80%] whitespace-pre-wrap rounded-2xl bg-violet-600 px-4 py-2 text-white"
-                  : "max-w-[80%] whitespace-pre-wrap rounded-2xl bg-black/5 px-4 py-2 dark:bg-white/10"
-              }
-            >
-              {message.text}
-            </p>
+            {message.role === "user" ? (
+              <p className="max-w-[80%] whitespace-pre-wrap rounded-2xl bg-violet-600 px-4 py-2 text-white">
+                {message.text}
+              </p>
+            ) : (
+              <div className="max-w-[80%] rounded-2xl bg-black/5 px-4 py-3 dark:bg-white/10">
+                <Markdown text={message.text} />
+              </div>
+            )}
           </div>
         ))}
         {loading && <p className="text-sm opacity-60">Mercek düşünüyor…</p>}

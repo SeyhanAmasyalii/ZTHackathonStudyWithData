@@ -11,9 +11,10 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] `cagri_ara` aracı: geçmiş kapanmış çağrılar ve çözümleri → çözüm önerisi
 - [x] Giriş ekranı: demo kullanıcı seçimi, imzalı oturum token'ı; sohbetteki kullanıcı token'dan
 - [x] Konuşma hafızası (ilk sürüm): frontend son 20 mesajı gönderir, "Yeni sohbet" sıfırlar
+- [x] Cevap biçimlendirme: kalın, kod, madde/numaralı liste, başlık (bağımlılıksız, HTML çalıştırmaz)
 
 ## Sırada
-- [ ] Frontend: cevaplardaki Markdown'ı biçimlendirme (`**kalın**`, madde işaretleri şu an düz metin görünüyor)
+- [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra
 - [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
