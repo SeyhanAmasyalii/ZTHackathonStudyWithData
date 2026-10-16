@@ -1,0 +1,76 @@
+{
+  "index_patterns": [
+    "dalan-banking-logs*"
+  ],
+  "template": {
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "message": {
+          "type": "text"
+        },
+        "client": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            },
+            "geo": {
+              "properties": {
+                "location": {
+                  "type": "geo_point"
+                }
+              }
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "duration": {
+              "type": "long"
+            }
+          }
+        },
+        "amount": {
+          "properties": {
+            "value": {
+              "type": "double"
+            }
+          }
+        },
+        "customer": {
+          "properties": {
+            "age": {
+              "type": "integer"
+            }
+          }
+        },
+        "banking": {
+          "properties": {
+            "loan": {
+              "properties": {
+                "monthly_rate": {
+                  "type": "double"
+                },
+                "debt_to_income": {
+                  "type": "double"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

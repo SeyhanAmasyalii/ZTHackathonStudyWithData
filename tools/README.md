@@ -1,5 +1,7 @@
 # tools/ — Sentetik veri betikleri
 
+> **Bu repoda (ZtHackathonStudyWithData) üretilmiş çıktılar da commit'lidir:** `tools/output/` ve `../data/out/` (ayrıntı: o klasörlerdeki README). Takım reposunda bu klasörler yine `.gitignore`'da tutulur.
+
 Ayrıntılı açıklama: [`docs/mercek-sentetik-veri-kaynaklari.md`](../docs/mercek-sentetik-veri-kaynaklari.md).
 
 ## Hazır betikler (V1, V3–V8)
