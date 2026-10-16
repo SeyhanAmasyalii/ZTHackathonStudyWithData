@@ -37,6 +37,7 @@ B_FROM = datetime(2026, 10, 17, 8, 30, tzinfo=TZ)
 
 DAILY_COUNT = 10_000
 B_COUNT = 46
+B_ZEYNEP_COUNT = 3
 C_ISKI_COUNT = 400
 C_OTHER_COUNT = 12
 PHONE_ERROR_COUNT = 60
@@ -233,6 +234,14 @@ def random_time(start: datetime, end: datetime, channel: int) -> datetime:
         if ok:
             return ts
     return ts
+
+
+def set_user(record: dict, user_name: str) -> None:
+    """Kaydın kullanıcısını değiştirir (user_name + event_original.UserName)."""
+    record["user_name"] = user_name
+    original = json.loads(record["event_original"])
+    original["UserName"] = user_name
+    record["event_original"] = json.dumps(original, ensure_ascii=False)
 
 
 def stack_trace(exc_type: str, message: str, screen: str, action: Action, files: dict) -> str:
@@ -482,6 +491,11 @@ class LogFactory:
             fields = {"institutionCode": "GAZ02", "billType": "Doğalgaz", "subscriberNoLength": rng.randint(8, 10)}
             records.append(self.institution_timeout(ts, action, channel, customer, "GAZ02", fields,
                                                     unit_id=unit, user_name=user))
+        # Zeynep (çağrı merkezi demo kullanıcısı): çağrı merkezi kayıtlarının 3'ü (zamana göre 1., 5., 9.).
+        # Rastgele sayı tüketmeden sonradan atanır; böylece diğer tüm kayıtlar aynı kalır.
+        call_center = sorted((r for r in records if r["channel_id"] == 2), key=lambda r: r["log_time"])
+        for record in call_center[::4][:B_ZEYNEP_COUNT]:
+            set_user(record, "zeynep")
         return records
 
     def scenario_c(self) -> list[dict]:

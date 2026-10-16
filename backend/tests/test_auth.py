@@ -82,7 +82,7 @@ def test_chat_uses_user_from_token():
         assert response.status_code == 200
         seen[user_name] = json.loads(fake.calls[1][-1]["content"])["total"]
     app.dependency_overrides.clear()
-    assert seen == {"elif": 8, "zeynep": 0}
+    assert seen == {"elif": 8, "zeynep": 3}
 
 
 def test_token_roundtrip_and_tampering():
@@ -100,3 +100,24 @@ def test_token_expires():
     token = create_token("elif", "s1", NOW, timedelta(hours=1))
     with pytest.raises(AuthError, match="süresi"):
         verify_token(token, "s1", NOW + timedelta(hours=1))
+
+
+def test_chat_sends_user_role_to_model():
+    fake = FakeLLMClient([LLMReply(content="tamam")])
+    app.dependency_overrides[get_llm] = _returning(fake)
+    token = login("kerem").json()["token"]
+    client.post("/api/chat", json={"message": "x"}, headers={"Authorization": f"Bearer {token}"})
+    app.dependency_overrides.clear()
+    system = fake.calls[0][0]["content"]
+    assert "Kullanıcının görevi: L2 Destek · 9010 BT Destek (L2)." in system
+    assert "kerem" not in system
+
+
+def test_zeynep_has_three_call_center_logs_this_morning(data_dir):
+    from app.repositories.datav2 import load_error_logs
+
+    zeynep = [e for e in load_error_logs(data_dir) if e.user_name == "zeynep"]
+    assert [e.log_time.strftime("%H:%M") for e in zeynep] == ["08:33", "08:43", "08:54"]
+    assert {(e.screen_code, e.error_number, e.institution_code) for e in zeynep} == {
+        ("ODMTTLMT", 110731, "GAZ02")
+    }

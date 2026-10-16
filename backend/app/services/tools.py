@@ -93,6 +93,8 @@ class ToolContext:
     now: datetime
     logs: tuple[LogEntry, ...]
     incidents: tuple[Incident, ...] = ()
+    # Prompt'a giden görev bilgisi (ör. "L2 Destek · 9010 BT Destek (L2)"); kullanıcı kodu değil.
+    user_role: str = ""
 
 
 def _parse_time(value: Any, name: str) -> datetime:

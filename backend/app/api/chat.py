@@ -40,6 +40,7 @@ def chat(
 ) -> ChatResponse:
     context = ToolContext(
         user_name=user.user_name,
+        user_role=f"{user.title} · {user.unit}",
         now=settings.now(),
         logs=load_error_logs(settings.data_dir),
         incidents=load_incidents(settings.data_dir),

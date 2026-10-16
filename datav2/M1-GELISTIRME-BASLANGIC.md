@@ -137,7 +137,7 @@ Veri sonu: **2026-10-17 09:00 (+03)**. Demo kayıtları bu andan sonra oluşur.
 - Geçmişte kural 1 (120218) loglarından **90** çağrı açılmış (Mercek'in önleyebileceği; `incidents.stats.json` → `A_affordability_120218`).
 
 **B — Başkentgaz zaman aşımı (kurum kaynaklı, ana kayıt)**
-- 17.10 08:30–09:00: ODMTTLMT · GAZ02 · **110731** INSTITUTION_TIMEOUT · **46** log (şube 601 Kızılay 34, çağrı merkezi 12), 46 farklı müşteri; şube kayıtlarının 8'i `elif`.
+- 17.10 08:30–09:00: ODMTTLMT · GAZ02 · **110731** INSTITUTION_TIMEOUT · **46** log (şube 601 Kızılay 34, çağrı merkezi 12), 46 farklı müşteri; şube kayıtlarının 8'i `elif`, çağrı merkezi kayıtlarının 3'ü `zeynep` (08:33, 08:43, 08:54).
 - 30 günlük olağan: GAZ02'de bugünden önce **hiç** zaman aşımı yok; ayrıca bilinen bakım penceresi (DUY-0398: 02–04) dışında → olağan dışı artış.
 - Kural 7 `open_incident=1`, departman FATURA_ODEME → **CAG-2051** (öncelik 2) + bağlı vakalar **CAG-2051-NN** (kapanış MUKERRER_CAGRI / ANA_KAYDA_BAGLANDI).
 - Eşleşme **SOL-031** (DIS_KURUM_KAYNAKLI / KURUM_SERVIS_KESINTISI); "benzer geçmiş olay" = SOL-031 ile kapanmış **6** çağrı.

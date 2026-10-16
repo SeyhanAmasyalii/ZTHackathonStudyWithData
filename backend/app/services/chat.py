@@ -23,7 +23,10 @@ def _prompt_template() -> str:
 
 
 def build_system_prompt(
-    now: datetime, screens: tuple[Screen, ...], institutions: tuple[Institution, ...]
+    now: datetime,
+    screens: tuple[Screen, ...],
+    institutions: tuple[Institution, ...],
+    user_role: str = "",
 ) -> str:
     screen_lines = "\n".join(
         f"{screen.code} · {screen.name} — {screen.description}" for screen in screens
@@ -36,6 +39,7 @@ def build_system_prompt(
     return (
         _prompt_template()
         .replace("{{now}}", now.strftime("%Y-%m-%d %H:%M"))
+        .replace("{{user_role}}", user_role or "belirtilmedi")
         .replace("{{screens}}", screen_lines)
         .replace("{{institutions}}", institution_lines)
     )
@@ -49,7 +53,10 @@ def answer(
     institutions: tuple[Institution, ...],
 ) -> str:
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": build_system_prompt(context.now, screens, institutions)},
+        {
+            "role": "system",
+            "content": build_system_prompt(context.now, screens, institutions, context.user_role),
+        },
         {"role": "user", "content": message.strip()},
     ]
     for turn in range(MAX_TURNS):

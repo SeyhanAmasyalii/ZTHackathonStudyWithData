@@ -98,7 +98,7 @@ def test_user_name_comes_from_context_not_model(context):
         other,
     )
     assert mine["total"] == 8
-    assert theirs["total"] == 0
+    assert theirs["total"] == 3
 
 
 @pytest.mark.parametrize(

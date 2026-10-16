@@ -91,3 +91,9 @@ def test_too_many_tool_turns_raises(make_fake, context, screens, institutions):
 def test_empty_final_reply_raises(make_fake, context, screens, institutions):
     with pytest.raises(LLMError, match="boş"):
         answer("x", make_fake([LLMReply(content=None)]), context, screens, institutions)
+
+
+def test_system_prompt_has_user_role_but_not_user_code(screens, institutions):
+    prompt = build_system_prompt(NOW, screens, institutions, "L2 Destek · 9010 BT Destek (L2)")
+    assert "Kullanıcının görevi: L2 Destek · 9010 BT Destek (L2)." in prompt
+    assert "kerem" not in prompt
