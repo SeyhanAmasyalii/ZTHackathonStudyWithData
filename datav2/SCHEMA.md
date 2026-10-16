@@ -218,7 +218,9 @@ Yok: subscriber_no, city, resolution_minutes. Kapanış ekranındaki "belirti", 
 | mercek_assigned_title / _symptom / _root_cause / _steps (JSON) / _error_code | Mercek'in metinden çıkardıkları | |
 | search_text | Hesaplanan (indexer) | |
 
-### inbound_emails 🟡 (~35)
+### inbound_emails ✅ (`inbound_emails.json`, 34)
+Sonuç: 18 işlenmiş kurum duyurusu + İSKİ 12.09 ve 26.09 hatırlatması (işlenmemiş, C) + ASKİ 05.10 (işlenmemiş, G) + 14 diğer (oltalama ve KVKK bulgulu müşteri e-postası dahil). `mercek_assigned_*` boş; demoda dolar.
+
 email_id, mailbox (`dis-paydas-duyuru@fineart.ornek.test`, tek ortak adres), received_at, from_address, from_display, subject, body_text, attachments_json, assigned_team, processing_status (yeni/inceleniyor/islendi/yok_sayildi), processed_by, processed_at, mercek_assigned_type (announcement/other), mercek_assigned_confidence, mercek_assigned_institution_code, mercek_assigned_summary, linked_announcement_id.
 İçerik: 20 kurum duyurusu (18 işlenmiş + İSKİ 12.09 ve ASKİ işlenmemiş) + ~15 diğer (teşekkür, otomatik yanıt, yanlış adres). KVKK bulgusu olan mail `yok_sayildi`, Foundry'ye gitmez.
 
