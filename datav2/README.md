@@ -6,3 +6,4 @@
 |---|---|---|---|
 | `screens.json` | screens | 9 | ✅ onaylandı |
 | `departments.json` | departments | 6 | ✅ onaylandı |
+| `screen_departments.json` | screen_departments | 23 | ✅ onaylandı |

@@ -1,0 +1,117 @@
+[
+  {
+    "screen_code": "KRTTBASV",
+    "department_id": "KART_YONETIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "KRTTBASV",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRTTGUNC",
+    "department_id": "KART_YONETIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "KRTTGUNC",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRTTGUNC",
+    "department_id": "HESAP_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRDTKULL",
+    "department_id": "KREDI_KULLANDIRIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "KRDTKULL",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRDTKULL",
+    "department_id": "HESAP_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "MUSTTANM",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "MUSTGUNC",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "HSPTVDSZ",
+    "department_id": "HESAP_YONETIM",
+    "role": "ana"
+  },
+  {
+    "screen_code": "HSPTVDSZ",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "ODMTTLMT",
+    "department_id": "FATURA_ODEME",
+    "role": "ana"
+  },
+  {
+    "screen_code": "ODMTTLMT",
+    "department_id": "HESAP_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRDTTAHS",
+    "department_id": "KREDI_TAKIP",
+    "role": "ana"
+  },
+  {
+    "screen_code": "KRDTTAHS",
+    "department_id": "HESAP_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "KRDTTAHS",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "KREDI_KULLANDIRIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "KREDI_TAKIP",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "KART_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "FATURA_ODEME",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "HESAP_YONETIM",
+    "role": "etkilesimli"
+  },
+  {
+    "screen_code": "PRMTGENL",
+    "department_id": "MUSTERI_YONETIM",
+    "role": "etkilesimli"
+  }
+]
