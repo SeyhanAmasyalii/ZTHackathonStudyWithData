@@ -23,13 +23,13 @@ search_text   "kurum yanıt vermiyor fatura talimatı"
 
 2. adım bu fişe oturumdaki kullanıcıyı (`user_name = elif`) ekleyip logu arar.
 
-"Sorun yaşıyorum" butonundan gelen istekte `correlation_id` olduğu için bu adım çalışmaz; log doğrudan SQL'den alınır.
+"Sorun yaşıyorum" butonundan gelen istekte `correlation_id` olduğu için bu adım çalışmaz; log doğrudan `kibana_logs` verisinden alınır.
 
 ## 2. Akış: mesaj başına tek AI çağrısı
 
 ```
 1. Kod: mesajdaki kişisel veriyi maskeler (§5)
-2. Kod: ekran ve kurum listesini prompt'a ekler (SQL'den, açılışta bir kez okunmuş)
+2. Kod: ekran ve kurum listesini prompt'a ekler (`datav2` JSON'larından, açılışta bir kez okunmuş)
 3. AI:  mesaj + liste → fişi doldurur (JSON şeması, §4)
 4. Kod: fişi kontrol eder (§6) → 2. adıma verir
 ```
@@ -67,11 +67,11 @@ clues = ExtractedClues.model_validate_json(resp.choices[0].message.content)
 |---|---|
 | `now`, `today` | Sunucu saati, `Europe/Istanbul` (isteğe bağlı `DEMO_NOW`) |
 | `user_role`, `user_unit` | Oturum |
-| `screens` | SQL `screens` → her satır `KOD · Ad — description` |
-| `institutions` | SQL `institutions` → her satır `KOD · Ad (bill_type)` |
+| `screens` | `datav2/screens.json` → her satır `KOD · Ad — description` |
+| `institutions` | `datav2/institutions.json` → her satır `KOD · Ad (bill_type)` |
 | `message` | Maskeli kullanıcı metni; `<` ve `>` temizlenir |
 
-`screens` ve `institutions` uygulama açılırken bir kez okunur, bellekte tutulur ve koda göre sıralı yazılır.
+**Veri kaynağı:** tüm veri `datav2/*.json` dosyalarından okunur (SQL yok). Dosyalar uygulama açılırken bir kez belleğe yüklenir; `screens` ve `institutions` koda göre sıralı yazılır.
 
 ## 4. Çıktı şeması
 
@@ -81,8 +81,8 @@ clues = ExtractedClues.model_validate_json(resp.choices[0].message.content)
 | `date` | `YYYY-MM-DD` / null | "dün" → dünün tarihi; yoksa bugün |
 | `date_range_days` | 1–7 / null | Tarih belirsizse ("geçen hafta") kaç gün geriye bakılacak |
 | `time_from`, `time_to` | `HH:MM` / null | Saat aralığı (kurallar prompt'ta) |
-| `screen_codes` | liste (en fazla 3) | SQL `screens` kodları |
-| `institution_code` | kod / null | SQL `institutions` kodları |
+| `screen_codes` | liste (en fazla 3) | `screens.json` kodları |
+| `institution_code` | kod / null | `institutions.json` kodları |
 | `customer_number` | 8 hane / null | Yalnızca mesajda aynen geçiyorsa |
 | `search_text` | metin | 3–8 anahtar kelime, numara ve ad içermez |
 | `summary` | metin | Tek cümle özet |
@@ -103,8 +103,8 @@ clues = ExtractedClues.model_validate_json(resp.choices[0].message.content)
       "date_range_days":  {"anyOf": [{"type": "integer"}, {"type": "null"}]},
       "time_from":        {"anyOf": [{"type": "string"}, {"type": "null"}]},
       "time_to":          {"anyOf": [{"type": "string"}, {"type": "null"}]},
-      "screen_codes":     {"type": "array", "items": {"type": "string", "enum": ["<SQL screens.code>"]}},
-      "institution_code": {"anyOf": [{"type": "string", "enum": ["<SQL institutions.institution_code>"]}, {"type": "null"}]},
+      "screen_codes":     {"type": "array", "items": {"type": "string", "enum": ["<screens.json code>"]}},
+      "institution_code": {"anyOf": [{"type": "string", "enum": ["<institutions.json institution_code>"]}, {"type": "null"}]},
       "customer_number":  {"anyOf": [{"type": "string"}, {"type": "null"}]},
       "search_text":      {"type": "string"},
       "summary":          {"type": "string"},
@@ -114,7 +114,7 @@ clues = ExtractedClues.model_validate_json(resp.choices[0].message.content)
 }
 ```
 
-Enum listeleri koddaki aynı SQL önbelleğinden üretilir. Abone numarası ve hane sayısı **bilerek yok** (logda abone numarası tutulmuyor).
+Enum listeleri koddaki aynı veri önbelleğinden üretilir. Abone numarası ve hane sayısı **bilerek yok** (logda abone numarası tutulmuyor).
 
 ## 5. KVKK maskeleme (AI'dan önce)
 
@@ -138,7 +138,7 @@ Geçmeyen alan boşaltılır; istek iptal edilmez.
 
 | Alan | Kontrol |
 |---|---|
-| `customer_number` | `^\d{8}$`, mesajda aynen geçiyor, `customers` tablosunda var |
+| `customer_number` | `^\d{8}$`, mesajda aynen geçiyor, `datav2/customers.json`'da var |
 | `screen_codes`, `institution_code` | katalogda var |
 | kurum var, ekran yok | `institution_screens`'ten ekle (ODMTTLMT) |
 | `date` | gelecekte değil, en fazla 7 gün geri; ikisi de boşsa bugün |
@@ -171,7 +171,8 @@ Yönlendirme: `durum_ozeti` → M1.7 · `diger` → kısa yönlendirme cevabı �
 | `prompts/varlik-cikar.md` | system + user prompt |
 | `backend/app/models/clues.py` | `ExtractedClues` (AI çıktısı), `Clues` (kontrol edilmiş) |
 | `backend/app/clients/llm.py` | `chat_json(prompt_name, variables, schema)` |
-| `backend/app/repositories/catalog.py` | `screens`, `institutions`, `institution_screens` + önbellek |
+| `backend/app/repositories/datastore.py` | `datav2/*.json` dosyalarını açılışta belleğe yükler (salt okunur) |
+| `backend/app/repositories/catalog.py` | ekranlar, kurumlar, `institution_screens`, müşteri no kontrolü |
 | `backend/app/services/kvkk.py` | tarama + maskeleme |
 | `backend/app/services/clues.py` | maskele → AI → kontrol → yedek yol |
 | `backend/tests/test_kvkk.py`, `test_clues.py` | §5 ve §7 |

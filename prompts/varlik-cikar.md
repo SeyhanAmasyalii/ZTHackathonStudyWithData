@@ -1,7 +1,7 @@
 # varlik-cikar
 
 Amaç: Mercek sohbetinde kullanıcının serbest metninden log aramada filtre olarak kullanılacak ipuçlarını çıkarmak (M1.1, 1. adım).
-Girdiler (kod doldurur): now, today, user_role, user_unit, screens (SQL `screens`), institutions (SQL `institutions`), message (KVKK maskeli)
+Girdiler (kod doldurur): now, today, user_role, user_unit, screens (`datav2/screens.json`), institutions (`datav2/institutions.json`), message (KVKK maskeli)
 Çıktı şeması: `ExtractedClues` — intent, date, date_range_days, time_from, time_to, screen_codes[], institution_code, customer_number, search_text, summary, confidence
 Model: Foundry deploy `chat`, Chat Completions, temperature 0, `response_format = json_schema (strict)`; mesaj başına tek çağrı
 Kullanan: `backend/app/services/clues.py`

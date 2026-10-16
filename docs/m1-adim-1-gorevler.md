@@ -43,29 +43,37 @@
 
 ## B. Backend (FastAPI'yi yazan kişi)
 
-Ön koşul: `backend/` iskeleti ve `/api/health` var (F0). SQL henüz hazır değilse B2'de JSON yedeği kullanılır.
+Ön koşul: `backend/` iskeleti ve `/api/health` var (F0).
+
+**Veri kaynağı:** tüm veri `datav2/*.json` dosyalarından okunur; bu adımda SQL kullanılmaz.
 
 ### B1 · Ayarlar (15 dk)
-`app/config.py` (`pydantic-settings`) alanları: `azure_openai_endpoint`, `azure_openai_api_key` (opsiyonel), `chat_deployment="chat"`, `demo_now` (opsiyonel), SQL ayarları. `.env.example`'a yalnızca `<PLACEHOLDER>`.
+`app/config.py` (`pydantic-settings`) alanları: `azure_openai_endpoint`, `azure_openai_api_key` (opsiyonel), `chat_deployment="chat"`, `demo_now` (opsiyonel), `data_dir` (varsayılan: repodaki `datav2/`). `.env.example`'a yalnızca `<PLACEHOLDER>`.
 
 > 🤖 Copilot: *"backend/app/config.py'ye şu ayarları ekle: … Hiçbir varsayılan değer secret içermesin. .env.example'ı `<PLACEHOLDER>` ile güncelle."*
 
 **Bitti sayılır:** `uv run pytest` ve `uv run ruff check .` yeşil.
 
-### B2 · Katalog okuma (30 dk)
-`app/repositories/catalog.py`:
-- `screens` (code, name, description), `institutions` (institution_code, name, bill_type), `institution_screens` tablolarını okur; parametreli sorgu.
-- Uygulama açılırken bir kez okur, bellekte tutar; koda göre sıralar.
-- SQL hazır değilse `datav2/screens.json`, `institutions.json`, `institution_screens.json`'dan okur (yalnızca yerel geliştirme).
+### B2 · Veri okuma (30 dk)
+`app/repositories/datastore.py`: `DATA_DIR` altındaki JSON'ları uygulama açılırken **bir kez** yükler, bellekte tutar (salt okunur).
+- Bu adımda gerekenler: `screens.json`, `institutions.json`, `institution_screens.json`, `customers.json` (müşteri no kontrolü ve ad soyad listesi için).
+- Dosya bulunamazsa ya da JSON bozuksa uygulama açılışta anlaşılır bir hatayla durur.
+
+`app/repositories/catalog.py` (datastore'u kullanır):
+- Ekranlar ve kurumlar koda göre sıralı.
 - Yardımcılar: `screens_text()` → `KOD · Ad — description` satırları; `institutions_text()` → `KOD · Ad (bill_type)`; `screen_codes()`, `institution_codes()`, `screens_for_institution(code)`.
 
-**Bitti sayılır:** Birim testi: 9 ekran, 16 kurum; `screens_for_institution("GAZ02") == ["ODMTTLMT"]`.
+`customer_exists(number)`: `customers.json`'dan oluşturulan küme ile kontrol.
+
+**Deploy notu:** `datav2/*.json` backend paketine girmeli. CI'daki build adımı JSON'ları `backend/data/` altına kopyalar; App Settings'te `DATA_DIR=data`. Dosyalar repoda zaten var, ek gizli bilgi yok.
+
+**Bitti sayılır:** Birim testi: 9 ekran, 16 kurum, 40.005 müşteri; `screens_for_institution("GAZ02") == ["ODMTTLMT"]`; `customer_exists("10000004")` doğru, `customer_exists("99999999")` yanlış.
 
 ### B3 · KVKK maskeleme (45 dk)
 `app/services/kvkk.py`: `mask(text) -> MaskResult(text, findings)` ve `scan(text) -> list[Finding]`. Tablo: `m1-adim-1-basit.md` §5.
 - TCKN algoritması, Luhn, IBAN mod-97 kodda; regex tek başına yetmez.
 - 8 haneli müşteri numarası maskelenmez.
-- Ad soyad listesi `customers` ad/soyadlarından (yerelde `datav2/customers.json`).
+- Ad soyad listesi `datav2/customers.json` ad/soyadlarından (datastore).
 
 > 🤖 Copilot: *"app/services/kvkk.py yaz: TCKN (algoritma), telefon, @ornek.test dışı e-posta, IBAN (mod-97), kart (Luhn), ad soyad listesi, IP. Bulguları etiketle değiştir. 8 haneli sayıyı maskeleme. tests/test_kvkk.py ile her tür için olumlu ve olumsuz örnek."*
 
@@ -97,7 +105,7 @@
 1. Boşsa AI çağırma; 1.000 karakterde kırp; `<` `>` temizle.
 2. `kvkk.mask` → ikinci `scan` bulgu verirse `KvkkBlocked` hatası.
 3. `llm.chat_json("varlik-cikar", {...}, ExtractedClues, schema)`.
-4. Kontroller: `m1-adim-1-basit.md` §6 tablosu (müşteri no `customers`'ta var mı dahil).
+4. Kontroller: `m1-adim-1-basit.md` §6 tablosu (müşteri no `customers.json`'da var mı dahil).
 5. `LLMError` ya da zaman aşımında yedek yol (regex) → `extraction_method="fallback"`.
 
 Ek: `backend/scripts/eval_clues.py` (backend kodunu import ettiği için backend içinde): §7'deki 1–9 numaralı mesajları **gerçek** Foundry'ye gönderir, beklenenle karşılaştırır, doğru sayısı ve süreyi yazar (A4'te kullanılır; CI'da çalışmaz).
@@ -125,4 +133,4 @@ Ek: `backend/scripts/eval_clues.py` (backend kodunu import ettiği için backend
 | 1:15 – 2:30 | (2. adım hazırlığı: AI Search) | B4, B5, B6 |
 | 2:30 – 3:00 | A4 (B6 ile birlikte) | B7, B8 |
 
-**Takılırsanız:** Foundry 401/403 → A3'teki rol ya da anahtar · "json_schema" / "response_format" hatası → model structured outputs desteklemiyor, A2'de başka model · SQL bağlantısı yok → B2'deki JSON yedeğiyle devam edin.
+**Takılırsanız:** Foundry 401/403 → A3'teki rol ya da anahtar · "json_schema" / "response_format" hatası → model structured outputs desteklemiyor, A2'de başka model · `DATA_DIR` bulunamadı → yerelde `backend/.env`'de `DATA_DIR=../datav2`.
