@@ -9,6 +9,36 @@ Bu doküman, hackathon boyunca kullanacağımız tüm dokümanları (hepsi bu re
 
 ---
 
+## Sentetik veri: ne var, kaç adet, nerede
+
+Tüm veri sentetiktir (gerçek müşteri verisi yok); seed 42, veri sonu 17.10.2026 09:00. Ayrıntılı dağılımlar: [`docs/mercek-sentetik-veri-sayilari.md`](docs/mercek-sentetik-veri-sayilari.md).
+
+| Veri | Adet | Dosya |
+|---|---|---|
+| Ekran · servis · ekran–servis ilişkisi | 20 · 7 · 30 | [`data/seed/catalog.json`](data/seed/catalog.json) |
+| Hata–servis kuralı · servis takvimi · kapsam eki | 17 · 11 · 5 | `catalog.json` |
+| Fatura kurumu · şube · çağrı kategorisi | 15 · 5 · 6 (30 alt kategori) | `catalog.json` |
+| Demo kullanıcısı · etkilenen il (E) | 5 · 3 | `catalog.json` |
+| Kurum duyurusu | 20 | [`data/seed/announcements.json`](data/seed/announcements.json) |
+| Kesin senaryo metinleri | 1 çözüm · 8 talep · 5 çağrı notu | [`data/seed/fixed_texts.json`](data/seed/fixed_texts.json) |
+| Üretilmiş metinler | 465 not · 36 çözüm · 87 talep · 30 taslak | [`data/seed/texts.json`](data/seed/texts.json) |
+| Ham işlem logu | 10.000 | [`tools/output/dalan-banking-logs.ndjson`](tools/output) |
+| Senaryolu işlem logu (ham + 415 senaryo kaydı) | **10.415** | [`tools/output/mercek-logs.ndjson`](tools/output) |
+| B demo penceresi (Başkentgaz zaman aşımı) | 46 | `tools/output/mercek-demo-window.ndjson` |
+| Müşteri | **40.000** | [`data/out/customers.csv`](data/out) |
+| Kredi | **33.000** (26.000 müşteride) | `data/out/loans.csv` |
+| Müşteri teması | **8.322** | `data/out/contacts.csv` |
+| Teknoloji çağrısı (CAG-0651…2050) | **1.400** | `data/out/incidents.csv` |
+| Çözüm bilgi bankası | 37 | `data/out/solutions.csv` |
+| Geçmiş talep (TLP-0500…1037) | 95 | `data/out/requests.csv` |
+| Değerlendirme seti | 30 (10 / 10 / 10) | [`data/seed/eval_cases.json`](data/seed/eval_cases.json) |
+| Hepsi yüklü veritabanı (15 tablo) | ≈93.400 satır | `data/out/mercek.db` (SQLite) |
+| AI Search indeksleri (Azure'da yüklenir) | 37 · 95 · 20 belge | `load_all.py --search` |
+
+**Senaryo rakamları:** A Elif geliri 38.000 · B 46 (+Mehmet = 47) log, CAG-2051 + 11 bağlı vaka · C 412 hata, İSKİ 400, 187 müşteri, 23 çağrı · D hedef 2.340, temas 71 / 64 / 51 · E 4.870 müşteri, 6.215 kredi, 612 gecikmede, 497 temas (418 erteleme). Kontrol: `python3 tools/mercek_data/validate_scenarios.py --sqlite data/out/mercek.db --now 2026-10-17T09:00:00+03:00`.
+
+---
+
 ## 1. Dokümanlar bir bakışta
 
 | # | Doküman | Ne anlatır | Kim için |
