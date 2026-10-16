@@ -337,7 +337,7 @@ class IncidentFactory:
             incident["enriched_json"] = json.dumps(enrichment, ensure_ascii=False)
 
 
-def stats(incidents: list[dict]) -> dict:
+def stats(incidents: list[dict], logs: list[dict]) -> dict:
     def count(pred):
         return sum(1 for i in incidents if pred(i))
 
@@ -345,6 +345,7 @@ def stats(incidents: list[dict]) -> dict:
     assert len(c) == sum(C_PLAN.values()), len(c)
     pilot = [i for i in incidents if i["enriched_json"]]
     accepted = [i for i in pilot if json.loads(i["enriched_json"])["accepted"] and i["status"] == "kapali"]
+    error_by_corr = {lg["correlation_id"]: lg["app_exception_value"] for lg in logs}
     return {
         "total": len(incidents),
         "ids": [incidents[0]["incident_id"], incidents[-1]["incident_id"]],
@@ -356,6 +357,8 @@ def stats(incidents: list[dict]) -> dict:
         "with_template": count(lambda i: i["solution_template_id"]),
         "linked_to_log": count(lambda i: i["kibana_correlation_id"]),
         "A_affordability": count(lambda i: i["screen_code"] == "KRDTKULL" and i["subcategory"] == "kullandırım yapılamadı"),
+        # A'da Mercek'in göstereceği sayı: kural 1 (120218 AFFORDABILITY_EXCEEDED) logundan açılmış çağrılar
+        "A_affordability_120218": count(lambda i: error_by_corr.get(i["kibana_correlation_id"]) == 120218),
         "B_institution_timeout": {i["incident_id"]: [i["institution_code"], i["solution_template_id"]]
                                   for i in incidents if i["subcategory"] == "kurumdan yanıt alınamadı"},
         "C_iski": {"total": len(c), "by_unit": dict(Counter(i["reporter_unit_id"] for i in c)),
@@ -387,7 +390,7 @@ def main() -> None:
         IncidentFactory.open(incident)
 
     (DATA / "incidents.json").write_text(json.dumps(incidents, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    summary = stats(incidents)
+    summary = stats(incidents, factory.logs)
     (DATA / "incidents.stats.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=1))
 

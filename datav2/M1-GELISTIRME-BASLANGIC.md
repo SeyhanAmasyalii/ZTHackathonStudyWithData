@@ -80,7 +80,7 @@ Tarayıcı ─► mercek-web (Next.js 16, App Service) ─► mercek-api (FastAP
 | App Service | `mercek-web` | Next.js standalone, `node server.js` |
 | App Service | `mercek-api` | FastAPI, `gunicorn -k uvicorn.workers.UvicornWorker`, sağlık: **`/api/health` → 200** |
 | Azure SQL Database | `mercek-sql` / `mercekdb` | Katalog, loglar, çağrılar, duyurular, e-postalar; örüntü sorguları |
-| Azure AI Search | `mercek-search` | M1 indeksleri: **`solution_templates`, `announcements`, `inbound_emails`** (Free katmanında 3 indeks sınırı; M2'de `demands` için Basic gerekir) |
+| Azure AI Search (**Basic**) | `mercek-search` | M1 indeksleri: **`solution_templates`, `announcements`, `inbound_emails`, `kibana_logs`** (4 indeks → Free'nin 3 indeks sınırı aşılır; M2'de `demands` eklenir). `kibana_logs` indeksi yalnızca Warning/Error logları içerir; `correlation_id` bilinmeyen sohbet sorularında ilgili logu bulmak için kullanılır, sayım ve örüntü SQL'de kalır |
 | Azure AI Foundry | `mercek-foundry` | Deploy adları: **`chat`**, **`embedding`** |
 | Application Insights | (opsiyonel) | İstek süreleri, hata izleme |
 
@@ -113,7 +113,7 @@ AI'a ham log değil, **kodun ürettiği özet** verilir. Kullanıcı metni ve lo
 |---|---|---|
 | **F0** | Monorepo iskeleti (rebuild Faz 1) + `.github/workflows/ci-cd.yml` (lint → test → build → deploy, OIDC ya da publish profile) + `/api/health` | PR'da quality yeşil, main'de deploy + smoke test yeşil, CodeQL dosyası değişmemiş |
 | **F1** | `db/schema.sql` (SCHEMA.md'den) + `scripts/load_datav2.py` (JSON → SQL, parametreli toplu yükleme; customers 40.005, loans 33.000, kibana_logs 10.555) + `search_text` hesaplanan kolonlar + change tracking | Satır sayıları README tablosuyla aynı |
-| **F2** | AI Search: 3 indeks, SQL indexer + embedding (integrated vectorization ya da push betiği) | `solution_templates` 37 · `announcements` 18 · `inbound_emails` 34 belge |
+| **F2** | AI Search: 4 indeks, SQL indexer + embedding (integrated vectorization ya da push betiği); `kibana_logs` için view `v_kibana_logs_search` (Warning/Error, `log_id` high water mark) | `solution_templates` 37 · `announcements` 18 · `inbound_emails` 34 · `kibana_logs` 2.002 belge |
 | **F3** | `clients/llm.py` (`chat_json` şemalı + 1 yeniden deneme, `embed`), `prompts/` dosyaları, KVKK tarama/maskeleme yardımcısı | Birim testleri (FakeLLM) yeşil; KVKK taraması `datav2`'de yalnızca EML-0032'yi bulur |
 | **F4** | Temel uygulama (rebuild Faz 2–4): demo kullanıcıları, 9 bankacılık ekranı (ekran kodu çubuğu), `POST /api/logs` → `kibana_logs` | Ekran işlemi SQL'de yeni log satırı üretir |
 | **F5** | **M1.1** "Sorun yaşıyorum" + panel + `POST /api/mercek/assist`; serbest metin çıkarımı | A ve B bağlamla açılır |
@@ -134,7 +134,7 @@ Veri sonu: **2026-10-17 09:00 (+03)**. Demo kayıtları bu andan sonra oluşur.
 - Elif (10000004), gelir **38.000**, mevcut kredisi **yok**.
 - 400.000 / 3 ay taksit **144.185,92**; 400.000 / 36 ay **22.754,17**; en yüksek tutar ≈ **334.004** → öneri **330.000** / 36 ay (**18.772,19**).
 - Kural 1: KRDTKULL · 120218 AFFORDABILITY_EXCEEDED · business · `open_incident=0` → **prevented_calls +1**.
-- Geçmişte bu türden **106** çağrı açılmış (Mercek'in önleyebileceği).
+- Geçmişte kural 1 (120218) loglarından **90** çağrı açılmış (Mercek'in önleyebileceği; `incidents.stats.json` → `A_affordability_120218`).
 
 **B — Başkentgaz zaman aşımı (kurum kaynaklı, ana kayıt)**
 - 17.10 08:30–09:00: ODMTTLMT · GAZ02 · **110731** INSTITUTION_TIMEOUT · **46** log (şube 601 Kızılay 34, çağrı merkezi 12), 46 farklı müşteri; şube kayıtlarının 8'i `elif`.
