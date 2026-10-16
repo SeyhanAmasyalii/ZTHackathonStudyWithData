@@ -35,21 +35,17 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   ```
 - Kısa ve odaklı yanıt; karar gereken noktaları numaralı sor (kullanıcı "1. uygun 2. ok" diye yanıtlar).
 
-## 4. Kaldığımız yer ve sıradaki adımlar
-**Biten JSON'lar (`datav2/`):** screens (9) · departments (6) · screen_departments (23) · error_handling_rules (20) · closure_codes (62).
+## 4. Kaldığımız yer ve yapılacaklar (güncelleme: 16.10.2026 20:20)
+**Biten JSON'lar (`datav2/`, README tablosunda ayrıntı):** screens · departments · screen_departments · error_handling_rules · closure_codes · org_units (19) · institutions (16) · institution_screens (16) · channels (6) · incident_categories (19, screen_code) · customers (40.005) · loans (33.000) · kibana_logs (10.555) · solution_templates (37) · incidents (700) · inbound_emails (34) · announcements (18, `source`) · demands (116) · department_calendar (11) · prevented_calls (boş).
+Üreticiler: `datav2/generators/*.py` (seed 42; customers → loans → kibana_logs → incidents; announcements/inbound_emails; demands → department_calendar). Sayılar: `*.stats.json`.
 
-**Sıradaki (sırayla):**
-1. **org_units** — 5 şube + G tipi 90xx genel müdürlük birimleri + birkaç B bölge (SCHEMA.md).
-2. **institutions** — 16 kurum (catalog.json'daki 15 + Gelir İdaresi VRG01).
-3. **institution_screens** — fatura kurumları → ODMTTLMT. Gelir İdaresi için hangi ekran (9 ekranda vergi ekranı yok) kullanıcıya sorulacak.
-4. **channels** — 5 kanal.
-5. **incident_categories** — 9 yeni ekrana göre gözden geçir; yalnızca temas alt kategorilerini çıkar.
-6. **scope_addons** — önce şemayı kullanıcıyla gözden geçir (departman uyumu).
-7. Ana tablolar: customers → loans → kibana_logs → solution_templates → incidents → inbound_emails → announcements → demands → department_calendar → prevented_calls (prevented_calls demoda dolar; boş/örnek). Büyük tablolarda (40.000 müşteri, 33.000 kredi, ~10.000 log) tam JSON yerine **üretici betik + örnek JSON + sayılar** önerilip kullanıcıya sorulmalı.
+**Yapılacaklar (to do):**
+1. ⏸ **scope_addons** — şema önerisi hazır (`department_shares_json` + `ana` anahtarı, `trigger_hint`); kullanıcı erteledi. Açık soru: C için ADD-PARAMETRE'ye bağlı ayrı talep olsun mu?
+2. 🔔 **KVKK** — Foundry'ye göndermeden önce maskeleme yardımcısı + tüm metin alanlarında otomatik tarama (TCKN algoritması, telefon, `@ornek.test` dışı e-posta, IBAN, Luhn kart no, kişi adı listesi, IP/makine adı) → validate'te "✓ KVKK taraması · 0 bulgu" + birim testi. Bilinçli bulgu: EML-0032 (yok_sayildi, Foundry'ye gitmez). loans'ta IBAN kaldırıldı.
+3. 📎 **Maliyet Tahminleme Formu (Excel)** — kullanıcı tekrar ekleyecek, detayı verecek.
+4. 🧭 **§5 büyük güncellemenin planı** — kullanıcıyla birlikte.
 
-**Bekleyen hatırlatmalar:**
-- 🔔 **KVKK (tablo belirlemesi bitince kullanıcıya hatırlat):** Foundry'ye göndermeden önce maskeleme yardımcısı + tüm metin alanlarında otomatik KVKK taraması (TCKN algoritması, telefon, `@ornek.test` dışı e-posta, IBAN, Luhn kart no, kişi adı listesi, IP/makine adı) → validate'te "✓ KVKK taraması · 0 bulgu" + birim testi.
-- 📎 **Maliyet Tahminleme Formu (Excel)** sisteme eklenecek; kullanıcı detayı sonra verecek. Dosya eski oturumun eklerindeydi — **yeni oturumda kullanıcıdan tekrar eklemesini iste** (repoya konmadı).
+**Bu oturumun kararları (özet):** Mercek pilotu 15–16.10 (yalnızca çağrı önerisi; örüntü taraması ve e-posta taraması demoda açılır). Demo kayıtları (CAG-2051/-NN, CAG-2052, DUY-0419, İSKİ duyurusu, TLP-1043/1044/1045, prevented_calls) dosyalarda yok, canlı üretilir. Çağrılar logların 30 gününe hizalı. G takvimi 19.10→23.10.
 
 ## 5. En sondaki büyük güncelleme (#9, tek seferde)
 Tüm JSON'lar bitince: `datav2` → `data/seed` ve üreticiler; kod (db.py, schema.sql, generate_*, load_all, demo_reset, validate_scenarios, search.py), testler, veri yeniden üretimi, senaryo doğrulaması; dokümanlar, prompt'lar, sunum; iki repo + proje senkronu. İçerik:
@@ -62,9 +58,10 @@ Tüm JSON'lar bitince: `datav2` → `data/seed` ve üreticiler; kod (db.py, sche
 - institution → **institution_code**; Gelir İdaresi.
 - **inbound_emails → announcements → etki analizi → talep önerisi** (C ve G yeni akış; AI Search'e inbound_emails indeksi).
 - Katalog tabloları (org_units, institutions, institution_screens, channels, incident_categories).
-- requests → **demands** (API `/api/demands/*`, indeks `demands`).
+- requests → **demands** (API `/api/demands/*`, indeks `demands`). Uygulamadaki eski örnek talepler (TLP-1038…1042) yeni bekleyen taleplerle değiştirilir.
 - service_calendar → **department_calendar** (talebe bağlı; 11 satır planlı talep olur).
 - **contacts kaldırılır**; D ve E kanıtı loans/customers'tan.
+- announcements: `mercek_assigned_` öneki kalkar, `source` (insan/mercek) eklenir. incident_categories'e `screen_code`, channels'a 6 İş Birimi. loans'tan `collection_account` kalkar. incidents 1.400 → 700 (30 gün).
 - mercek_events → **prevented_calls**; ai_usage yok.
 - Geçmiş taleplerdeki eski ekran referansları 9 ekrana dağıtılır; B ve C ODMTFATR → **ODMTTLMT**; D butonu **KRDTTAHS**.
 

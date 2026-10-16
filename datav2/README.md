@@ -25,3 +25,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `announcements.json` | announcements | 18 | ✅ onaylandı · üretici `generators/announcements.py` · `mercek_assigned_` öneki kaldırıldı, `source` (insan/mercek) eklendi · 4 duyuru talebe bağlı (TLP-1033/1034/1035, TLP-1023) |
 | `demands.json` | demands | 116 (95 geçmiş + 11 takvim + 3 duyuru + 7 bekleyen) | ✅ onaylandı · üretici `generators/demands.py` · D/E/G (TLP-1043/1044/1045) demoda · TLP-1023 = DUY-0415 · FAST → HESAP_YONETIM %30 |
 | `department_calendar.json` | department_calendar | 11 (CAL-0001…0011, TLP-1021…1031) | ✅ onaylandı · D/E sonuçları aynı · G = 19.10→23.10 (HANDOFF düzeltildi) |
+| `prevented_calls.json` | prevented_calls | 0 | ✅ onaylandı · boş başlar; ilk kayıt A senaryosunda demoda |

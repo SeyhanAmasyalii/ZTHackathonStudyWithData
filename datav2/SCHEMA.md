@@ -238,7 +238,9 @@ Yok: source_channel, scope_additions_json, TL maliyet. Efor yalnızca adam-gün;
 ### department_calendar ✅ (`department_calendar.json`, 11)
 calendar_id (CAL-xxxx), department_id, demand_id (**zorunlu**), date_from, date_to, allocation_pct. `note` yok; talep dışı satır yok. Bugünkü 11 takvim satırı (`catalog.json` → service_calendar) planlı talep olarak demands'e eklenir (ör. TLP-1021 Yıl sonu regülasyon işi, KREDI_TAKIP 12.10–08.11 %100). Kapasite günde 1 a/g. D/E/G takvim sonuçları: D 09.11→02.12/04.12 · E 19.10→30.10/02.11, sıraya koy 09.11→20.11 · G 19.10→23.10 (16.10 kararı).
 
-### prevented_calls 🟡 (eski mercek_events)
+### prevented_calls ✅ (`prevented_calls.json`, boş; eski mercek_events)
+Karar (16.10): pilotta önleme yoktu; tablo boş başlar, ilk kayıt A senaryosunda Elif'in denemesiyle demoda oluşur.
+
 prevented_id (IDENTITY), ts, user_name, screen_code, error_code, rule_id, kibana_correlation_id. `ai_usage` yok. Diğer metrikler kendi tablolarından sayılır.
 
 ### Kaldırılan tablolar
