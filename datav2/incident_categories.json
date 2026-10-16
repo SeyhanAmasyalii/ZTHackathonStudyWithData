@@ -1,0 +1,97 @@
+[
+  {
+    "category": "Fatura talimatı",
+    "subcategory": "kurumdan yanıt alınamadı",
+    "screen_code": "ODMTTLMT"
+  },
+  {
+    "category": "Fatura talimatı",
+    "subcategory": "abone numarası kabul edilmiyor",
+    "screen_code": "ODMTTLMT"
+  },
+  {
+    "category": "Fatura talimatı",
+    "subcategory": "talimat kaydedilemedi",
+    "screen_code": "ODMTTLMT"
+  },
+  {
+    "category": "Kredi",
+    "subcategory": "kullandırım yapılamadı",
+    "screen_code": "KRDTKULL"
+  },
+  {
+    "category": "Kredi",
+    "subcategory": "taksit tahsil edilemedi",
+    "screen_code": "KRDTTAHS"
+  },
+  {
+    "category": "Kredi",
+    "subcategory": "gecikme faizi hatalı hesaplandı",
+    "screen_code": "KRDTTAHS"
+  },
+  {
+    "category": "Kart",
+    "subcategory": "başvuru reddedildi",
+    "screen_code": "KRTTBASV"
+  },
+  {
+    "category": "Kart",
+    "subcategory": "başvuru tamamlanamadı",
+    "screen_code": "KRTTBASV"
+  },
+  {
+    "category": "Kart",
+    "subcategory": "kart bilgileri güncellenemiyor",
+    "screen_code": "KRTTGUNC"
+  },
+  {
+    "category": "Hesap",
+    "subcategory": "hesap açılamadı",
+    "screen_code": "HSPTVDSZ"
+  },
+  {
+    "category": "Müşteri bilgileri",
+    "subcategory": "müşteri tanımlanamadı",
+    "screen_code": "MUSTTANM"
+  },
+  {
+    "category": "Müşteri bilgileri",
+    "subcategory": "kimlik doğrulama başarısız",
+    "screen_code": "MUSTTANM"
+  },
+  {
+    "category": "Müşteri bilgileri",
+    "subcategory": "adres güncellenemiyor",
+    "screen_code": "MUSTGUNC"
+  },
+  {
+    "category": "Müşteri bilgileri",
+    "subcategory": "iletişim izni değiştirilemiyor",
+    "screen_code": "MUSTGUNC"
+  },
+  {
+    "category": "Müşteri bilgileri",
+    "subcategory": "telefon numarası hatalı",
+    "screen_code": "MUSTGUNC"
+  },
+  {
+    "category": "Parametre",
+    "subcategory": "parametre değişikliği kaydedilemedi",
+    "screen_code": "PRMTGENL"
+  },
+  {
+    "category": "Parametre",
+    "subcategory": "parametre onayı tamamlanamadı",
+    "screen_code": "PRMTGENL"
+  },
+  {
+    "category": "Diğer",
+    "subcategory": "ekran açılmıyor / genel hata",
+    "screen_code": "*"
+  },
+  {
+    "category": "Diğer",
+    "subcategory": "şikâyet",
+    "screen_code": "*"
+  }
+]

@@ -15,3 +15,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `institutions.json` | institutions | 16 (15 fatura + VRG01 Gelir İdaresi) | ✅ onaylandı · B: GAZ02 · C: SU01 · G: SU02; abone no uzunluğu bilerek yok |
 | `institution_screens.json` | institution_screens | 16 (tüm kurumlar → ODMTTLMT / talimat) | ✅ onaylandı · VRG01: MTV vb. vergi talimatı; usage enum: odeme/sorgu/gecmis/talimat |
 | `channels.json` | channels | 6 | ✅ onaylandı · 5 Servis → çağrı açılmaz · 6 İş Birimi (G birimleri, branch_type G) → is_birimi · dijitalde (3, 4) çağrıyı Mercek açar, reporter 9999 |
+| `incident_categories.json` | incident_categories | 19 (7 kategori) | ✅ onaylandı · screen_code kolonu eklendi (Diğer: `*`) · "Fatura ödeme" → "Fatura talimatı" · temas ve ekranı olmayan alt kategoriler çıkarıldı |

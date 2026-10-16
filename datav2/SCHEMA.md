@@ -117,8 +117,9 @@ Değerler: 1 Şube→sube · 2 Çağrı Merkezi→cagri_merkezi · 3 İnternet �
 ### incident_categories 🟡
 | Kolon | Açıklama | Örnek |
 |---|---|---|
-| category | Kategori | Fatura ödeme |
+| category | Kategori | Fatura talimatı |
 | subcategory | Alt kategori | kurumdan yanıt alınamadı |
+| screen_code | İlgili ekran; `*` tüm ekranlar | ODMTTLMT |
 
 Kaynak: `catalog.json` → incident_categories (6 kategori). contacts kalktığı için yalnızca temaslarda kullanılan alt kategoriler (hatırlatma almadım, gecikme faizi itirazı, taksit sorusu, erteleme, erken kapama vb.) çağrılarda kullanılmıyorsa çıkarılır. Yeni ekranlara göre (talimat, tahsilat, parametre, müşteri tanımlama) alt kategoriler gözden geçirilir.
 
