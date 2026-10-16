@@ -1,6 +1,9 @@
 # M1 · 1. adım — Serbest metinden ipucu çıkarma (`varlik-cikar`)
 
-> Backend ve Foundry geliştiricileri için tasarım. Prompt dosyası: [`prompts/varlik-cikar.md`](../prompts/varlik-cikar.md).
+> **İleri sürüm — vakit kalırsa.** Önce [`m1-adim-1-basit.md`](m1-adim-1-basit.md) uygulanır (mesaj başına tek çağrı, katalog prompt'ta).
+> Bu doküman üstüne eklenecekleri anlatır: katalog için `get_catalog` aracı ve Responses API ile konuşma geçmişi.
+> Bu sürümde `prompts/varlik-cikar.md`'deki EKRANLAR/KURUMLAR bölümü şu metinle değiştirilir:
+> *"Ekran ve kurum listesini bilmiyorsun; önce `get_catalog` aracını çağır. screen_codes ve institution_code yalnızca aracın döndürdüğü listeden seçilir."*
 > Kaynak sırası ve kurallar: [`datav2/M1-GELISTIRME-BASLANGIC.md`](../datav2/M1-GELISTIRME-BASLANGIC.md). Kararlar: 16.10.2026.
 
 ## 1. Bu adım ne yapar
