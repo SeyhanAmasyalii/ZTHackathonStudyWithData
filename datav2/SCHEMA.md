@@ -224,9 +224,10 @@ Sonuç: 18 işlenmiş kurum duyurusu + İSKİ 12.09 ve 26.09 hatırlatması (iş
 email_id, mailbox (`dis-paydas-duyuru@fineart.ornek.test`, tek ortak adres), received_at, from_address, from_display, subject, body_text, attachments_json, assigned_team, processing_status (yeni/inceleniyor/islendi/yok_sayildi), processed_by, processed_at, mercek_assigned_type (announcement/other), mercek_assigned_confidence, mercek_assigned_institution_code, mercek_assigned_summary, linked_announcement_id.
 İçerik: 20 kurum duyurusu (18 işlenmiş + İSKİ 12.09 ve ASKİ işlenmemiş) + ~15 diğer (teşekkür, otomatik yanıt, yanlış adres). KVKK bulgusu olan mail `yok_sayildi`, Foundry'ye gitmez.
 
-### announcements 🟡 (18 + demoda üretilenler)
-ann_id, source_email_id, mercek_assigned_institution_code, published_at, mercek_assigned_effective_at, mercek_assigned_title, mercek_assigned_summary, mercek_assigned_screens_json, mercek_assigned_departments_json, mercek_assigned_impact, proposed_demand_id, status (onerildi/onayli/reddedildi), approved_by, approved_at, search_text.
-C: İSKİ duyurusu burada **yok** (mailde bulunur). G: ASKİ (DUY-0419) → TLP-1045.
+### announcements ✅ (`announcements.json`, 18 geçmiş + demoda üretilenler)
+Şema kararı (16.10): `mercek_assigned_` öneki kaldırıldı; kaydı kimin oluşturduğu `source` kolonunda.
+ann_id, source_email_id, **source** (insan/mercek), institution_code, published_at, effective_at, title, summary, screens_json, departments_json, impact (yok/dusuk/orta/yuksek), proposed_demand_id, status (onerildi/onayli/reddedildi), approved_by, approved_at, search_text (hesaplanan).
+Geçmiş 18 duyuru `source=insan`, `onayli`. Talep bağlantıları: DUY-0371→TLP-1033, DUY-0408→TLP-1034, DUY-0414→TLP-1035 (tamamlandı), DUY-0415→TLP-1023 (takvim talebi, planlı). C: İSKİ duyurusu tabloda **yok** (mailde bulunur, demoda Mercek ekler). G: ASKİ (DUY-0419, `source=mercek`, `onerildi`) → TLP-1045.
 
 ### demands 🟡 (eski requests, ~95 + 11 takvim talebi + demo)
 demand_id (TLP-xxxx), created_at, demander_unit_id (org_units), origin (business_unit/mercek), source_announcement_id, title, description, status (oneri/analiz/planli/tamamlandi/iptal), type, components_json, screens_json, departments_json, planned_effort_md, actual_effort_md, planned_component_efforts_json, actual_component_efforts_json, planned_department_efforts_json, actual_department_efforts_json, decisions, analyst, approved_by, approved_at, planned_department_id, planned_from, planned_to, mercek_assigned_analysis_json, mercek_suggestions_json (addon_id, suggestion, evidence, effort_delta_md, date_impact, decision bekliyor/kabul/ret, decided_by, decided_at), mercek_suggestion_count (hesaplanan), search_text.
