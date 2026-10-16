@@ -10,7 +10,9 @@ Kullanıcı Mercek sohbetine yazar ("bugün sabah 10 civarı bir müşterinin kr
 ```
 Kullanıcı metni
   → [kod] ön kontrol + KVKK maskeleme
-  → [Foundry `chat`] varlik-cikar (JSON şeması)
+  → [Foundry `chat`] 1. tur: get_catalog aracını çağırır
+  → [kod] aracı çalıştırır: SQL screens + institutions (önbellekten)
+  → [Foundry `chat`] 2. tur: varlik-cikar (JSON şeması)
   → [kod] doğrulama
   → Clues  ──►  2. adım: filtre (user_name, tarih/saat, ekran, kurum, müşteri) + AI Search kibana_logs
 ```
@@ -24,11 +26,11 @@ Kullanıcı metni
 | `message` | Kullanıcının serbest metni, **KVKK maskeli**, `<veri>` içinde |
 | `now`, `today` | Sunucu saati, Türkiye saati (`Europe/Istanbul`). İsteğe bağlı `DEMO_NOW` ayarı |
 | `user_role`, `user_unit` | Oturumdaki kullanıcı |
-| `screens` | SQL `screens`: her satır `KOD · Ad — description` |
-| `institutions` | SQL `institutions`: her satır `KOD · Ad (bill_type)` |
 
-- `screens` ve `institutions` uygulama açılırken **bir kez** okunur ve bellekte tutulur. Liste koda göre sıralı yazılır, böylece prompt sabit kalır ve Foundry'nin prompt önbelleği çalışır.
-- Şemadaki enum listeleri (`screen_codes`, `institution_code`) **aynı tablolardan üretilir**. Tabloya yeni ekran eklenince prompt da şema da kod değişmeden güncellenir.
+Ekran ve kurum listeleri prompt'a yazılmaz; model **`get_catalog` aracıyla** ister (§3a).
+
+- Backend `screens` ve `institutions` tablolarını uygulama açılırken **bir kez** okur ve bellekte tutar; araç bu önbellekten cevap verir (her istekte SQL'e gidilmez).
+- Şemadaki enum listeleri (`screen_codes`, `institution_code`) ve §6'daki doğrulama **aynı önbellekten üretilir**. Tabloya yeni ekran eklenince araç da şema da kod değişmeden güncellenir.
 - `user_name` prompt'a girmez. Filtreye 2. adımda **oturumdan** eklenir.
 
 ## 3. Foundry
@@ -37,15 +39,54 @@ Kullanıcı metni
 |---|---|
 | Deploy | `chat` (tüm Mercek prompt'ları) |
 | Model | Büyük, reasoning'siz genel model (gpt-4.1 sınıfı ya da bölgedeki en güncel karşılığı). Mini sınıfı kullanılmaz (Türkçe ve göreli tarih hesabında hata). Reasoning modeli de kullanılmaz (demoda 3–5 sn bekleme). Bu sınıf yoksa gpt-5 sınıfı, `reasoning_effort: "minimal"` |
-| Seçimin doğrulanması | §8'deki test seti iki aday modelle çalıştırılır. Kabul: 10/10 doğru, p95 < 2 sn. Seçim gerekçesiyle README'ye yazılır |
+| Seçimin doğrulanması | §8'deki test seti iki aday modelle çalıştırılır. Kabul: 11 metin testinin (§8, 1–11) hepsi doğru, p95 < 3 sn (iki tur). Seçim gerekçesiyle README'ye yazılır |
 | Kota | ≥ 30K TPM |
 | Kimlik | İdeal: `mercek-api` Managed Identity + **Cognitive Services OpenAI User**. Yedek: `AZURE_OPENAI_API_KEY` App Settings'te |
 | Ayarlar | `AZURE_OPENAI_ENDPOINT=<PLACEHOLDER>`, `CHAT_DEPLOYMENT=chat` |
 | İstemci | `OpenAI(base_url=f"{endpoint}/openai/v1")`, `model=CHAT_DEPLOYMENT` |
-| Parametreler | `temperature=0`, `max_tokens=300`, zaman aşımı 10 sn, `response_format = json_schema (strict)` |
+| Parametreler | `temperature=0`, `max_tokens=300`, zaman aşımı 10 sn (iki tur toplamı) |
+| 1. tur | `tools=[get_catalog]`, `tool_choice={"type":"function","function":{"name":"get_catalog"}}` (zorunlu) |
+| 2. tur | araç sonucu `role: tool` mesajıyla eklenir; `tool_choice="none"`, `response_format = json_schema (strict)` |
 | Yeniden deneme | Şema/Pydantic doğrulaması başarısızsa 1 kez; yine olmazsa yedek yol (§7) |
 
 Runtime Foundry çağrıları Copilot bütçesine (LLM maliyeti puanı) sayılmaz; seçim doğruluk ve hıza göre yapılmıştır.
+
+## 3a. Araç: `get_catalog`
+
+Tool calling (function calling): model aracı çağırır, **backend çalıştırır**, sonucu modele döner. Model SQL'e kendisi bağlanmaz.
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "get_catalog",
+    "description": "Mercek'in bildiği bankacılık ekranlarını (SQL screens) ve fatura kurumlarını (SQL institutions) döner. Ekran ve kurum kodu seçmeden önce çağır.",
+    "parameters": {"type": "object", "properties": {}, "additionalProperties": false},
+    "strict": true
+  }
+}
+```
+
+Dönen içerik (örnek, kısaltılmış):
+
+```json
+{
+  "screens": [
+    {"code": "KRDTKULL", "name": "Bireysel Kredi Kullandırım", "description": "…"},
+    {"code": "ODMTTLMT", "name": "Fatura Talimat Bilgileri Giriş", "description": "Kurum ve abone numarasıyla otomatik fatura ödeme talimatı tanımlama; abone numarası kurumdan doğrulanır"}
+  ],
+  "institutions": [
+    {"institution_code": "SU01", "name": "İSKİ", "bill_type": "Su"},
+    {"institution_code": "GAZ02", "name": "Başkentgaz", "bill_type": "Doğalgaz"}
+  ]
+}
+```
+
+**Neden tek araç:** ilk turda araç çağrısı zorunlu yapılır; aksi halde model kodları bilmeden tahmin edebilir. `tool_choice` yalnızca tek bir aracı zorlayabildiği için ekranlar ve kurumlar tek araçta döner.
+
+**Bedeli ve kazancı:** +1 tur (yaklaşık 1 sn). Aynı yapıya sonraki adımlarda yeni araçlar eklenir (`search_logs`, `analyze_pattern`, `match_solution`); Mercek sohbeti modelin araç seçtiği bir agent'a dönüşür, hesabı yine kod yapar.
+
+**Güvenlik:** araç yalnızca önbellekteki katalog listesini döner; parametre almaz, SQL sorgusu modelden gelmez. Bilinmeyen araç adı ya da beklenmeyen araç çağrısı kodda reddedilir.
 
 ## 4. Çıktı şeması
 
@@ -154,6 +195,8 @@ Regex ile basit çıkarım; yanıtta `extraction_method: "fallback"`, arayüzde 
 | 9 | "Umut Öztürk, TC 12345678950, kredisi açılmadı" | AI'a giden metin "[AD_SOYAD], TC [TCKN], kredisi açılmadı" · `masked: true` |
 | 10 | "99999999 müşterisi işlem yapamıyor" | customer_number kodda boşaltılır (tabloda yok) |
 | 11 | "Saat 15'te sorun oldu" | saat aralığı kodda null (henüz 12:10) |
+| 12 | (FakeLLM) 1. turda `get_catalog` çağrısı | backend katalog döner; 2. turda şemalı cevap alınır |
+| 13 | (FakeLLM) model tanımsız bir araç çağırır | çağrı reddedilir, yedek yola geçilir |
 
 ## 9. Dosyalar
 
@@ -161,7 +204,8 @@ Regex ile basit çıkarım; yanıtta `extraction_method: "fallback"`, arayüzde 
 |---|---|
 | `prompts/varlik-cikar.md` | system + user prompt |
 | `backend/app/models/clues.py` | `ExtractedClues` (AI çıktısı), `Clues` (doğrulanmış) |
-| `backend/app/clients/llm.py` | `chat_json(prompt_name, variables, schema)`; prompt dosyasını yükler, değişkenleri doldurur, şemalı ister, 1 kez yeniden dener |
+| `backend/app/clients/llm.py` | `chat_json(prompt_name, variables, schema, tools=None)`; prompt dosyasını yükler, değişkenleri doldurur, araç turunu yürütür, şemalı ister, 1 kez yeniden dener |
+| `backend/app/services/tools.py` | araç kayıt defteri: ad → fonksiyon (`get_catalog`); bilinmeyen araç reddedilir |
 | `backend/app/repositories/catalog.py` | `screens`, `institutions`, `institution_screens` okuma + önbellek |
 | `backend/app/services/kvkk.py` | tarama + maskeleme |
 | `backend/app/services/clues.py` | ön kontrol → AI → doğrulama → yedek yol |
