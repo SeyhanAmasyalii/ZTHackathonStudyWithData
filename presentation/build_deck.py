@@ -238,26 +238,33 @@ for i, (ic, col, head, d) in enumerate(diffs):
 notes(s, "0:50–0:58 · Mercek çağrıyı kaydetmekle kalmıyor: açıklıyor, birleştiriyor, koda bağlıyor ve talebi gerekçelendiriyor. AI'ın rolü sınırlı ve denetlenebilir.")
 
 # ---------- 6. Mimari ----------
-s = new_slide("Mimari: Azure Üzerinde Uçtan Uca")
+s = new_slide("Mimari: Azure Üzerinde Hibrit RAG")
 
 
-def arch(x, y, w, h, head, sub, fill, color=INK, line_c=None):
+def arch(x, y, w, h, head, sub, fill, color=INK, line_c=None, hs=15, ss=12):
     box(s, x, y, w, h, fill=fill, line=line_c)
-    text(s, x + 0.1, y + 0.05, w - 0.2, h - 0.1, [(head, {"size": 15, "bold": True, "color": color}), (sub, {"size": 12, "color": color})],
+    text(s, x + 0.08, y + 0.05, w - 0.16, h - 0.1, [(head, {"size": hs, "bold": True, "color": color}), (sub, {"size": ss, "color": color})],
          align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, space=2)
 
 
-arch(0.45, 2.35, 1.95, 2.6, "Kullanıcılar", "Şube, çağrı merkezi\nL2 destek\nİş birimi, analist", SOFT)
-arch(2.95, 1.35, 2.6, 1.75, "App Service · web", "Next.js 16\nBankacılık ekranları,\nMercek, Talep Yönlendirme", RED, WHITE)
-arch(2.95, 4.15, 2.6, 1.75, "App Service · api", "FastAPI · /api/health\norkestrasyon, hesap\nve doğrulama", RED2, WHITE)
-arch(6.05, 1.35, 2.75, 1.35, "Azure AI Foundry", "chat + embedding modeli", WHITE, line_c=G2)
-arch(6.05, 2.95, 2.75, 1.35, "Azure SQL", "Log, katalog, portföy,\nçağrı, talep, takvim", WHITE, line_c=G2)
-arch(6.05, 4.55, 2.75, 1.35, "Azure AI Search", "Çözüm, talep, duyuru\nhibrit arama", WHITE, line_c=G2)
-line(s, 2.4, 3.0, 2.95, 2.25)
-line(s, 4.25, 3.1, 4.25, 4.15)
-line(s, 5.55, 4.6, 6.05, 2.02)
-line(s, 5.55, 5.0, 6.05, 3.62)
-line(s, 5.55, 5.3, 6.05, 5.22)
+arch(0.45, 2.35, 1.6, 2.6, "Kullanıcılar", "Şube, çağrı\nmerkezi\nL2 destek\nİş birimi,\nanalist", SOFT)
+arch(2.3, 1.35, 2.3, 1.75, "App Service · web", "Next.js 16\nBankacılık ekranları,\nMercek, Talep", RED, WHITE)
+arch(2.3, 4.15, 2.3, 1.75, "App Service · api", "FastAPI · /api/health\norkestrasyon, hesap\nve doğrulama", RED2, WHITE)
+# Hibrit RAG çerçevesi
+box(s, 4.85, 1.2, 4.1, 4.75, fill=WHITE, line=RED)
+text(s, 5.0, 1.24, 3.8, 0.4, [[("HİBRİT RAG  ", {"size": 13, "bold": True, "color": RED}),
+                              ("1 getir · 2 bağlam · 3 üret", {"size": 11, "color": G3})]], anchor=MSO_ANCHOR.MIDDLE)
+arch(5.0, 1.7, 2.3, 1.6, "Azure AI Search", "1 · anlamca getir\nçözüm · talep · duyuru\nvektör + kelime, Türkçe", SOFT, line_c=RED, hs=14, ss=11)
+arch(5.0, 3.45, 2.3, 1.45, "Azure SQL", "1 · rakamı getir\nlog · çağrı · portföy · takvim\nparametreli sorgu", SOFT, line_c=G2, hs=14, ss=11)
+arch(7.55, 1.7, 1.25, 3.2, "Azure AI Foundry", "2 · bağlam\n\n3 · chat ile üret\n\nembedding → indeks", RED, WHITE, hs=13, ss=11)
+text(s, 5.0, 5.0, 3.8, 0.9, [("Benzeri AI Search bulur, rakamı SQL verir; model yalnızca bu kaynaklı bağlamla yazar ve her cevapta kaynak no'su gösterir.",
+                              {"size": 11, "color": INK})], anchor=MSO_ANCHOR.MIDDLE)
+line(s, 2.05, 3.0, 2.3, 2.25)
+line(s, 3.45, 3.1, 3.45, 4.15)
+line(s, 4.6, 4.7, 5.0, 2.5)
+line(s, 4.6, 5.0, 5.0, 4.17)
+line(s, 7.3, 2.5, 7.55, 2.9, color=RED)
+line(s, 7.3, 4.17, 7.55, 3.7, color=RED)
 box(s, 0.45, 6.1, 8.35, 0.65)
 s.shapes.add_picture(str(ICON / "github-g.png"), Inches(0.6), Inches(6.22), Inches(0.42), Inches(0.42))
 text(s, 1.15, 6.1, 7.6, 0.65, [[("GitHub Actions: ", {"size": 12, "bold": True}), ("lint · test · audit · gitleaks → build → 2 deploy → smoke test    ", {"size": 12}),
@@ -268,7 +275,7 @@ text(s, 9.35, 1.45, 3.4, 2.4, [("AI ne yapar (Foundry)", {"size": 16, "bold": Tr
 box(s, 9.15, 4.1, 3.75, 2.65, fill=G3)
 text(s, 9.35, 4.2, 3.4, 2.5, [("Kod ne yapar (kurallar)", {"size": 16, "bold": True, "color": WHITE})] +
      [(t, {"size": 14, "color": WHITE}) for t in ["Log örüntüsü, kredi hesabı", "Eşik, servis ataması, ana kayıt", "Adam-gün medyanı, takvim", "Köprü sayıları", "AI çıktısındaki sayı ve satırları doğrulama"]], space=3)
-notes(s, "0:58–1:05 · İki App Service (web ve api), Foundry'de sohbet ve embedding modeli, SQL yapısal veri, AI Search hibrit arama. CI/CD her PR'da test ve güvenlik taraması yapıyor. Sağda AI'ın ve kuralların işi. (Yalnızca gerçekten çalışan servisler bu slaytta kalmalı.)")
+notes(s, "0:58–1:05 · Mercek hibrit RAG kullanır: AI Search geçmiş çözümleri, talepleri ve duyuruları anlam benzerliğiyle bulur (vektör + kelime, Türkçe analizör, Foundry embedding); Azure SQL o anki gerçek rakamları parametreli sorgularla getirir. Foundry ikisini bağlam olarak alıp cevabı yazar; rakam uydurmaz çünkü her sayı SQL'den gelir. Model SQL yazmaz (text-to-SQL yok). CI/CD her PR'da test ve güvenlik taraması yapıyor. Sağda AI'ın ve kuralların işi. (Yalnızca gerçekten çalışan servisler bu slaytta kalmalı.)")
 
 # ---------- 7. Kullanım senaryoları ----------
 s = new_slide("Altı Kullanım Senaryosu")
@@ -345,7 +352,7 @@ notes(s, "4:15–4:45 · Önce/sonra. Demo sırasında artan sayaçları ve öl�
 
 # ---------- 10. Neredeyiz ----------
 s = new_slide("Neredeyiz, Sırada Ne Var")
-cols = [("check-w.png", RED, "Tamamlanan", ["M1: bağlam, log örüntüsü, servis ataması, ana kayıt, eşleştirme, kod analizi", "M2: talep analizi, servis etkisi, adam-gün, takvim, köprü", "Azure: 2 App Service, Foundry, SQL, AI Search", "CI/CD ve PR'da güvenlik taraması"]),
+cols = [("check-w.png", RED, "Tamamlanan", ["M1: bağlam, log örüntüsü, servis ataması, ana kayıt, eşleştirme, kod analizi", "M2: talep analizi, servis etkisi, adam-gün, takvim, köprü", "Azure: 2 App Service, Foundry, hibrit RAG (AI Search + SQL)", "CI/CD ve PR'da güvenlik taraması"]),
         ("warn-w.png", G3, "Sınırlamalar", ["Veri tamamen sentetik", "Gerçek log, çağrı ve kod entegrasyonu yok", "Kod düzeltmeleri öneri; uygulama insan onaylı", "E-posta ve SMS gönderimi simülasyon"]),
         ("route-w.png", RED3, "Canlıya geçiş", ["Log kaynağı: Kibana / Elasticsearch", "Çağrı sistemi ve kod reposu için salt-okur entegrasyon", "KVKK: loglarda maskeleme", "Pilot: şube kanalı, KRDTKULL ve ODMTFATR"])]
 for i, (ic, col, head, items) in enumerate(cols):
