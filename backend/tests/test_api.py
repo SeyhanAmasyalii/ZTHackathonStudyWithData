@@ -84,7 +84,7 @@ def test_demo_now_default_and_empty():
     assert Settings(demo_now="2026-10-17T10:00").now().tzinfo == TURKEY_TZ
 
 
-def test_azure_client_parses_tool_calls():
+def test_azure_client_parses_tool_calls(caplog):
     """OpenAI SDK'sının gerçek cevap biçimini, ağa çıkmadan sahte HTTP cevabıyla dener."""
     import httpx
     from openai import OpenAI
@@ -125,17 +125,26 @@ def test_azure_client_parses_tool_calls():
         )
 
     llm = AzureLLMClient(
-        Settings(azure_openai_endpoint="https://ornek.openai.azure.com", azure_openai_api_key="k")
+        Settings(
+            azure_openai_endpoint="https://ornek.openai.azure.com",
+            azure_openai_api_key="gizli-anahtar-123",
+            llm_debug=True,
+        )
     )
     llm._client = OpenAI(
         base_url="https://ornek.openai.azure.com/openai/v1",
         api_key="k",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    reply = llm.chat([{"role": "user", "content": "x"}], [{"type": "function", "function": {}}])
+    with caplog.at_level("INFO", logger="app.clients.llm"):
+        reply = llm.chat([{"role": "user", "content": "x"}], [{"type": "function", "function": {}}])
 
     assert seen["url"] == "https://ornek.openai.azure.com/openai/v1/chat/completions"
     assert '"model":"gpt-5.5"' in seen["body"].replace(" ", "")
     assert reply.content is None
     assert reply.tool_calls[0].name == "kibana_sorgula"
     assert reply.as_message()["tool_calls"][0]["id"] == "call_9"
+    assert "MODELE GİDEN" in caplog.text
+    assert "MODELDEN DÖNEN" in caplog.text
+    assert '"arguments": "{\\"only_mine\\": true}"' in caplog.text
+    assert "gizli-anahtar-123" not in caplog.text

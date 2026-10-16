@@ -1,11 +1,15 @@
 """Azure AI Foundry'deki sohbet modeline erişim."""
 
+import json
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from openai import OpenAI, OpenAIError
 
 from app.config import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class LLMError(Exception):
@@ -66,6 +70,7 @@ class AzureLLMClient:
             raise LLMError(f"Eksik ortam değişkeni: {', '.join(missing)}")
 
         self._deployment = settings.chat_deployment
+        self._debug = settings.llm_debug
         self._client = OpenAI(
             base_url=_base_url(settings.azure_openai_endpoint),
             api_key=settings.azure_openai_api_key,
@@ -74,6 +79,11 @@ class AzureLLMClient:
         )
 
     def chat(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> LLMReply:
+        if self._debug:
+            _debug_log(
+                "MODELE GİDEN",
+                {"model": self._deployment, "messages": messages, "tools": tools},
+            )
         try:
             response = self._client.chat.completions.create(
                 model=self._deployment,
@@ -91,4 +101,24 @@ class AzureLLMClient:
             for call in (message.tool_calls or [])
             if call.type == "function"
         ]
-        return LLMReply(content=message.content, tool_calls=calls)
+        reply = LLMReply(content=message.content, tool_calls=calls)
+        if self._debug:
+            usage = response.usage
+            _debug_log(
+                "MODELDEN DÖNEN",
+                {
+                    "finish_reason": response.choices[0].finish_reason,
+                    "content": reply.content,
+                    "tool_calls": [
+                        {"id": c.id, "name": c.name, "arguments": c.arguments}
+                        for c in reply.tool_calls
+                    ],
+                    "usage": usage.model_dump() if usage else None,
+                },
+            )
+        return reply
+
+
+def _debug_log(title: str, payload: dict[str, Any]) -> None:
+    """LLM_DEBUG=true iken modele giden/dönen içeriği okunur biçimde yazar (yalnızca yerelde)."""
+    logger.info("\n===== %s =====\n%s", title, json.dumps(payload, ensure_ascii=False, indent=2))

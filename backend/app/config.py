@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     azure_openai_api_key: str = ""
     chat_deployment: str = "gpt-5.5"
     llm_timeout_seconds: float = 60.0
+    # true: modele giden ve dönen içeriğin tamamı (kullanıcı mesajları dahil) loglanır.
+    # Yalnızca yerelde hata ayıklama için; Azure'da kapalı kalmalı.
+    llm_debug: bool = False
 
     data_dir: Path = REPO_ROOT / "datav2"
     # Veri 2026-10-17 09:00'da bitiyor; demoda "şu an" 09:15'e sabitlenir.
