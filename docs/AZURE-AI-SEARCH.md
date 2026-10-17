@@ -126,9 +126,14 @@ Kontrol: Mercek'te Elif → **"abone numarasını sistem kabul etmiyor"** → G�
 
 1. `<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → Rol: **Search Index Data Reader** → İleri
    → Erişim ata: **Yönetilen kimlik** → **+ Üye seç** → Yönetilen kimlik: **App Service** → `<api>` → Seç → **Gözden geçir + ata**.
-2. `<search>` → Anahtarlar → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı.
-3. `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula. Kod anahtar yoksa Entra token'ı kullanır.
-4. Rol atamasının etkinleşmesi 5–10 dk sürebilir; bu sürede `hata_ara` 403 alabilir (sohbet yine çalışır).
+2. `<search>` → **Güvenlik ve ağ → Anahtarlar** → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı
+   (yalnızca "API anahtarı" seçiliyse rol atamaları dikkate alınmaz).
+3. Rol atamasının etkinleşmesi için **5–10 dk bekleyin**, sonra `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula.
+   Kod anahtar yoksa Entra token'ı (App Service'te Managed Identity) kullanır. Silinen sorgu anahtarını `<search>` → Anahtarlar →
+   Sorgu anahtarlarını yönet'ten de silebilirsiniz.
+4. Kontrol: Mercek'te "abone numarasını sistem kabul etmiyor" → Günlük akışında (F5) `ad=hata_ara ... sonuç=5` ve
+   `DefaultAzureCredential acquired a token from ManagedIdentityCredential`. `sonuç=Hata araması şu an yapılamıyor` ve üstünde
+   `hata_ara başarısız: Arama servisi 403` görürseniz rol ataması henüz etkinleşmemiştir (birkaç dakika sonra tekrar deneyin) ya da 1–2. adım eksiktir.
 
 **AI Search → SQL ve Foundry** (indexer, beceri, vektörleştirici) şimdilik SQL kullanıcısı ve Foundry anahtarıyla, AI Search içinde saklanır.
 Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücretsiz katmanda bulunmayabilir); ücretli katmanda ayrı adım.
