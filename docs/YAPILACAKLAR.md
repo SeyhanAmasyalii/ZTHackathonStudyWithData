@@ -27,7 +27,7 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 ## Sonra
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
 - [x] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`; SQL görünümünden indexer, 5 dk; SQL Basic) — prova: "abone numarasını sistem kabul etmiyor" → ODMTTLMT 110412, 165 kayıt, SOL-005 temkinli. Rehber: `docs/AZURE-AI-SEARCH.md`
-- [ ] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader; `docs/AZURE-AI-SEARCH.md` §5)
+- [x] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader, `SEARCH_API_KEY` yok; prova: `hata_ara` 200). Rehber: `docs/AZURE-AI-SEARCH.md` §5
 - [x] Azure AI Search: `benzer_cozum_ara` (kod): 37 hazır çözüm + kapanmış çağrı notları tek indekste (`mercek-cozumler`, SQL görünümü `v_cozum_sablonlari`, 5 dk); eşleşme yüzdesi ve %75 eşiği kodda. Rehber: `docs/AZURE-AI-SEARCH.md` §6
 - [ ] `benzer_cozum_ara` prova: indeksi kur, `--dene` ile eşik ölçeğini doğrula, App Service'e `SEARCH_SOLUTION_INDEX`
 - [ ] Duyuru + işlenmemiş e-posta araması (tek indeks; Free'de 3. indeks)

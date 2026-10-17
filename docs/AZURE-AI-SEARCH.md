@@ -124,11 +124,11 @@ Kontrol: Mercek'te Elif → **"abone numarasını sistem kabul etmiyor"** → G�
 
 **Backend → AI Search** (sorgu): `<api>`'nin sistem kimliği `docs/AZURE-SQL.md` §4.1'de açıldıysa tekrar açmaya gerek yok.
 
-1. `<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → Rol: **Search Index Data Reader** → İleri
+1. `<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → Rol: **Search Index Data Reader** (Türkçe portalda **Arama Dizini Veri Okuyucusu**; aramaya `Arama` yazın, "Yönetilen Uygulama…" rolünü seçmeyin) → İleri
    → Erişim ata: **Yönetilen kimlik** → **+ Üye seç** → Yönetilen kimlik: **App Service** → `<api>` → Seç → **Gözden geçir + ata**.
-2. `<search>` → **Güvenlik ve ağ → Anahtarlar** → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı
+2. `<search>` → **Ayarlar → Anahtarlar** (bazı portallarda Güvenlik ve ağ → Anahtarlar) → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı
    (yalnızca "API anahtarı" seçiliyse rol atamaları dikkate alınmaz).
-3. Rol atamasının etkinleşmesi için **5–10 dk bekleyin**, sonra `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula.
+3. Rol atamasının etkinleşmesi için **5–10 dk bekleyin**, sonra **API uygulamasını** açın (AI Search değil): `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula.
    Kod anahtar yoksa Entra token'ı (App Service'te Managed Identity) kullanır. Silinen sorgu anahtarını `<search>` → Anahtarlar →
    Sorgu anahtarlarını yönet'ten de silebilirsiniz.
 4. Kontrol: Mercek'te "abone numarasını sistem kabul etmiyor" → Günlük akışında (F5) `ad=hata_ara ... sonuç=5` ve
