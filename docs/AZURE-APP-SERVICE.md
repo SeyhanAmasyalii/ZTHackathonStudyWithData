@@ -95,7 +95,13 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 2. `dist\mercek-api.zip` dosyasını sayfadaki dosya listesinin üzerine **sürükle-bırak**. İlk yüklemede `requirements.txt` kurulur (2–4 dk); ilerleme sayfada görünür.
 3. Aynısını `https://<web>.scm.azurewebsites.net/ZipDeployUI` için `dist\mercek-web.zip` ile yap.
 
-> Alternatif (CLI varsa): `az webapp deploy -g <rg> -n <api> --src-path dist\mercek-api.zip --type zip`
+> **ZipDeployUI açılmazsa (Linux Kudu'da olmayabilir) → Cloud Shell (yine tarayıcıda, kurulum yok):**
+> 1. Portal üst çubuğu → **Cloud Shell** simgesi (`>_`) → **Bash** → "Depolama hesabı gerekmez" (geçici oturum) → Uygula.
+> 2. Cloud Shell araç çubuğu → **Dosyaları yönet → Karşıya yükle** → `dist\mercek-api.zip`.
+> 3. `az webapp deploy -g <rg> -n <api> --src-path mercek-api.zip --type zip`
+>    (`-n` uygulamanın **adı**dır, uzun adres değil; ör. `mercek-api-seyhan`).
+>
+> Bilgisayarda Azure CLI varsa aynı komut: `az webapp deploy -g <rg> -n <api> --src-path dist\mercek-api.zip --type zip`
 > Kalıcı çözüm: CI/CD workflow'u (`.github/workflows/ci-cd.yml`) aynı zip'leri her main push'ta yükler.
 
 ## 6. Kontrol
