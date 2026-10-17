@@ -145,7 +145,9 @@ Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücre
 kelimeleriyle anlatsa da eşleşir. Müşteri numarası ve kişi bilgisi indekse girmez (görünüm yalnızca not metnini alır).
 
 **Eşleşme yüzdesini kod hesaplar** (`backend/app/services/solution_index.py`): AI Search vektör puanı cosine benzerliğine çevrilir,
-0,20 → %0 ve 0,70 → %100 aralığına ölçeklenir, model hata kodunu da verdiyse ve şablonun hata kodu aynıysa +15 puan.
+0,40 → %0 ve 0,72 → %100 aralığına ölçeklenir, model hata kodunu da verdiyse ve şablonun hata kodu aynıysa +25 puan.
+Ölçüm (prova): doğru şablon 0,65–0,67 benzerlik, yakın ama yanlış 0,58–0,63, ilgisiz ~0,25. Birbirine yakın şablonları
+(ör. üç "zaman aşımı" şablonu) metin tek başına ayıramaz; hata kodu ayırır (SOL-031 `INSTITUTION_TIMEOUT`, SOL-032 `CORE_BANKING_TIMEOUT`).
 **%75** ve üstü eşleşmedir; altı "hazır çözüm yok" sayılır, model bunu çözüm gibi sunmaz.
 
 Akış `hata_ara` ile aynı: SQL görünümü `dbo.v_cozum_sablonlari` → veri kaynağı (yüksek su işareti: şablon ya da ona bağlı bir çağrı
@@ -172,7 +174,8 @@ Hackathon ortamında iki indeksi birden kurmak için: `--indeks hepsi`.
 uv run --directory backend python ..\scripts\build_search_index.py --dene "adres değişikliği yapamıyorum, alan hatası veriyor"
 uv run --directory backend python ..\scripts\build_search_index.py --dene "Input string was not in a correct format"
 ```
-İlki SOL-026'yı ✓ ile (≥ %75), ikincisi ✓'siz (hazır çözüm yok) göstermeli. Olmazsa çıktıyı paylaşın:
+İlki SOL-026'yı ✓ ile (≥ %75), ikincisi ✓'siz (hazır çözüm yok) göstermeli. `--dene` hata kodu vermez; sohbette model
+hata kodunu da verdiğinde (ör. INSTITUTION_TIMEOUT) aynı kodlu şablon +25 puan alır. Olmazsa çıktıyı paylaşın:
 `SIMILARITY_FLOOR` / `SIMILARITY_CEIL` (solution_index.py) ölçülen benzerliklere göre ayarlanır.
 
 ### 6.3 App Service'e bağla

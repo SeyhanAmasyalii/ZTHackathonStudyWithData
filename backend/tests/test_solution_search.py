@@ -31,7 +31,7 @@ def score_for(cosine: float) -> float:
 
 
 HIT = {
-    "@search.score": score_for(0.65),
+    "@search.score": score_for(0.664),
     "solution_template_id": "SOL-026",
     "title": "Adres güncellemede zorunlu alan boş",
     "symptom": "Adres güncellemesi kaydedilemiyor.",
@@ -43,7 +43,7 @@ HIT = {
     "department_id": "MUSTERI_YONETIM",
     "closed_count": 12,
 }
-WEAK_HIT = {**HIT, "@search.score": score_for(0.35), "solution_template_id": "SOL-001"}
+WEAK_HIT = {**HIT, "@search.score": score_for(0.585), "solution_template_id": "SOL-001"}
 
 
 class FakeSolutions:
@@ -96,7 +96,7 @@ def test_benzer_cozum_ara_marks_threshold_in_code():
     assert result["matched"] is True
     best, weak = result["results"]
     assert best["solution_template_id"] == "SOL-026"
-    assert best["match_percent"] == 90
+    assert best["match_percent"] == 83
     assert best["above_threshold"] is True
     assert best["steps"] == ["Eksik alanı tamamla.", "Özeti kontrol edip kaydet."]
     assert best["closed_incident_count"] == 12
@@ -111,15 +111,15 @@ def test_benzer_cozum_ara_no_match_below_threshold():
         context(FakeSolutions([WEAK_HIT])),
     )
     assert result["matched"] is False
-    assert result["results"][0]["match_percent"] == 30
+    assert result["results"][0]["match_percent"] == 58
 
 
 def test_benzer_cozum_ara_error_code_can_lift_over_threshold():
-    hit = {**HIT, "@search.score": score_for(0.55)}  # %70
+    hit = {**HIT, "@search.score": score_for(0.573)}  # %54 (SOL-031 ölçümü)
     args = {"description": "adres", "error_code": "validation_error"}
     result = run_tool("benzer_cozum_ara", json.dumps(args), context(FakeSolutions([hit])))
     assert result["query"]["error_code"] == "VALIDATION_ERROR"
-    assert result["results"][0]["match_percent"] == 85
+    assert result["results"][0]["match_percent"] == 79
     assert result["matched"] is True
 
 

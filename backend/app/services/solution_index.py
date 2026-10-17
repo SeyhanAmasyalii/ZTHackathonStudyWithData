@@ -18,11 +18,12 @@ from app.services.log_index import EMBEDDING_DIMENSIONS, VECTOR_FIELD, foundry_p
 SQL_VIEW = "v_cozum_sablonlari"
 MATCH_THRESHOLD = 0.75
 # Cosine benzerliği yüzdeye çevrilir: SIMILARITY_FLOOR ve altı %0, SIMILARITY_CEIL ve üstü %100.
-# text-embedding-3-small'da ilgisiz Türkçe metinler bile ~0,2 benzerlik verir; değerler
-# scripts/build_search_index.py --dene ile ölçülerek ayarlanır.
-SIMILARITY_FLOOR = 0.20
-SIMILARITY_CEIL = 0.70
-ERROR_CODE_BONUS = 0.15
+# Ölçüm (text-embedding-3-small, scripts/build_search_index.py --dene, 17.10): doğru şablon
+# 0,65–0,67; yakın ama yanlış şablon 0,58–0,63; ilgisiz metin ~0,25. Metin benzer şablonları
+# (ör. üç "zaman aşımı" şablonu) tek başına ayıramadığı için aynı hata kodu belirleyicidir.
+SIMILARITY_FLOOR = 0.40
+SIMILARITY_CEIL = 0.72
+ERROR_CODE_BONUS = 0.25
 RESULT_FIELDS = (
     "solution_template_id",
     "title",
