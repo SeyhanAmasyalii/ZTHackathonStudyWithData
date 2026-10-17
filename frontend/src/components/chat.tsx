@@ -96,7 +96,9 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
                 {message.text}
               </p>
             ) : (
-              <div className="max-w-[80%] rounded-2xl bg-black/5 px-4 py-3 dark:bg-white/10">
+              <div
+                className={`${message.affected ? "w-full" : "max-w-[80%]"} rounded-2xl bg-black/5 px-4 py-3 dark:bg-white/10`}
+              >
                 <Markdown text={message.text} />
                 {message.affected && (
                   <AffectedCustomersPanel
