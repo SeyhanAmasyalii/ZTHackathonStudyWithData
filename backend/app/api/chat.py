@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.api.auth import get_current_user
+from app.clients.agent import AgentClient, FoundryAgentClient
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.clients.search import AzureSearchClient, SearchError
 from app.config import Settings, get_settings
@@ -21,7 +22,7 @@ from app.repositories.app_store import AppStore, StoredMessage, get_app_store
 from app.repositories.catalog import get_catalog
 from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
-from app.services.chat import answer
+from app.services.chat import answer, answer_with_agent
 from app.services.log_index import LogSearch
 from app.services.solution_index import SolutionSearch
 from app.services.tools import LogSearchFn, SolutionSearchFn, ToolContext
@@ -33,11 +34,30 @@ MAX_HISTORY_CONTENT = 8000
 router = APIRouter(tags=["chat"])
 
 
-def get_llm() -> LLMClient:
+def get_llm(settings: Annotated[Settings, Depends(get_settings)]) -> LLMClient | None:
+    """LLM_MODE=chat iken model istemcisi; agent modunda None (get_agent kullanılır)."""
+    if settings.llm_mode == "agent":
+        return None
     try:
-        return AzureLLMClient(get_settings())
+        return AzureLLMClient(settings)
     except LLMError as exc:
         logger.error("LLM yapılandırması eksik: %s", exc)
+        raise HTTPException(status_code=503, detail="Model bağlantısı yapılandırılmamış.") from exc
+
+
+@lru_cache
+def _agent_client() -> AgentClient:
+    return FoundryAgentClient(get_settings())
+
+
+def get_agent(settings: Annotated[Settings, Depends(get_settings)]) -> AgentClient | None:
+    """LLM_MODE=agent iken Foundry agent istemcisi (bir kez kurulur); chat modunda None."""
+    if settings.llm_mode != "agent":
+        return None
+    try:
+        return _agent_client()
+    except LLMError as exc:
+        logger.error("Agent yapılandırması eksik: %s", exc)
         raise HTTPException(status_code=503, detail="Model bağlantısı yapılandırılmamış.") from exc
 
 
@@ -72,7 +92,8 @@ def chat(
     request: ChatRequest,
     # Sıra önemli: önce oturum kontrolü (401), sonra model bağlantısı (503).
     user: Annotated[DemoUser, Depends(get_current_user)],
-    llm: Annotated[LLMClient, Depends(get_llm)],
+    llm: Annotated[LLMClient | None, Depends(get_llm)],
+    agent: Annotated[AgentClient | None, Depends(get_agent)],
     settings: Annotated[Settings, Depends(get_settings)],
     catalog: Annotated[Catalog, Depends(get_catalog)],
     search_logs: Annotated[LogSearchFn | None, Depends(get_log_search)],
@@ -103,15 +124,25 @@ def chat(
 
     trace: list[tuple[str, dict]] = []
     try:
-        reply = answer(
-            request.message,
-            llm,
-            context,
-            catalog.screens,
-            catalog.institutions,
-            history,
-            trace,
-        )
+        if agent is not None:
+            # Model önceki turları Foundry'den hatırlar; yeni/kaybolmuş konuşmada geçmiş gider.
+            previous = store.get_agent_response_id(conversation_id) if stored else None
+            reply, response_id = answer_with_agent(
+                request.message, agent, context, history, previous, trace
+            )
+            store.set_agent_response_id(conversation_id, response_id)
+        elif llm is not None:
+            reply = answer(
+                request.message,
+                llm,
+                context,
+                catalog.screens,
+                catalog.institutions,
+                history,
+                trace,
+            )
+        else:  # yalnızca bağımlılıklar yanlış kurulursa
+            raise LLMError("Model istemcisi yok")
     except LLMError as exc:
         logger.error("Sohbet yanıtı üretilemedi: %s", exc)
         raise HTTPException(status_code=502, detail="Şu an yanıt üretilemiyor.") from exc

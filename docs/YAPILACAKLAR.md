@@ -21,7 +21,9 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 ## Sırada
 - [x] Azure SQL App Service'e bağlandı (prova): Günlük akışında `Veri kaynağı: Azure SQL (mercekdb)`, sohbet SQL verisiyle çalışıyor
 - [x] SQL'e Managed Identity ile şifresiz bağlantı (prova; App Settings'te SQL parolası yok). Rehber: `docs/AZURE-SQL.md` §4
-- [ ] (Ek puan) Foundry'ye de Managed Identity ile bağlanma (anahtar yerine)
+- [ ] (Ek puan) Foundry'ye de Managed Identity ile bağlanma (anahtar yerine) — agent modunda zaten Entra/MI
+- [x] Foundry Agent Service (kod): `LLM_MODE=agent`, agent `scripts/setup_agent.py` ile kurulur, araçlar backend'de, hafıza Foundry'de (`previous_response_id`), SQL ekran geçmişi/sahiplik için. Rehber: `docs/FOUNDRY-AGENT.md`
+- [ ] Agent prova (yerel): `az login`, `setup_agent.py`, `LLM_MODE=agent` ile test soruları
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra

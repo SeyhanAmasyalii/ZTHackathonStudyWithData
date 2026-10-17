@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -36,6 +36,14 @@ class Settings(BaseSettings):
     # true: modele giden ve dönen içeriğin tamamı (kullanıcı mesajları dahil) loglanır.
     # Yalnızca yerelde hata ayıklama için; Azure'da kapalı kalmalı.
     llm_debug: bool = False
+    # chat: model doğrudan çağrılır (geçmiş her turda gönderilir).
+    # agent: Foundry Agent Service'teki agent çağrılır (scripts/setup_agent.py ile kurulur);
+    # araçlar yine backend'de çalışır, modelin hafızası Foundry'de (previous_response_id).
+    llm_mode: Literal["chat", "agent"] = "chat"
+    # Foundry proje uç noktası: https://<kaynak>.services.ai.azure.com/api/projects/<proje>
+    # Yalnızca Microsoft Entra ile (yerelde az login, Azure'da Managed Identity).
+    foundry_project_endpoint: str = ""
+    foundry_agent_name: str = "mercek"
 
     data_dir: Path = _bundled_or_repo("data", "datav2")
     # Azure SQL. SQL_SERVER boşsa veri data_dir'deki JSON'lardan okunur.

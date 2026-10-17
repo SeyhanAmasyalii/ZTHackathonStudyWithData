@@ -34,6 +34,23 @@ wheels = [
 ]
 
 [[package]]
+name = "azure-ai-projects"
+version = "2.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-core" },
+    { name = "azure-identity" },
+    { name = "azure-storage-blob" },
+    { name = "isodate" },
+    { name = "openai" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/63/c4/2d12f3ba1bc1cc3f844e9d34e602f825dea8d5cae069a203f80591e63091/azure_ai_projects-2.9.0.tar.gz", hash = "sha256:f85902b1c220f5ef999f7892d5fa8b6f1efecf867c73b107df7de614f5821fd3", size = 40061819, upload-time = "2026-10-17T03:57:23.38Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/25/cda9f33df69ba45378b7dcbb591b15ca0df0ddf633cbf2359d2f8030f06b/azure_ai_projects-2.9.0-py3-none-any.whl", hash = "sha256:e0e0ea059dee51ea92b65f1e40fa6b50f62636485f8228325f1918f9fb5d7d92", size = 552868, upload-time = "2026-10-17T03:57:26.606Z" },
+]
+
+[[package]]
 name = "azure-core"
 version = "1.41.0"
 source = { registry = "https://pypi.org/simple" }
@@ -60,6 +77,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e6/87/e88098a024d74b7434de5b110c261da024fe5d6c139f1847f6f8a2b76678/azure_identity-1.26.0.tar.gz", hash = "sha256:61b4538b87df10d2d6d44b77cd5ea28a8929fd4929d58b45bf3f230f7daba02e", size = 310151, upload-time = "2026-10-01T14:17:47.825Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/d5/ae45ce8009d0d015304b206c7c4a6cbab02c03f8f07eedefb32b099ccee3/azure_identity-1.26.0-py3-none-any.whl", hash = "sha256:3c60d9682b3ac01507388d474cb5a5ffbe54152a96b6cdcaa7013da9315cf186", size = 195958, upload-time = "2026-10-01T14:17:49.705Z" },
+]
+
+[[package]]
+name = "azure-storage-blob"
+version = "12.31.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-core" },
+    { name = "cryptography" },
+    { name = "isodate" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/26/ca/5299cedef5957dd838d4dc46f97bea37335bb39f6610d72b27e1a3317650/azure_storage_blob-12.31.0.tar.gz", hash = "sha256:997b393cfcbdc4b186d5911790d91f80387f7edc12c4d73eab963a2d26e5b2a9", size = 670868, upload-time = "2026-09-30T21:23:22.837Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9b/57/d1f45fbccc0dfbe6b6db7e5fa06199e35219c712f3743677bec1b4e7d78b/azure_storage_blob-12.31.0-py3-none-any.whl", hash = "sha256:0c0cb601d3462491d09ea96023cd791bb9dd4b173bf950daf3cff34ff47ba5b5", size = 455738, upload-time = "2026-09-30T21:23:24.944Z" },
 ]
 
 [[package]]
@@ -566,6 +598,15 @@ wheels = [
 ]
 
 [[package]]
+name = "isodate"
+version = "0.7.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/54/4d/e940025e2ce31a8ce1202635910747e5a87cc3a6a6bb2d00973375014749/isodate-0.7.2.tar.gz", hash = "sha256:4cd1aa0f43ca76f4a6c6c0292a85f40b35ec2e43e315b59f06e6d32171a953e6", size = 29705, upload-time = "2024-10-08T23:04:11.5Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/15/aa/0aca39a37d3c7eb941ba736ede56d689e7be91cab5d9ca846bde3999eba6/isodate-0.7.2-py3-none-any.whl", hash = "sha256:28009937d8031054830160fce6d409ed342816b543597cece116d966c6d99e15", size = 22320, upload-time = "2024-10-08T23:04:09.501Z" },
+]
+
+[[package]]
 name = "jiter"
 version = "0.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -665,6 +706,7 @@ name = "mercek-api"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "azure-ai-projects" },
     { name = "azure-identity" },
     { name = "fastapi" },
     { name = "httpx" },
@@ -682,6 +724,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "azure-ai-projects", specifier = "==2.9.0" },
     { name = "azure-identity", specifier = "==1.26.0" },
     { name = "fastapi", specifier = "==0.143.3" },
     { name = "httpx", specifier = "==0.28.1" },
