@@ -108,9 +108,9 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 
 | Adres | Beklenen |
 |---|---|
-| `https://<api>.azurewebsites.net/api/health` | `{"status":"ok"}` |
+| `https://<api>.azurewebsites.net/api/health` | `{"status":"ok"}` (F1'de ilk açılış 30–60 sn) |
 | `https://<api>.azurewebsites.net/api/users` | Elif, Zeynep, Kerem |
-| `https://<web>.azurewebsites.net` | Giriş ekranı → Elif → "ODMTTLMT ekranında hata alıyorum" → Mercek cevabı |
+| `https://<web>.azurewebsites.net` | Giriş ekranı → Elif → "ODMTTLMT ekranında hata alıyorum" → 7 hata, GAZ02 110731, SOL-031 |
 
 ## 7. Sorun giderme
 
@@ -122,6 +122,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 | "Şu an yanıt üretilemiyor" | Uç nokta, anahtar ya da `CHAT_DEPLOYMENT` adı yanlış; Log stream'deki `Model çağrısı başarısız` satırı |
 | Arada bir "Oturum geçersiz" | `SESSION_SECRET` tanımlı değil (her yeniden başlatmada yeni anahtar üretilir) |
 | `az webapp deploy` yetki hatası | Hesabın bu kaynakta yetkisi yok; resource group sahibine sor |
+| Chrome adres çubuğunda kırmızı **"Tehlikeli"** | Google Güvenli Tarama yeni `azurewebsites.net` adresindeki giriş sayfasını kimlik avı sanmış olabilir; kod sorunu değil. https://safebrowsing.google.com/safebrowsing/report_error/ ile bildir; demodan önce jürinin tarayıcısında kontrol et |
 | Web 503 / açılmıyor | `<web>` Log stream; başlangıç komutu `node server.js` ve `HOSTNAME=0.0.0.0` mi? |
 
 ## Notlar
