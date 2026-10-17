@@ -11,6 +11,7 @@
 | `docs/AZURE-AI-SEARCH.md` | AI Search, `mercek-loglar` ve `mercek-cozumler` indeksleri, MI |
 | `docs/FOUNDRY-AGENT.md` | Foundry projesi, `mercek-cagri` agent'ı, izleme (App Insights) |
 | `docs/MERCEK-TEST-SORULARI.md` | Kurulum sonrası deneme soruları ve beklenen cevaplar |
+| `docs/COPILOT-MERCEK-PROMPTLARI.md` | Kodu hackathon reposunda Copilot'a yazdırmak için sistem talimatı ve faz istemleri |
 
 ---
 
