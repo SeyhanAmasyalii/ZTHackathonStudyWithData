@@ -36,7 +36,11 @@ Agent SDK'sı **yalnızca Microsoft Entra** ile çalışır (anahtar yok).
 - Azure portal → `<foundry>` (Foundry kaynağı) → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** →
   rol: **Azure AI User** (Türkçe portalda "Azure AI Kullanıcısı"; aramaya `Azure AI` yazın) → Üyeler: **Kullanıcı, grup…** → kendi hesabınız →
   **Gözden geçir + ata**. Kaynağın sahibiyseniz (Owner) genelde gerekmez; `setup_agent.py` 403 verirse bu rolü ekleyin.
-- Bilgisayarda bir kez: `az login` (Azure CLI). Birden fazla kiracı varsa: `az login --tenant <kiracı-kimliği>`.
+- Bilgisayarda Azure CLI yoksa: `winget install -e --id Microsoft.AzureCLI` → **yeni** CMD penceresi açın.
+- Giriş: `az login --tenant <kiracı-kimliği>` (kiracı kimliği: portal → Microsoft Entra ID → Genel Bakış → Kiracı Kimliği).
+  Yalnızca `az login` "MFA gerekli … No subscriptions found" derse kiracıyı vererek tekrar girin; MFA tarayıcıda tamamlanır.
+  Tarayıcı açılmazsa: `az login --tenant <kiracı-kimliği> --use-device-code`.
+  Kontrol: `az account show --query "{abonelik:name, kiraci:tenantId}" -o table`.
 
 ## 3. Agent'ı kur (bilgisayarda, repo kökünde, 1 dk)
 
@@ -58,7 +62,11 @@ Deneme: Ben Mercek; ... kibana_sorgula, cagri_ara ... araçlarını kullanabilir
 Araç listesi `.env`'deki AI Search ayarlarına göre çıkar (`SEARCH_ENDPOINT`, `SEARCH_SOLUTION_INDEX`).
 **Prompt ya da araç değişince betiği tekrar çalıştırın** (yeni sürüm oluşur, backend en son sürümü kullanır).
 
-Portalda kontrol: ai.azure.com → proje → **Agents** → `mercek-cagri` → talimat ve araçlar görünür (buradan düzenlemeyin; betik ezer).
+Portalda kontrol: `https://ai.azure.com` → üstte proje (`<proje>`) → sol menü **Aracılar** → `mercek-cagri`
+(yeşil tik = hazır). Sekmeler: **Deneme alanı · Ayrıntılar · İzlemeler · İçgörüler · İzleme · Değerlendirme · İyileştir**.
+**Ayrıntılar**'da talimat ve araçlar görünür. Buradan **düzenlemeyin / Kaydet'e basmayın**: betik bir sonraki çalışmada yeni sürümle ezer.
+> **Deneme alanı**'nda agent'a soru sorulabilir ama araçlarımız orada **çalışmaz** (araçları backend çalıştırır); agent araç
+> çağırmak istediğinde portal sonucu bekler. Gerçek deneme Mercek arayüzünden yapılır.
 
 ## 4. Yerelde agent modunda dene
 
@@ -66,7 +74,25 @@ Portalda kontrol: ai.azure.com → proje → **Agents** → `mercek-cagri` → t
 - Elif → "ODMTTLMT ekranında hata alıyorum" → aynı cevap (7 hata, GAZ02 110731, SOL-031); terminalde `Araç çağrısı: ... ad=kibana_sorgula`.
 - Aynı sohbette "Peki nasıl çözerim?" → önceki konuyu hatırlar (geçmiş gönderilmeden, Foundry'den).
 - F5 → konuşma ekrana geri gelir (SQL).
-- ai.azure.com → proje → **Agents → mercek-cagri → Traces / İzleme** (ya da Konuşmalar): turlar ve araç çağrıları.
+- Terminalde `AGENT'A GİDEN` blokları yalnızca `LLM_DEBUG=true` iken görünür; ikinci soruda `"previous_response_id": "resp_…"` dolu olmalı.
+  Deneme bitince `LLM_DEBUG` satırını silin (kullanıcı mesajlarını da loglar; Azure'da hep kapalı).
+
+### 4.1 Foundry'de izleme (jüriye gösterilecek ekran, 5 dk, bir kez)
+
+Agent'ın çalıştırma ve belirteç (token) sayıları **İzleme** sekmesinde kendiliğinden görünür ("Aracı çalıştırmaları",
+"Toplam belirteç kullanımı"). Her konuşmanın adım adım izi (hangi araç, hangi sırayla, kaç saniye) için **Application Insights** bağlanır:
+
+1. ai.azure.com → **Aracılar** → `mercek-cagri` → **İzleme** sekmesi → üstteki "Başlamak için bir App Insights kaynağı oluşturun
+   veya bağlayın" bandında **Bağla**.
+2. **Yeni oluştur** → ad: `mercek-appinsights` (kaynak grubu `<rg>`, bölge Foundry ile aynı) → **Oluştur / Bağla**.
+   Var olan bir Application Insights varsa onu seçin. (Kullandıkça ödenir; demo hacminde maliyet ihmal edilebilir.)
+3. Mercek'te birkaç soru sorun → 2–5 dk sonra **İzlemeler** sekmesi: her çalıştırma satırına tıklayınca girdiler, `function_call`
+   (ör. `kibana_sorgula`), backend'in döndürdüğü `function_call_output` ve cevap sırayla görünür.
+   **İzleme** sekmesinde çalıştırma sayısı, gecikme, belirteç ve hata oranı grafikleri.
+4. **Değerlendirme** sekmesi (isteğe bağlı): otomatik kalite/güvenlik değerlendirmesi planlanabilir; demo için şart değil.
+
+Not: araç sonuçları (ör. log sayıları) izde görünür; içerikte kişisel veri yoktur (araçlar müşteri bilgisi döndürmez,
+etkilenen müşteri listesi modele gitmez).
 
 Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın.
 
@@ -91,7 +117,10 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 
 | Belirti | Çözüm |
 |---|---|
+| `'az' is not recognized` | Azure CLI kurulu değil ya da kurulumdan sonra yeni CMD açılmadı (§2) |
+| `az login`: `AADSTS50076 ... multi-factor authentication` / `No subscriptions found` | `az login --tenant <kiracı-kimliği>` ile MFA'yı tamamlayın (§2) |
 | `setup_agent.py`: `DefaultAzureCredential failed to retrieve a token` | `az login` yapılmamış |
+| Sohbette "Şu an yanıt üretilemiyor", günlükte `400 ... Invalid value: ''. Supported values are: 'additional_tools', ...` | Eski kod: agent girdilerinde `type` yok. `git pull` (düzeltildi) |
 | `setup_agent.py`: `✗ Agent oluşturulamadı: 403` | Hesabınızda `<foundry>` üzerinde **Azure AI User** yok (§2) ya da yanlış kiracıdasınız |
 | `✗ Agent oluşturulamadı: 404` | `FOUNDRY_PROJECT_ENDPOINT` yanlış (sonunda `/api/projects/<proje>` olmalı) |
 | `... deployment ... not found` | Projede `gpt-5.5` dağıtımı yok ya da `CHAT_DEPLOYMENT` adı farklı |
