@@ -1,0 +1,15 @@
+Şifresiz demo girişi: kullanıcı listeden seçer, backend imzalı ve süreli token verir.
+
+- app/repositories/users.py: DemoUser(user_name, name, title, unit, can_view_customers=False) frozen dataclass.
+  DEMO_USERS: elif (Elif Demir, Şube Müşteri Temsilcisi, 601 Kızılay Şubesi), zeynep (Zeynep Arslan, Çağrı Merkezi Temsilcisi,
+  9009 Çağrı Merkezi), kerem (Kerem Aydın, L2 Destek, 9010 BT Destek (L2), can_view_customers=True).
+  ROLES = {"elif": "sube", "zeynep": "cagri_merkezi", "kerem": "l2"}.
+- app/services/auth.py: create_token(user_name, secret, now, ttl) ve verify_token(token, secret, now) — payload base64url JSON
+  {"u","exp"} + "." + HMAC-SHA256 imza (base64url). hmac.compare_digest; bozuk/süresi dolmuş → AuthError. new_secret().
+- app/api/auth.py: GET /api/users (user_name, name, title, unit), POST /api/login {user_name} → {token, user} (12 saat).
+  get_current_user dependency: "Authorization: Bearer" yoksa/geçersizse 401 "Giriş yapmanız gerekiyor." / "Oturum geçersiz, tekrar giriş yapın.".
+  SESSION_SECRET boşsa açılışta geçici anahtar (uyarı logu).
+- Model kullanıcı adını hiç görmez; sohbetteki kullanıcı yalnızca token'dan okunur.
+- Testler: token gidiş-dönüş, imza bozulunca/süre dolunca hata, bilinmeyen kullanıcı 404/401, /api/users listesi.
+
+Kabul: testler geçer.

@@ -1,0 +1,25 @@
+Kullanıcı sorunu kendi kelimeleriyle anlattığında hata türünü anlamca bulan araç. Kaynak Azure SQL; AI Search indexer 5 dk'da bir alır.
+
+- db/search_views.sql (tekrar çalıştırılabilir, GO ayrımlı): kibana_logs'a row_ver ROWVERSION (yoksa); CREATE OR ALTER VIEW
+  dbo.v_hata_turleri: Warning/Error loglardan hata türü = ekran + hata no + hata kodu (message_response.errorCode) + kurum
+  (message_fields.institutionCode); alanlar id, screen_code, screen_name, error_number, error_code, institution_code,
+  institution_name, bill_type, message (farklı mesajlar ' | ' ile), explanation (error_handling_rules.explanation_hint),
+  content (hepsinin birleşimi), log_count, customer_count, first_seen, last_seen, hwm (CONVERT(BIGINT, MAX(row_ver))).
+  load_sql.py yüklemeden sonra bu dosyayı da çalıştırır.
+- app/clients/search.py: AzureSearchClient (REST, api-version 2024-07-01): SEARCH_API_KEY varsa api-key başlığı, yoksa
+  DefaultAzureCredential token (scope https://search.azure.com/.default). put/delete(404'ü yok say)/post/get/count/search. SearchError.
+- app/services/log_index.py: index_definition (alanlar, tr.microsoft analyzer, 1536 boyutlu vektör, HNSW, azureOpenAI vectorizer —
+  sorgu metnini AI Search vektöre çevirir), datasource_definition (azuresql, view, HighWaterMark "hwm"; bağlantı ADO.NET biçimi,
+  parola ; ' " içeriyorsa çift tırnak), skillset (AzureOpenAIEmbeddingSkill), indexer (id base64Encode, schedule PT5M ya da yok),
+  search_body (hibrit: search + vectorQueries kind=text; screen_code filtresi yalnızca ^[A-Z0-9]{3,20}$ doğrulandıktan sonra).
+- scripts/build_search_index.py: görünümleri kurar → AI Search'te veri kaynağı, indeks, beceri, indexer → indexer'ı bekler →
+  örnek arama yazdırır. Seçenekler: --indeks loglar|cozumler|hepsi, --zamanlamasiz, --dene METİN (Faz 10).
+- tools.hata_ara: required description (≤300 karakter, kişisel veri yazma), opsiyonel screen_code. Sonuç: en fazla 5 hata türü
+  (ekran, hata no/kodu, kurum, mesaj, açıklama, 30 günlük log/müşteri sayısı, skor). Servis hatası → {"error":"Hata araması şu an yapılamıyor"}.
+  tools_for: SEARCH_ENDPOINT varsa sunulur. chat.get_log_search lru_cache.
+- Prompt: belirtiyi tarif ediyorsa önce hata_ara, sonra sayılar için kibana_sorgula (mercek-chat.md'de var).
+- Testler (MockTransport): indeks/kaynak/beceri/indexer tanımları, görünüm kolonları ↔ indeks alanları eşleşmesi, bağlantı dizesi
+  kaçışı, hibrit gövde, filtre doğrulama, araç hata yönetimi, sohbette hata_ara → kibana_sorgula akışı.
+
+Kabul: build_search_index.py → "mercek-loglar" 107 belge; sohbette "abone numarasını sistem kabul etmiyor" → ad=hata_ara,
+ODMTTLMT 110412, İSKİ 158, SOL-005 temkinli. Azure: <api> kimliğine Search Index Data Reader, SEARCH_API_KEY App Service'te yok.

@@ -1,0 +1,22 @@
+Foundry'deki gpt-5.5'e OpenAI v1 uyumlu uç üzerinden bağlanan sohbet.
+
+- app/clients/llm.py: LLMError; ToolCall(id, name, arguments: str); LLMReply(content, tool_calls) + as_message();
+  LLMClient Protocol (chat(messages, tools) -> LLMReply). AzureLLMClient: base_url = endpoint + "/openai/v1" (sonda zaten varsa ekleme),
+  api_key ayarlardan, timeout ayarlardan, max_retries=1; chat.completions.create(model=chat_deployment, messages, tools).
+  Eksik ayar → LLMError("Eksik ortam değişkeni: …"). OpenAIError → LLMError (anahtar/ayrıntı loglama).
+  LLM_DEBUG=true iken modele giden/dönen içerik loglanır (yalnızca yerelde).
+- prompts/mercek-chat.md: (prova reposundan aynen kopyalandı) yer tutucular {{now}}, {{user_role}}, {{screens}}, {{institutions}}.
+- app/services/chat.py:
+  - build_system_prompt(now, screens, institutions, user_role): yer tutucuları doldurur. Ekran satırı "KOD · Ad — açıklama",
+    kurum satırı "KOD · Ad (fatura türü) → ekran: KOD1, KOD2".
+  - answer(message, llm, context, screens, institutions, history=(), trace=None): system + geçmiş + user; araç döngüsü
+    MAX_TURNS=8; araç sonucu role=tool, JSON (ensure_ascii=False); her araç çağrısı "Araç çağrısı: tur=%d ad=%s sorgu=%s sonuç=%s"
+    olarak loglanır; trace listesine (ad, sonuç) eklenir. Boş cevap / tur sınırı → LLMError.
+- app/models/chat.py: HistoryMessage(role user|assistant, content 1–8000), ChatRequest(message 1–2000, history ≤20,
+  conversation_id ^[0-9a-f]{32}$ opsiyonel), ChatResponse(reply, conversation_id?).
+- app/api/chat.py: POST /api/chat (önce get_current_user → 401, sonra get_llm → 503 "Model bağlantısı yapılandırılmamış.").
+  LLMError → 502 "Şu an yanıt üretilemiyor.". response_model_exclude_none=True.
+- tests/conftest.py: FakeLLMClient (sırayla cevap döner, çağrıları kaydeder, fail seçeneği), tool_call(name, call_id, **args) yardımcı.
+- Testler: prompt yer tutucuları doluyor; 401/503/502 sırası; boş mesaj 422; araç döngüsü ve tur sınırı.
+
+Kabul: testler geçer; .env doldurulunca curl ile /api/chat Türkçe cevap döner.

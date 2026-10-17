@@ -1,0 +1,18 @@
+datav2'nin tüm tabloları Azure SQL'e; backend SQL_SERVER tanımlıysa SQL'den okur, ulaşamazsa JSON'a düşer.
+
+- scripts/datav2_tables.py: datav2/*.json tabloları (*.stats.json ve kibana_logs_partNN.json hariç) + datav2/ui/scenarios.ts
+  (çalıştırmadan ayrıştırılan nesne → scenarios tablosu). Kolon tipleri veriden çıkarılır (INT/BIGINT/BIT/DATETIMEOFFSET(3)/NVARCHAR(n|MAX));
+  boş tablolar SCHEMA.md'den (MANUAL_TABLES). primary_key(table). schema_batches(text): "GO" ile ayrılmış toplu ifadeler.
+- scripts/build_schema.py → db/schema.sql (DROP + CREATE, PK).
+- backend: sürücü mssql-python (tam sürüm). app/repositories/sql.py: connection_string (Encrypt=yes; SQL_USER varsa Uid/Pwd,
+  yoksa Authentication=ActiveDirectoryDefault — yerelde az login, Azure'da Managed Identity), değerler ODBC kaçışlı.
+  connect(settings): sürücü fonksiyon içinde import edilir; uyuyan veritabanı için 3 deneme, kalıcı hatalarda (firewall, Login failed)
+  denemez. TABLE_COLUMNS + select_sql(table) (datetime kolonları CONVERT(NVARCHAR(40), …, 126)) + read_raw(connection) → RawData.
+- catalog.get_catalog: SQL_SERVER varsa SQL, hata olursa logla ve JSON'a düş. Log: "Veri kaynağı: Azure SQL (mercekdb) · N hata logu · M çağrı".
+- scripts/load_sql.py: schema.sql → her tablo 500'lük partilerle TEK JSON parametresi + OPENJSON ile INSERT (Türkçe karakterler için
+  json.dumps ensure_ascii=True) → her tablo SQL'den geri okunup JSON ile alan alan karşılaştırılır → katalog kontrolü
+  ("✓ Kontrol: 21 tablo; sohbet kataloğu 2002 hata logu, 700 çağrı"). Firewall hatasında kısa Türkçe mesaj (traceback değil).
+  Şifre ekrana yazılmaz.
+- Testler: tip çıkarımı, scenarios.ts ayrıştırma, connection string kaçışları, select_sql, JSON↔SQL eşitliği (sahte satırlarla).
+
+Kabul: testler geçer; load_sql.py hackathon SQL'ine yükler; backend logunda "Veri kaynağı: Azure SQL".
