@@ -84,8 +84,13 @@ Agent'ın çalıştırma ve belirteç (token) sayıları **İzleme** sekmesinde 
 
 1. ai.azure.com → **Aracılar** → `mercek-cagri` → **İzleme** sekmesi → üstteki "Başlamak için bir App Insights kaynağı oluşturun
    veya bağlayın" bandında **Bağla**.
-2. **Yeni oluştur** → ad: `mercek-appinsights` (kaynak grubu `<rg>`, bölge Foundry ile aynı) → **Oluştur / Bağla**.
-   Var olan bir Application Insights varsa onu seçin. (Kullandıkça ödenir; demo hacminde maliyet ihmal edilebilir.)
+2. Açılan **İzleyici ayarları** penceresi → *Application insights kaynak adı*: **Yeni kaynak oluştur** · *Ad*: `mercek-appinsights` ·
+   *Log Analytics Çalışma Alanı*: önerilen (varsayılan `…workspace-…`) · *Kimlik Doğrulama Türü*: listede **Microsoft Entra ID**
+   varsa onu, yoksa **API Anahtarı** (anahtar Foundry'nin bağlantısında saklanır, repoya/koda girmez) → **Oluştur**.
+   Var olan bir Application Insights varsa listeden onu seçin. (Kullandıkça ödenir; demo hacminde maliyet ihmal edilebilir.)
+   - Pencerenin altındaki **gizlilik bildirimi**: izlerde kullanıcı mesajları ve araç sonuçları saklanır; projede
+     *Log Analytics Reader* rolü olan herkes görür. Mercek'te araç sonuçlarında kişisel veri yok ve kullanıcı metni Foundry'ye
+     gitmeden taranıyor; yine de bu rolü yalnızca takıma verin (KVKK).
 3. Mercek'te birkaç soru sorun → 2–5 dk sonra **İzlemeler** sekmesi: her çalıştırma satırına tıklayınca girdiler, `function_call`
    (ör. `kibana_sorgula`), backend'in döndürdüğü `function_call_output` ve cevap sırayla görünür.
    **İzleme** sekmesinde çalıştırma sayısı, gecikme, belirteç ve hata oranı grafikleri.
