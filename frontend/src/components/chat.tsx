@@ -2,10 +2,21 @@
 
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
+import { AffectedCustomersPanel } from "@/components/affected-customers";
 import { Markdown } from "@/components/markdown";
-import { MAX_MESSAGE_LENGTH, sendChat, UnauthorizedError } from "@/lib/api";
+import {
+  type AffectedSummary,
+  MAX_MESSAGE_LENGTH,
+  sendChat,
+  UnauthorizedError,
+} from "@/lib/api";
 
-type Message = { id: number; role: "user" | "assistant"; text: string };
+type Message = {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+  affected?: AffectedSummary;
+};
 
 type ChatProps = { token: string; onUnauthorized: () => void };
 
@@ -21,9 +32,9 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  function addMessage(role: Message["role"], text: string) {
+  function addMessage(role: Message["role"], text: string, affected?: AffectedSummary) {
     const id = nextId.current++;
-    setMessages((current) => [...current, { id, role, text }]);
+    setMessages((current) => [...current, { id, role, text, affected }]);
   }
 
   async function submit() {
@@ -37,7 +48,8 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
     setError(null);
     setLoading(true);
     try {
-      addMessage("assistant", await sendChat(text, history, token));
+      const data = await sendChat(text, history, token);
+      addMessage("assistant", data.reply, data.affected_customers);
     } catch (err) {
       if (err instanceof UnauthorizedError) {
         onUnauthorized();
@@ -86,6 +98,13 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
             ) : (
               <div className="max-w-[80%] rounded-2xl bg-black/5 px-4 py-3 dark:bg-white/10">
                 <Markdown text={message.text} />
+                {message.affected && (
+                  <AffectedCustomersPanel
+                    summary={message.affected}
+                    token={token}
+                    onUnauthorized={onUnauthorized}
+                  />
+                )}
               </div>
             )}
           </div>

@@ -164,7 +164,10 @@ def _optional_str(args: dict[str, Any], name: str) -> str | None:
     return value.strip()
 
 
-def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+def filter_logs(
+    args: dict[str, Any], context: ToolContext
+) -> tuple[list[LogEntry], dict[str, Any]]:
+    """kibana_sorgula ve etkilenen müşteri listesi için ortak filtre: (loglar, normalize sorgu)."""
     start = _parse_time(args.get("start_time"), "start_time")
     end = min(_parse_time(args.get("end_time"), "end_time"), context.now)
     if start >= end:
@@ -192,19 +195,25 @@ def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]
         )
 
     found = [entry for entry in context.logs if matches(entry)]
+    query = {
+        "start_time": start.strftime("%Y-%m-%dT%H:%M"),
+        "end_time": end.strftime("%Y-%m-%dT%H:%M"),
+        "only_mine": only_mine,
+        "screen_code": screen_code,
+        "institution_code": institution_code,
+        "error_number": error_number,
+        "keyword": keyword,
+    }
+    return found, query
+
+
+def kibana_sorgula(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    found, query = filter_logs(args, context)
     groups = Counter(
         (e.screen_code, e.error_number, e.error_code, e.institution_code) for e in found
     )
     return {
-        "query": {
-            "start_time": start.strftime("%Y-%m-%dT%H:%M"),
-            "end_time": end.strftime("%Y-%m-%dT%H:%M"),
-            "only_mine": only_mine,
-            "screen_code": screen_code,
-            "institution_code": institution_code,
-            "error_number": error_number,
-            "keyword": keyword,
-        },
+        "query": query,
         "total": len(found),
         "distinct_customers": len({e.customer_id for e in found if e.customer_id}),
         "by_error": [

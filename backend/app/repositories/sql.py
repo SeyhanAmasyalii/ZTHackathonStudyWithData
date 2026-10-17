@@ -52,6 +52,7 @@ TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
         "message_fields",
         "message_response",
     ),
+    "customers": ("customer_number", "full_name", "phone", "perm_phone", "perm_sms", "perm_email"),
 }
 # DATETIMEOFFSET kolonları ISO 8601 metin olarak okunur (126: yerel saat + ofset, JSON'daki gibi).
 DATETIME_COLUMNS = {"created_at", "log_time"}

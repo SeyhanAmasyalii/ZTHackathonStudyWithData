@@ -48,13 +48,47 @@ export function login(userName: string): Promise<Session> {
   });
 }
 
+/** Modelin son log sorgusu; etkilenen müşteri listesi backend'de bununla yeniden hesaplanır. */
+export type AffectedQuery = {
+  start_time: string;
+  end_time: string;
+  only_mine: boolean;
+  screen_code?: string | null;
+  institution_code?: string | null;
+  error_number?: number | null;
+  keyword?: string | null;
+};
+
+export type AffectedSummary = AffectedQuery & { customer_count: number };
+
+export type AffectedCustomer = {
+  customer_number: string;
+  full_name: string | null;
+  phone: string | null;
+  can_call: boolean;
+  channel: string;
+  last_error_time: string;
+  screen_code: string;
+  error_number: number | null;
+  institution_code: string | null;
+};
+
+export type AffectedCustomers = {
+  total_customers: number;
+  callable_customers: number;
+  truncated: boolean;
+  rows: AffectedCustomer[];
+};
+
+export type ChatReply = { reply: string; affected_customers?: AffectedSummary };
+
 /** Mesajı ve aynı sohbetin önceki mesajlarını backend'e (POST /api/chat) gönderir. */
 export async function sendChat(
   message: string,
   history: HistoryMessage[],
   token: string,
-): Promise<string> {
-  const data = await request<{ reply: string }>("/api/chat", {
+): Promise<ChatReply> {
+  return request<ChatReply>("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
@@ -64,5 +98,25 @@ export async function sendChat(
         .map((item) => ({ ...item, content: item.content.slice(0, MAX_HISTORY_CONTENT) })),
     }),
   });
-  return data.reply;
+}
+
+/** Etkilenen müşteri listesi (yalnızca L2; liste modele gitmez, görüntüleme kayda alınır). */
+export function fetchAffectedCustomers(
+  query: AffectedQuery,
+  token: string,
+): Promise<AffectedCustomers> {
+  const body: AffectedQuery = {
+    start_time: query.start_time,
+    end_time: query.end_time,
+    only_mine: query.only_mine,
+    screen_code: query.screen_code,
+    institution_code: query.institution_code,
+    error_number: query.error_number,
+    keyword: query.keyword,
+  };
+  return request<AffectedCustomers>("/api/affected-customers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
 }

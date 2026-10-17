@@ -8,6 +8,7 @@ FastAPI. Mercek sohbet mesajını Azure AI Foundry'deki modele (`gpt-5.5`) ileti
 | `GET /api/users` | Giriş ekranındaki demo kullanıcıları |
 | `POST /api/login` | `{"user_name": "elif"}` → `{"token": "...", "user": {...}}` |
 | `POST /api/chat` | `Authorization: Bearer <token>` + `{"message": "..."}` → `{"reply": "..."}`; token yoksa 401 |
+| `POST /api/affected-customers` | Yalnızca L2 (`can_view_customers`): son log sorgusundaki etkilenen müşteriler (müşteri no, ad, telefon, iletişim izni, son hata, kurum). Telefon izni yoksa numara maskeli. Liste modele gitmez; her görüntüleme `mercek.audit` logunda (müşteri bilgisi olmadan) |
 
 **Oturum:** şifresiz demo girişi; backend imzalı ve süreli (12 saat) bir token verir (HMAC-SHA256, `SESSION_SECRET`). Sohbetteki kullanıcı adı yalnızca token'dan okunur; model kullanıcı adını görmez, `only_mine=true` filtresini backend uygular.
 

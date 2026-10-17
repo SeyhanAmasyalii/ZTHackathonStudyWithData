@@ -15,6 +15,8 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] Azure App Service (prova, kişisel abonelik, F1): `mercek-api`, `mercek-web` portaldan; paket `scripts/package_azure.py`, yükleme Cloud Shell. Rehber: `docs/AZURE-APP-SERVICE.md`
 - [x] Azure SQL: datav2'nin 21 tablosu (+ `scenarios.ts`) tüm kolonlarıyla; şema `scripts/build_schema.py` → `db/schema.sql`, yükleme+doğrulama `scripts/load_sql.py`; backend `SQL_SERVER` varsa SQL'den okur (yoksa/ulaşamazsa JSON). Rehber: `docs/AZURE-SQL.md`
 
+- [x] Etkilenen müşteri listesi (L2): cevabın altında düğme, `POST /api/affected-customers`; iletişim izni (izinsizde maske), veri en aza indirme, erişim kaydı; liste modele gitmez
+
 ## Sırada
 - [x] Azure SQL App Service'e bağlandı (prova): Günlük akışında `Veri kaynağı: Azure SQL (mercekdb)`, sohbet SQL verisiyle çalışıyor
 - [x] SQL'e Managed Identity ile şifresiz bağlantı (prova; App Settings'te SQL parolası yok). Rehber: `docs/AZURE-SQL.md` §4

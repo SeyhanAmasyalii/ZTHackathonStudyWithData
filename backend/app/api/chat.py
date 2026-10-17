@@ -8,7 +8,7 @@ from app.api.auth import get_current_user
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.clients.search import AzureSearchClient, SearchError
 from app.config import Settings, get_settings
-from app.models.chat import ChatRequest, ChatResponse
+from app.models.chat import AffectedSummary, ChatRequest, ChatResponse
 from app.repositories.catalog import get_catalog
 from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
@@ -42,7 +42,7 @@ def get_log_search() -> LogSearchFn | None:
         return None
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat", response_model=ChatResponse, response_model_exclude_none=True)
 def chat(
     request: ChatRequest,
     # Sıra önemli: önce oturum kontrolü (401), sonra model bağlantısı (503).
@@ -60,6 +60,7 @@ def chat(
         incidents=catalog.incidents,
         search_logs=search_logs,
     )
+    trace: list[tuple[str, dict]] = []
     try:
         reply = answer(
             request.message,
@@ -68,8 +69,23 @@ def chat(
             catalog.screens,
             catalog.institutions,
             request.history,
+            trace,
         )
     except LLMError as exc:
         logger.error("Sohbet yanıtı üretilemedi: %s", exc)
         raise HTTPException(status_code=502, detail="Şu an yanıt üretilemiyor.") from exc
-    return ChatResponse(reply=reply)
+    return ChatResponse(reply=reply, affected_customers=_affected_summary(user, trace))
+
+
+def _affected_summary(user: DemoUser, trace: list[tuple[str, dict]]) -> AffectedSummary | None:
+    """Yetkili kullanıcıya, modelin son kibana_sorgula sorgusundan müşteri listesi düğmesi.
+
+    Sorguyu model seçer ama düğmeyi ve listeyi kod üretir; liste modele gönderilmez.
+    """
+    if not user.can_view_customers:
+        return None
+    for name, result in reversed(trace):
+        if name == "kibana_sorgula" and "query" in result and "error" not in result:
+            count = result.get("distinct_customers", 0)
+            return AffectedSummary(**result["query"], customer_count=count) if count else None
+    return None
