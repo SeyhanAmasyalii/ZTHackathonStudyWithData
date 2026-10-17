@@ -85,7 +85,7 @@ Agent'ın çalıştırma ve belirteç (token) sayıları **İzleme** sekmesinde 
 1. ai.azure.com → **Aracılar** → `mercek-cagri` → **İzleme** sekmesi → üstteki "Başlamak için bir App Insights kaynağı oluşturun
    veya bağlayın" bandında **Bağla**.
 2. Açılan **İzleyici ayarları** penceresi → *Application insights kaynak adı*: **Yeni kaynak oluştur** · *Ad*: `mercek-appinsights` ·
-   *Log Analytics Çalışma Alanı*: önerilen (varsayılan `…workspace-…`) · *Kimlik Doğrulama Türü*: listede **Microsoft Entra ID**
+   *Log Analytics Çalışma Alanı*: önerilen (varsayılan `…workspace-…`) · *Kimlik Doğrulama Türü*: **Proje Yönetilen Kimliği** (anahtarsız; prova seçimi) ya da listede **Microsoft Entra ID**
    varsa onu, yoksa **API Anahtarı** (anahtar Foundry'nin bağlantısında saklanır, repoya/koda girmez) → **Oluştur**.
    Var olan bir Application Insights varsa listeden onu seçin. (Kullandıkça ödenir; demo hacminde maliyet ihmal edilebilir.)
    - Pencerenin altındaki **gizlilik bildirimi**: izlerde kullanıcı mesajları ve araç sonuçları saklanır; projede
