@@ -34,7 +34,7 @@ Aşağıda `<foundry>` = Foundry kaynağı (ör. `seyhanamasyali-7898-resource`)
 
 Agent SDK'sı **yalnızca Microsoft Entra** ile çalışır (anahtar yok).
 - Azure portal → `<foundry>` (Foundry kaynağı) → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** →
-  rol: **Azure AI User** (Türkçe portalda "Azure AI Kullanıcısı"; aramaya `Azure AI` yazın) → Üyeler: **Kullanıcı, grup…** → kendi hesabınız →
+  rol: **Azure AI User** (listede yoksa **Azure AI Developer**; aramaya `Azure AI` yazın) → Üyeler: **Kullanıcı, grup…** → kendi hesabınız →
   **Gözden geçir + ata**. Kaynağın sahibiyseniz (Owner) genelde gerekmez; `setup_agent.py` 403 verirse bu rolü ekleyin.
 - Bilgisayarda Azure CLI yoksa: `winget install -e --id Microsoft.AzureCLI` → **yeni** CMD penceresi açın.
 - Giriş: `az login --tenant <kiracı-kimliği>` (kiracı kimliği: portal → Microsoft Entra ID → Genel Bakış → Kiracı Kimliği).
@@ -103,7 +103,8 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 
 ## 5. Azure'a (App Service)
 
-1. **Kimlik yetkisi:** `<foundry>` → **Erişim denetimi (IAM)** → **Rol ataması ekle** → **Azure AI User** →
+1. **Kimlik yetkisi:** `<foundry>` → **Erişim denetimi (IAM)** → **Rol ataması ekle** → **Azure AI User**
+   (portal listesinde yoksa — prova portalında çıkmadı — **Azure AI Developer**; 403 sürerse ek olarak **Cognitive Services User**) →
    Erişim ata: **Yönetilen kimlik** → **App Service** → `<api>` → **Gözden geçir + ata** (5–10 dk'da etkinleşir).
 2. `<api>` → **Ayarlar → Ortam değişkenleri** → ekleyin → **Uygula**:
 
