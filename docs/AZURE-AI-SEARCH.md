@@ -27,7 +27,8 @@ Aşağıda `<search>` = arama hizmeti adı (ör. `mercek-search-<takım>`), `<rg
 
 ## 2. AI Search hizmeti (5 dk)
 
-1. Portal → arama: `AI Search` → **+ Oluştur**.
+1. Portal → arama: `AI Search` → **Hizmetler** altında **Yapay Zeka Arama (Foundry IQ)** (Türkçe portalda Azure AI Search'ün adı) → **+ Oluştur**.
+   Market altındaki **Azure AI Search** de aynı kaynağı açar; Allfind/Algolia gibi üçüncü taraf ürünleri seçmeyin.
 2. Resource group: `<rg>` · Hizmet adı: `<search>` · Konum: Foundry ile aynı (Ücretsiz katman o bölgede yoksa yakın bir bölge, ör. West Europe)
    · Fiyatlandırma katmanı: **Fiyatlandırma katmanını değiştir → Ücretsiz** (3 indeks, 50 MB; bize 1 indeks, ~2 MB yeter).
    Hackathon aboneliğinde takıma verilen katman neyse o.
