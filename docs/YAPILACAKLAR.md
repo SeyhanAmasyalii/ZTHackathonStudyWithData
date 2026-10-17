@@ -2,6 +2,9 @@
 
 Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi. Tamamlanan madde `[x]` olur.
 
+## Hackathon ortamı
+- Kurulum sırası ve kontrol listesi: `docs/HACKATHON-KURULUM.md`
+
 ## Yapıldı
 - [x] Backend: `POST /api/chat`, Foundry `gpt-5.5` bağlantısı
 - [x] Frontend: tek sayfa Mercek sohbet ekranı
