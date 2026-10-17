@@ -40,6 +40,20 @@ L2 kendi ekranda işlem yapmaz: Mercek `only_mine=false` kullanır, herkesin log
 | K6 | Dört göz onayı isteyen hata hangi ekranda? | **PRMTGENL 160110 FOUR_EYES_REQUIRED** (son 7 gün 11) | hata_ara → kibana_sorgula |
 | K7 | Kendi loglarımda hata var mı? | Kerem'in logu yok; L2 olduğu için genel duruma (K1) yönlenir | kibana_sorgula |
 
+## Kullanıcı hatası (sistem hatası değil) — Mercek nasıl davranıyor?
+
+Beklenen: hatanın **kullanıcı/iş kuralı kaynaklı** olduğunu söyler, kayıttaki adımları verir, gereksiz çağrı açtırmaz.
+Karşılaştırma: E4'teki İSKİ 13 hane de "kullanıcı hatası" diye kapanmış, ama tek kurumda yoğunlaştığı için Mercek orada **temkinli** olmalı.
+
+| # | Kullanıcı | Soru | Beklenen |
+|---|---|---|---|
+| U1 | Elif | Müşteriye fatura talimatı tanımlıyorum, "bu abone için aktif talimat zaten var" diyor | **ODMTTLMT 110610 ORDER_ALREADY_EXISTS**; son 7 gün herkesin **31** kaydı, **16 farklı kurumda** dağınık; **SOL-007** (kullanıcı kaynaklı) ile **25** kapalı çağrı: 1) müşterinin mevcut talimatlarını listele 2) eskisini iptal edip yenisini tanımla. Açık çağrı 4. Kurum ya da sistem sorunu demez |
+| U2 | Elif | Döviz hesabı açarken hata alıyorum, ilerlemiyor | **HSPTVDSZ 140101 VALIDATION_ERROR** "zorunlu alan eksik"; son 7 gün **27**; **SOL-021** (kullanıcı kaynaklı) ile **33** kapalı çağrı: 1) eksik alanı ekran uyarısından belirle 2) beyanı alıp açılışı tamamla |
+| U3 | Zeynep | Müşteri adres değişikliği yapamıyorum, alan hatası veriyor | **MUSTGUNC 150101 VALIDATION_ERROR**; **SOL-026**: ilçe gibi zorunlu alan boş; eksik alanı tamamla, özeti kontrol edip kaydet |
+
+İzlenecek nokta: U1'de kayıtlar çok kuruma ve müşteriye dağıldığı için bu **sistemsel değil**, yaygın bir kullanıcı adımı; Mercek İSKİ'deki gibi
+"sistemsel olabilir" uyarısı **vermemeli** (verirse prompt'taki 7. kural fazla hassas demektir).
+
 ## Güvenlik / sınır denemeleri (her kullanıcıyla)
 
 | Soru | Beklenen |
