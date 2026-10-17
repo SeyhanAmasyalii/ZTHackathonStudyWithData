@@ -1,7 +1,7 @@
 # Mercek — Azure App Service'e yükleme (portal ile)
 
 > Hedef: `mercek-api` (FastAPI) ve `mercek-web` (Next.js) Azure'da çalışsın; `https://<api>/api/health` → 200.
-> Kaynaklar **portaldan** açılır ve ayarlanır. Kodu paketlemek için tek komut (`scripts/package_azure.py`), yüklemek için tarayıcıda sürükle-bırak (Kudu) yeterlidir. Azure CLI gerekmez.
+> Kaynaklar **portaldan** açılır ve ayarlanır. Kodu paketlemek için tek komut (`scripts/package_azure.py`), yüklemek için portaldaki Cloud Shell yeterlidir. Bilgisayara Azure CLI kurmak gerekmez.
 > **Repoya hiçbir anahtar yazılmaz.** Anahtarlar yalnızca App Service → Ortam değişkenleri ekranına girilir.
 
 ## 0. Hazırlık (5 dk)
@@ -88,20 +88,20 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 
 > `python` yoksa: `uv run --directory backend python ..\scripts\package_azure.py --api-url ...`
 
-## 5. Paketleri yükle (tarayıcıda sürükle-bırak, 5 dk)
+## 5. Paketleri yükle (tarayıcıda Cloud Shell, 5 dk)
 
-1. Tarayıcıda `https://<api>.scm.azurewebsites.net/ZipDeployUI` (Azure hesabıyla açılır).
-   - Ya da portal → uygulama → **Geliştirme Araçları → Gelişmiş Araçlar → Git**. Yeni Kudu ekranı açılırsa sağ üstteki **Old UI** → **Tools → Zip Push Deploy**.
-2. `dist\mercek-api.zip` dosyasını sayfadaki dosya listesinin üzerine **sürükle-bırak**. İlk yüklemede `requirements.txt` kurulur (2–4 dk); ilerleme sayfada görünür.
-3. Aynısını `https://<web>.scm.azurewebsites.net/ZipDeployUI` için `dist\mercek-web.zip` ile yap.
+> Linux App Service'te Kudu'nun sürükle-bırak sayfası (`/ZipDeployUI`) **yok** ("No route registered"). Yükleme portalın içindeki Cloud Shell'den yapılır; bilgisayara kurulum gerekmez.
 
-> **ZipDeployUI açılmazsa (Linux Kudu'da olmayabilir) → Cloud Shell (yine tarayıcıda, kurulum yok):**
-> 1. Portal üst çubuğu → **Cloud Shell** simgesi (`>_`) → **Bash** → "Depolama hesabı gerekmez" (geçici oturum) → Uygula.
-> 2. Cloud Shell araç çubuğu → **Dosyaları yönet → Karşıya yükle** → `dist\mercek-api.zip`.
-> 3. `az webapp deploy -g <rg> -n <api> --src-path mercek-api.zip --type zip`
->    (`-n` uygulamanın **adı**dır, uzun adres değil; ör. `mercek-api-seyhan`).
->
-> Bilgisayarda Azure CLI varsa aynı komut: `az webapp deploy -g <rg> -n <api> --src-path dist\mercek-api.zip --type zip`
+1. Portal üst çubuğu → **Cloud Shell** simgesi (`>_`) → **Bash** → "Depolama hesabı gerekmez" (geçici oturum) → Uygula.
+2. Cloud Shell araç çubuğu → **Dosyaları yönet → Karşıya yükle** → `dist\mercek-api.zip` (sonra `dist\mercek-web.zip`).
+3. Komutlar (`-n` uygulamanın **adı**dır, uzun adres değil):
+   ```bash
+   az webapp deploy -g <rg> -n <api> --src-path mercek-api.zip --type zip
+   az webapp deploy -g <rg> -n <web> --src-path mercek-web.zip --type zip
+   ```
+   İlk backend yüklemesinde `requirements.txt` kurulur (2–4 dk).
+
+> Bilgisayarda Azure CLI varsa aynı komutlar `--src-path dist\mercek-api.zip` ile çalışır.
 > Kalıcı çözüm: CI/CD workflow'u (`.github/workflows/ci-cd.yml`) aynı zip'leri her main push'ta yükler.
 
 ## 6. Kontrol
@@ -121,7 +121,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 | "Model bağlantısı yapılandırılmamış" | `AZURE_OPENAI_ENDPOINT` / `AZURE_OPENAI_API_KEY` eksik |
 | "Şu an yanıt üretilemiyor" | Uç nokta, anahtar ya da `CHAT_DEPLOYMENT` adı yanlış; Log stream'deki `Model çağrısı başarısız` satırı |
 | Arada bir "Oturum geçersiz" | `SESSION_SECRET` tanımlı değil (her yeniden başlatmada yeni anahtar üretilir) |
-| `ZipDeployUI` erişim hatası | Hesabın bu kaynakta yetkisi yok; resource group sahibine sor ya da CLI ile `az webapp deploy` |
+| `az webapp deploy` yetki hatası | Hesabın bu kaynakta yetkisi yok; resource group sahibine sor |
 | Web 503 / açılmıyor | `<web>` Log stream; başlangıç komutu `node server.js` ve `HOSTNAME=0.0.0.0` mi? |
 
 ## Notlar
