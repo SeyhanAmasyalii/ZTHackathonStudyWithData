@@ -105,6 +105,7 @@ Kontrol: Mercek'te Elif → **"abone numarasını sistem kabul etmiyor"** → G�
 
 | Belirti | Çözüm |
 |---|---|
+| Oluşturma: `The region '...' is currently out of the resources required to provision new services` | O bölgede kapasite yok (özellikle Ücretsiz katman). Aynı adla başka bölgede tekrar oluşturun (ör. West Europe, North Europe); başarısız dağıtım kaynak bırakmaz. Arama farklı bölgede olabilir, kod etkilenmez |
 | Betik: `SEARCH_ENDPOINT tanımlı değil` | `backend\.env`'de `SEARCH_ENDPOINT` yok |
 | Betik: `Embedding çağrısı başarısız: NotFoundError` | Foundry'de embedding deploy'u yok ya da adı `EMBEDDING_DEPLOYMENT` ile aynı değil |
 | Betik: `Arama servisi 403` | Yönetici anahtarı yanlış/eksik (sorgu anahtarı indeks oluşturamaz) |
