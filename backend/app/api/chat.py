@@ -84,8 +84,12 @@ def _affected_summary(user: DemoUser, trace: list[tuple[str, dict]]) -> Affected
     """
     if not user.can_view_customers:
         return None
+    # Model aynı turda birden fazla sorgu yapabilir (ör. önce 30 dk, sonra 7 gün; ya da tersi).
+    # Müşteri bulunan en son sorgu esas alınır; boş sorgu düğmeyi gizlemez.
     for name, result in reversed(trace):
-        if name == "kibana_sorgula" and "query" in result and "error" not in result:
-            count = result.get("distinct_customers", 0)
-            return AffectedSummary(**result["query"], customer_count=count) if count else None
+        if name != "kibana_sorgula" or "query" not in result or "error" in result:
+            continue
+        count = result.get("distinct_customers", 0)
+        if count:
+            return AffectedSummary(**result["query"], customer_count=count)
     return None

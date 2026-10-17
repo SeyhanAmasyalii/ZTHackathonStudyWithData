@@ -1,9 +1,11 @@
+import json
 from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.api.chat import get_llm
+from app.clients.llm import LLMReply, ToolCall
 from app.config import TURKEY_TZ
 from app.main import app
 from app.repositories.datav2 import Customer, json_catalog
@@ -126,3 +128,21 @@ def test_chat_offers_list_only_to_l2(fake_llm):
     kibana_then_reply(fake_llm)
     body = client.post("/api/chat", json={"message": "x"}, headers=token("elif")).json()
     assert "affected_customers" not in body
+
+
+def test_chat_offers_list_when_last_query_is_empty(fake_llm):
+    # Model iki sorguyu aynı turda yapar: 7 gün (31 müşteri) ve son 30 dk (0 müşteri).
+    empty = {**QUERY, "start_time": "2026-10-17T08:45"}
+    fake_llm.replies = [
+        LLMReply(
+            content=None,
+            tool_calls=[
+                ToolCall(id="a", name="kibana_sorgula", arguments=json.dumps(QUERY)),
+                ToolCall(id="b", name="kibana_sorgula", arguments=json.dumps(empty)),
+            ],
+        ),
+        FakeLLMClient().replies[0],
+    ]
+    body = client.post("/api/chat", json={"message": "x"}, headers=token("kerem")).json()
+    assert body["affected_customers"]["customer_count"] == 31
+    assert body["affected_customers"]["start_time"] == "2026-10-10T09:15"
