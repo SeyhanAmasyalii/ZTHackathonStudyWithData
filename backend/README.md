@@ -17,7 +17,7 @@ Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `a
 - `kibana_sorgula`: ekran, kurum, hata no, zaman aralığı (en fazla 7 gün), yalnızca kullanıcının logları mı, anahtar kelime → `kibana_logs.json` (Warning/Error).
 - `cagri_ara`: ekran + hata no (+ kurum) → `incidents.json` geçmiş çağrıları, kapananların hazır çözümü (`solution_templates.json`), açık çağrı sayısı.
 
-**Veri kaynağı:** `SQL_SERVER` tanımlıysa Azure SQL (`db/schema.sql`, yükleme `scripts/load_sql.py`), değilse `datav2` JSON. Veri açılışta bir kez belleğe alınır; SQL'e ulaşılamazsa JSON'a düşülür (log: `Veri kaynağı: ...`). Kurulum: `docs/AZURE-SQL.md`.
+**Veri kaynağı:** `SQL_SERVER` tanımlıysa Azure SQL (şema `db/schema.sql` ← `scripts/build_schema.py`, yükleme `scripts/load_sql.py`; datav2'nin tüm tabloları yüklenir, sohbet 6'sını okur), değilse `datav2` JSON. Veri açılışta bir kez belleğe alınır; SQL'e ulaşılamazsa JSON'a düşülür (log: `Veri kaynağı: ...`). Kurulum: `docs/AZURE-SQL.md`.
 
 **Hata ayıklama:** `.env`'de `LLM_DEBUG=true` → modele giden ve dönen her şey terminale yazılır (yalnızca yerelde).
 

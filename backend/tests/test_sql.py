@@ -1,7 +1,12 @@
-from app.config import Settings
+import sys
+
+from app.config import REPO_ROOT, Settings
 from app.repositories import catalog as catalog_module
 from app.repositories import sql
 from app.repositories.datav2 import TABLES, build_catalog, json_catalog, read_json
+
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from datav2_tables import parse_schema  # noqa: E402
 
 
 class FakeCursor:
@@ -53,21 +58,25 @@ def test_connection_string_without_user_uses_entra():
     assert "Pwd" not in text
 
 
-def test_insert_sql_uses_parameters():
-    statement = sql.insert_sql("institution_screens")
-    assert statement == (
-        "INSERT INTO dbo.institution_screens (institution_code, screen_code) VALUES (?, ?)"
-    )
-
-
-def test_select_sql_reads_datetimes_as_iso_text():
+def test_select_sql_reads_datetimes_with_offset():
     statement = sql.select_sql("incidents")
-    assert "CONVERT(NVARCHAR(40), created_at, 127) AS created_at" in statement
+    assert "CONVERT(NVARCHAR(40), [created_at], 126) AS [created_at]" in statement
     assert statement.endswith("FROM dbo.incidents")
 
 
 def test_every_table_has_columns():
     assert set(sql.TABLE_COLUMNS) == set(TABLES)
+
+
+def test_read_columns_exist_in_data_and_schema(data_dir):
+    columns = sql.TABLE_COLUMNS["incidents"]
+    assert {"reporter_user_name", "scenario_path"} <= set(columns)
+    assert set(columns) <= set(read_json(data_dir).incidents[0])
+    schema = parse_schema((REPO_ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
+    for table, table_columns in sql.TABLE_COLUMNS.items():
+        assert set(table_columns) <= set(schema[table]), table
+    for column in sql.DATETIME_COLUMNS:
+        assert any(schema[t].get(column, "").startswith("DATETIMEOFFSET") for t in schema)
 
 
 def test_read_raw_builds_same_catalog_as_json(data_dir):
@@ -121,3 +130,25 @@ def test_catalog_reads_sql_when_configured(monkeypatch, data_dir):
         assert loaded is not json_catalog(data_dir)
     finally:
         catalog_module._load.cache_clear()
+
+
+def test_connect_does_not_retry_firewall_error(monkeypatch):
+    import mssql_python
+
+    calls = []
+
+    def refuse(_text):
+        calls.append(1)
+        raise mssql_python.ProgrammingError(
+            "Client with IP address '1.2.3.4' is not allowed to access the server.", ""
+        )
+
+    monkeypatch.setattr(mssql_python, "connect", refuse)
+    monkeypatch.setattr(sql.time, "sleep", lambda _s: None)
+    settings = Settings(sql_server="x.database.windows.net", sql_user="u", sql_password="p")
+    try:
+        with sql.connect(settings):
+            pass
+    except mssql_python.Error:
+        pass
+    assert calls == [1]

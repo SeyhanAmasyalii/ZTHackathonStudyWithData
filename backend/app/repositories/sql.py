@@ -15,8 +15,8 @@ from app.repositories.datav2 import TABLES, RawData
 
 logger = logging.getLogger(__name__)
 
-# Tablo → kolonlar (db/schema.sql). Sorgulara yalnızca bu sabit adlar girer, kullanıcı girdisi
-# girmez; değerler her zaman parametreyle (?) gönderilir.
+# Sohbetin okuduğu tablolar ve kolonlar (tüm şema: db/schema.sql). Sorgulara yalnızca bu sabit
+# adlar girer, kullanıcı girdisi girmez.
 TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
     "screens": ("code", "name", "description"),
     "institutions": ("institution_code", "name", "bill_type"),
@@ -35,6 +35,8 @@ TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
         "closure_code",
         "sub_closure_code",
         "solution_template_id",
+        "reporter_user_name",
+        "scenario_path",
     ),
     "kibana_logs": (
         "log_id",
@@ -51,11 +53,13 @@ TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
         "message_response",
     ),
 }
-# DATETIMEOFFSET kolonları ISO 8601 metin olarak okunur (JSON'daki biçimle aynı).
+# DATETIMEOFFSET kolonları ISO 8601 metin olarak okunur (126: yerel saat + ofset, JSON'daki gibi).
 DATETIME_COLUMNS = {"created_at", "log_time"}
 
 CONNECT_ATTEMPTS = 3
 RETRY_SECONDS = 10
+# Beklemekle düzelmeyen hatalar (güvenlik duvarı, kullanıcı/parola): tekrar denenmez.
+PERMANENT_ERRORS = ("is not allowed to access the server", "Login failed")
 
 
 def _quote(value: str) -> str:
@@ -94,7 +98,7 @@ def connect(settings: Settings) -> Iterator[Any]:
             connection = mssql_python.connect(connection_string(settings))
             break
         except mssql_python.Error as exc:
-            if attempt == CONNECT_ATTEMPTS:
+            if attempt == CONNECT_ATTEMPTS or any(text in str(exc) for text in PERMANENT_ERRORS):
                 raise
             logger.warning(
                 "SQL bağlantısı kurulamadı (deneme %d/%d): %s",
@@ -111,18 +115,12 @@ def connect(settings: Settings) -> Iterator[Any]:
 
 def select_sql(table: str) -> str:
     columns = ", ".join(
-        f"CONVERT(NVARCHAR(40), {column}, 127) AS {column}"
+        f"CONVERT(NVARCHAR(40), [{column}], 126) AS [{column}]"
         if column in DATETIME_COLUMNS
-        else column
+        else f"[{column}]"
         for column in TABLE_COLUMNS[table]
     )
     return f"SELECT {columns} FROM dbo.{table}"
-
-
-def insert_sql(table: str) -> str:
-    columns = TABLE_COLUMNS[table]
-    placeholders = ", ".join("?" for _ in columns)
-    return f"INSERT INTO dbo.{table} ({', '.join(columns)}) VALUES ({placeholders})"
 
 
 def read_raw(connection) -> RawData:
