@@ -112,8 +112,9 @@ Birkaç saniye sonra **Nesne (sorumlu) kimliği** görünür; kimliğin adı uyg
 `SQL_SERVER` ve `SQL_DATABASE` kalır. Uygulama yeniden başlar.
 
 ### 4.4 Kontrol
-- `<api>` → **İzleme → Günlük akışı**: `Veri kaynağı: Azure SQL (mercekdb) · 2002 hata logu · 700 çağrı`
-  (parola artık tanımlı olmadığı için bu satır bağlantının Managed Identity ile kurulduğunu gösterir).
+- `<api>` → **İzleme → Günlük akışı** (sayfayı F5 ile yenileyin; akış eski satırlarda takılı kalabilir):
+  - `DefaultAzureCredential acquired a token from ManagedIdentityCredential` → kimlikle token alındı
+  - `Veri kaynağı: Azure SQL (mercekdb) · 2002 hata logu · 700 çağrı` → SQL'e parolasız bağlanıldı
 - Sohbette "ODMTTLMT ekranında hata alıyorum" → aynı cevap.
 - Hata olursa günlükte `Azure SQL okunamadı; JSON verisine geçildi` ve altında sebep görünür (aşağıdaki tablo).
   Uygulama bu sırada JSON'la çalışmaya devam eder; geri dönmek için `SQL_USER`/`SQL_PASSWORD`'u tekrar ekleyin.

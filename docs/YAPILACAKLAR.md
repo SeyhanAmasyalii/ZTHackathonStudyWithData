@@ -17,7 +17,8 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 
 ## Sırada
 - [x] Azure SQL App Service'e bağlandı (prova): Günlük akışında `Veri kaynağı: Azure SQL (mercekdb)`, sohbet SQL verisiyle çalışıyor
-- [ ] (Ek puan) SQL'e Managed Identity ile şifresiz bağlantı (`docs/AZURE-SQL.md` §4)
+- [x] SQL'e Managed Identity ile şifresiz bağlantı (prova; App Settings'te SQL parolası yok). Rehber: `docs/AZURE-SQL.md` §4
+- [ ] (Ek puan) Foundry'ye de Managed Identity ile bağlanma (anahtar yerine)
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra

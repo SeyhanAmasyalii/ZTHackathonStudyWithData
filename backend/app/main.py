@@ -14,6 +14,8 @@ settings = get_settings()
 
 # Uygulama logları (ör. araç çağrıları) uvicorn terminalinde görünsün.
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s: %(message)s")
+# Managed Identity token isteklerinin başlık dökümü gürültü; "token alındı" satırı (azure.identity) kalır.
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.WARNING)
 
 
 @asynccontextmanager
