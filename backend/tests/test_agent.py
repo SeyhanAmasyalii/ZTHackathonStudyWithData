@@ -72,7 +72,12 @@ def test_agent_runs_tools_in_backend_and_chains_responses():
     assert first_input[0]["role"] == "developer"
     assert "2026-10-17 09:15" in first_input[0]["content"]
     assert "elif" not in first_input[0]["content"]  # kullanıcı kodu modele gitmez
-    assert first_input[1] == {"role": "user", "content": "ODMTTLMT ekranında hata alıyorum"}
+    assert first_input[1] == {
+        "type": "message",
+        "role": "user",
+        "content": "ODMTTLMT ekranında hata alıyorum",
+    }
+    assert all(item["type"] == "message" for item in first_input)
     # Araç sonucu backend'de hesaplanır, function_call_output olarak önceki cevaba eklenir.
     second_input, second_previous = agent.calls[1]
     assert second_previous == "resp_1"

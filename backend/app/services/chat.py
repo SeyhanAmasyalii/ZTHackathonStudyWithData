@@ -64,6 +64,7 @@ def build_agent_instructions(
 def context_message(context: ToolContext) -> dict[str, Any]:
     """Agent yolunda her turdaki değişken bilgi (kullanıcı kodu değil, görev bilgisi)."""
     return {
+        "type": "message",
         "role": "developer",
         "content": (
             f"BAĞLAM — Şu an: {context.now.strftime('%Y-%m-%d %H:%M')} (Türkiye saati). "
@@ -108,13 +109,18 @@ def answer_with_agent(
     previous_response_id varsa model önceki turları Foundry'den hatırlar, geçmiş gönderilmez.
     Yoksa ya da Foundry bulamazsa SQL'deki geçmiş (history) gönderilir.
     """
-    user_items = [context_message(context), {"role": "user", "content": message.strip()}]
+    # Agent uç noktası her girdide "type" ister (ör. message, function_call_output).
+    user_items = [context_message(context), _message("user", message.strip())]
     try:
         return _agent_loop(agent, context, user_items, previous_response_id, trace)
     except PreviousResponseNotFound:
         logger.warning("Agent önceki cevabı bulamadı; geçmiş yeniden gönderiliyor")
-    replay = [{"role": item.role, "content": item.content} for item in history]
+    replay = [_message(item.role, item.content) for item in history]
     return _agent_loop(agent, context, [*replay, *user_items], None, trace)
+
+
+def _message(role: str, content: str) -> dict[str, Any]:
+    return {"type": "message", "role": role, "content": content}
 
 
 def _agent_loop(
