@@ -16,6 +16,7 @@ Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `a
 **Araçlar** (model parametreleri seçer, backend `datav2` JSON'larında çalıştırır; en fazla 5 tur):
 - `kibana_sorgula`: ekran, kurum, hata no, zaman aralığı (en fazla 7 gün), yalnızca kullanıcının logları mı, anahtar kelime → `kibana_logs.json` (Warning/Error).
 - `cagri_ara`: ekran + hata no (+ kurum) → `incidents.json` geçmiş çağrıları, kapananların hazır çözümü (`solution_templates.json`), açık çağrı sayısı.
+- `hata_ara` (AI Search yapılandırılmışsa): sorunun tarifi → `mercek-loglar` indeksinde hibrit (kelime + vektör) arama → en benzer hata türleri (ekran, hata no, kurum, mesaj). Sayımı yine `kibana_sorgula` yapar. İndeks: `scripts/build_search_index.py`, rehber `docs/AZURE-AI-SEARCH.md`.
 
 **Veri kaynağı:** `SQL_SERVER` tanımlıysa Azure SQL (şema `db/schema.sql` ← `scripts/build_schema.py`, yükleme `scripts/load_sql.py`; datav2'nin tüm tabloları yüklenir, sohbet 6'sını okur), değilse `datav2` JSON. Veri açılışta bir kez belleğe alınır; SQL'e ulaşılamazsa JSON'a düşülür (log: `Veri kaynağı: ...`). Kurulum: `docs/AZURE-SQL.md`.
 
