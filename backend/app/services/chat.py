@@ -54,6 +54,7 @@ def answer(
     screens: tuple[Screen, ...],
     institutions: tuple[Institution, ...],
     history: Sequence[HistoryMessage] = (),
+    trace: list[tuple[str, dict[str, Any]]] | None = None,
 ) -> str:
     messages: list[dict[str, Any]] = [
         {
@@ -75,6 +76,8 @@ def answer(
         messages.append(reply.as_message())
         for call in reply.tool_calls:
             result = run_tool(call.name, call.arguments, context)
+            if trace is not None:
+                trace.append((call.name, result))
             logger.info(
                 "Araç çağrısı: tur=%d ad=%s sorgu=%s sonuç=%s",
                 turn + 1,

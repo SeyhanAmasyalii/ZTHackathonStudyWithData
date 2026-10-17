@@ -1,7 +1,7 @@
 """datav2 verisini (JSON ya da Azure SQL'den gelen ham satırlar) sohbet kataloğuna dönüştürür."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
@@ -53,6 +53,18 @@ class Screen:
     code: str
     name: str
     description: str
+
+
+@dataclass(frozen=True)
+class Customer:
+    """Bilgilendirme için gereken en az alan: ad, telefon, iletişim izinleri."""
+
+    customer_number: str
+    full_name: str
+    phone: str
+    perm_phone: bool
+    perm_sms: bool
+    perm_email: bool
 
 
 @dataclass(frozen=True)
@@ -112,6 +124,7 @@ TABLES = (
     "solution_templates",
     "incidents",
     "kibana_logs",
+    "customers",
 )
 
 
@@ -125,6 +138,7 @@ class RawData:
     solution_templates: tuple[dict, ...]
     incidents: tuple[dict, ...]
     kibana_logs: tuple[dict, ...]
+    customers: tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -135,6 +149,8 @@ class Catalog:
     incidents: tuple[Incident, ...]
     screens: tuple[Screen, ...]
     institutions: tuple[Institution, ...]
+    # Modele hiç gitmez; yalnızca yetkili kullanıcıya etkilenen müşteri listesi için (kod).
+    customers: dict[str, Customer] = field(default_factory=dict)
 
 
 def read_json(data_dir: Path) -> RawData:
@@ -217,6 +233,20 @@ def build_incidents(raw: RawData) -> tuple[Incident, ...]:
     return tuple(sorted(incidents, key=lambda incident: incident.created_at))
 
 
+def build_customers(raw: RawData) -> dict[str, Customer]:
+    return {
+        row["customer_number"]: Customer(
+            customer_number=row["customer_number"],
+            full_name=row.get("full_name") or "",
+            phone=row.get("phone") or "",
+            perm_phone=bool(row.get("perm_phone")),
+            perm_sms=bool(row.get("perm_sms")),
+            perm_email=bool(row.get("perm_email")),
+        )
+        for row in raw.customers
+    }
+
+
 def build_catalog(raw: RawData) -> Catalog:
     screens = build_screens(raw)
     institutions = build_institutions(raw)
@@ -225,6 +255,7 @@ def build_catalog(raw: RawData) -> Catalog:
         incidents=build_incidents(raw),
         screens=screens,
         institutions=institutions,
+        customers=build_customers(raw),
     )
 
 

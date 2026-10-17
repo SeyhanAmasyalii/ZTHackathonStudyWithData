@@ -11,9 +11,12 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] `cagri_ara` aracı: geçmiş kapanmış çağrılar ve çözümleri → çözüm önerisi
 - [x] Giriş ekranı: demo kullanıcı seçimi, imzalı oturum token'ı; sohbetteki kullanıcı token'dan
 - [x] Konuşma hafızası (ilk sürüm): frontend son 20 mesajı gönderir, "Yeni sohbet" sıfırlar
+- [x] Konuşma geçmişi, kullanıcılar ve KVKK erişim kaydı Azure SQL'de (`app_users`, `audit_log`, `conversations`, `conversation_messages`); sayfa yenilenince sohbet geri gelir. Kurulum: `scripts/setup_app_tables.py`, rehber `docs/AZURE-SQL.md` §5
 - [x] Cevap biçimlendirme: kalın, kod, madde/numaralı liste, başlık (bağımlılıksız, HTML çalıştırmaz)
 - [x] Azure App Service (prova, kişisel abonelik, F1): `mercek-api`, `mercek-web` portaldan; paket `scripts/package_azure.py`, yükleme Cloud Shell. Rehber: `docs/AZURE-APP-SERVICE.md`
 - [x] Azure SQL: datav2'nin 21 tablosu (+ `scenarios.ts`) tüm kolonlarıyla; şema `scripts/build_schema.py` → `db/schema.sql`, yükleme+doğrulama `scripts/load_sql.py`; backend `SQL_SERVER` varsa SQL'den okur (yoksa/ulaşamazsa JSON). Rehber: `docs/AZURE-SQL.md`
+
+- [x] Etkilenen müşteri listesi (L2): cevabın altında düğme, `POST /api/affected-customers`; iletişim izni (izinsizde maske), veri en aza indirme, erişim kaydı; liste modele gitmez
 
 ## Sırada
 - [x] Azure SQL App Service'e bağlandı (prova): Günlük akışında `Veri kaynağı: Azure SQL (mercekdb)`, sohbet SQL verisiyle çalışıyor
@@ -22,9 +25,11 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra
-- [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
 - [x] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`; SQL görünümünden indexer, 5 dk; SQL Basic) — prova: "abone numarasını sistem kabul etmiyor" → ODMTTLMT 110412, 165 kayıt, SOL-005 temkinli. Rehber: `docs/AZURE-AI-SEARCH.md`
-- [ ] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader; `docs/AZURE-AI-SEARCH.md` §5)
-- [ ] Azure AI Search: `benzer_cozum_ara` (çözüm şablonları + çağrı notları)
+- [x] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader, `SEARCH_API_KEY` yok; prova: `hata_ara` 200). Rehber: `docs/AZURE-AI-SEARCH.md` §5
+- [x] Azure AI Search: `benzer_cozum_ara` (kod): 37 hazır çözüm + kapanmış çağrı notları tek indekste (`mercek-cozumler`, SQL görünümü `v_cozum_sablonlari`, 5 dk); eşleşme yüzdesi ve %75 eşiği kodda. Rehber: `docs/AZURE-AI-SEARCH.md` §6
+- [x] `benzer_cozum_ara` prova (yerel): indeks kuruldu, `--dene` ölçümüyle eşik ayarlandı; K5 → eşik altı, hazır çözüm yok, aday adımları önerilmiyor
+- [ ] Azure'a yükleme: App Service'e `SEARCH_SOLUTION_INDEX=mercek-cozumler` + API paketi
+- [ ] Duyuru + işlenmemiş e-posta araması (tek indeks; Free'de 3. indeks)
 - [ ] KVKK: modele gitmeden önce kişisel veri maskeleme

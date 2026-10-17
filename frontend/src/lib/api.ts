@@ -48,21 +48,98 @@ export function login(userName: string): Promise<Session> {
   });
 }
 
-/** Mesajı ve aynı sohbetin önceki mesajlarını backend'e (POST /api/chat) gönderir. */
+/** Modelin son log sorgusu; etkilenen müşteri listesi backend'de bununla yeniden hesaplanır. */
+export type AffectedQuery = {
+  start_time: string;
+  end_time: string;
+  only_mine: boolean;
+  screen_code?: string | null;
+  institution_code?: string | null;
+  error_number?: number | null;
+  keyword?: string | null;
+};
+
+export type AffectedSummary = AffectedQuery & { customer_count: number };
+
+export type AffectedCustomer = {
+  customer_number: string;
+  full_name: string | null;
+  phone: string | null;
+  can_call: boolean;
+  channel: string;
+  last_error_time: string;
+  screen_code: string;
+  error_number: number | null;
+  institution_code: string | null;
+};
+
+export type AffectedCustomers = {
+  total_customers: number;
+  callable_customers: number;
+  truncated: boolean;
+  rows: AffectedCustomer[];
+};
+
+export type ChatReply = {
+  reply: string;
+  affected_customers?: AffectedSummary;
+  conversation_id?: string;
+};
+
+export type ConversationMessage = {
+  role: "user" | "assistant";
+  content: string;
+  affected_customers?: AffectedSummary;
+};
+
+/** Sunucudaki (SQL) konuşma; sayfa yenilenince sohbeti geri yüklemek için. */
+export function fetchConversation(
+  conversationId: string,
+  token: string,
+): Promise<{ conversation_id: string; messages: ConversationMessage[] }> {
+  return request(`/api/conversations/${encodeURIComponent(conversationId)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/** Mesajı, konuşma kimliğini ve yedek olarak önceki mesajları backend'e (POST /api/chat) gönderir. */
 export async function sendChat(
   message: string,
   history: HistoryMessage[],
   token: string,
-): Promise<string> {
-  const data = await request<{ reply: string }>("/api/chat", {
+  conversationId: string | null = null,
+): Promise<ChatReply> {
+  return request<ChatReply>("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
       message,
+      // Geçmiş sunucuda tutulur; frontend'in geçmişi yalnızca sunucuda kayıt yoksa kullanılır.
+      conversation_id: conversationId,
       history: history
         .slice(-MAX_HISTORY)
         .map((item) => ({ ...item, content: item.content.slice(0, MAX_HISTORY_CONTENT) })),
     }),
   });
-  return data.reply;
+}
+
+/** Etkilenen müşteri listesi (yalnızca L2; liste modele gitmez, görüntüleme kayda alınır). */
+export function fetchAffectedCustomers(
+  query: AffectedQuery,
+  token: string,
+): Promise<AffectedCustomers> {
+  const body: AffectedQuery = {
+    start_time: query.start_time,
+    end_time: query.end_time,
+    only_mine: query.only_mine,
+    screen_code: query.screen_code,
+    institution_code: query.institution_code,
+    error_number: query.error_number,
+    keyword: query.keyword,
+  };
+  return request<AffectedCustomers>("/api/affected-customers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
 }

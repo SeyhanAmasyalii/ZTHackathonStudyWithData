@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,8 +81,25 @@ def package_api() -> None:
     zip_dir(out, DIST / "mercek-api.zip")
 
 
+def build_id() -> str:
+    """git kısa commit + paketleme zamanı, ör. 58a9741 · 17.10 06:20."""
+    git = shutil.which("git")
+    commit = "?"
+    if git:
+        result = subprocess.run(
+            [git, "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True
+        )
+        commit = result.stdout.strip() or "?"
+    return f"{commit} · {datetime.now().strftime('%d.%m %H:%M')}"
+
+
 def package_web(api_url: str) -> None:
-    env = {**os.environ, "NEXT_PUBLIC_API_URL": api_url.rstrip("/")}
+    env = {
+        **os.environ,
+        "NEXT_PUBLIC_API_URL": api_url.rstrip("/"),
+        "NEXT_PUBLIC_BUILD_ID": build_id(),
+    }
+    print(f"Sürüm: {env['NEXT_PUBLIC_BUILD_ID']} (ekranın sol üstünde görünür)")
     run(["npm", "ci"], FRONTEND, env)
     run(["npm", "run", "build"], FRONTEND, env)
     standalone = FRONTEND / ".next" / "standalone"

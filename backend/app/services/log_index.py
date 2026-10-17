@@ -58,7 +58,7 @@ def foundry_resource_uri(endpoint: str) -> str:
     return _base_url(endpoint).removesuffix("/openai/v1")
 
 
-def _foundry(settings: Settings) -> dict[str, str]:
+def foundry_params(settings: Settings) -> dict[str, str]:
     return {
         "resourceUri": foundry_resource_uri(settings.azure_openai_endpoint),
         "deploymentId": settings.embedding_deployment,
@@ -115,7 +115,7 @@ def index_definition(name: str, settings: Settings) -> dict[str, Any]:
                 {
                     "name": "foundry",
                     "kind": "azureOpenAI",
-                    "azureOpenAIParameters": _foundry(settings),
+                    "azureOpenAIParameters": foundry_params(settings),
                 }
             ],
         },
@@ -144,12 +144,14 @@ def _ado_value(value: str) -> str:
     return value
 
 
-def datasource_definition(names: SearchNames, connection_string: str) -> dict[str, Any]:
+def datasource_definition(
+    names: SearchNames, connection_string: str, view: str = SQL_VIEW
+) -> dict[str, Any]:
     return {
         "name": names.datasource,
         "type": "azuresql",
         "credentials": {"connectionString": connection_string},
-        "container": {"name": SQL_VIEW},
+        "container": {"name": view},
         "dataChangeDetectionPolicy": {
             "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
             "highWaterMarkColumnName": "hwm",
@@ -157,16 +159,18 @@ def datasource_definition(names: SearchNames, connection_string: str) -> dict[st
     }
 
 
-def skillset_definition(names: SearchNames, settings: Settings) -> dict[str, Any]:
+def skillset_definition(
+    names: SearchNames, settings: Settings, what: str = "Hata türü"
+) -> dict[str, Any]:
     return {
         "name": names.skillset,
-        "description": "Hata türü metnini Foundry embedding ile vektöre çevirir",
+        "description": f"{what} metnini Foundry embedding ile vektöre çevirir",
         "skills": [
             {
                 "@odata.type": "#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill",
                 "name": "embedding",
                 "context": "/document",
-                **_foundry(settings),
+                **foundry_params(settings),
                 "dimensions": EMBEDDING_DIMENSIONS,
                 "inputs": [{"name": "text", "source": "/document/content"}],
                 "outputs": [{"name": "embedding", "targetName": VECTOR_FIELD}],

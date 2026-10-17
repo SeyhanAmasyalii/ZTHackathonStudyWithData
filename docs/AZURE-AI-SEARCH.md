@@ -72,7 +72,7 @@ uv run --directory backend python ..\scripts\build_search_index.py
 Beklenen (1–3 dk):
 
 ```
-✓ SQL görünümü dbo.v_hata_turleri: 107 hata türü
+✓ SQL görünümleri: dbo.v_hata_turleri 107 hata türü · dbo.v_cozum_sablonlari 37 hazır çözüm
 ✓ AI Search: veri kaynağı, indeks 'mercek-loglar', embedding becerisi, indexer (5 dakikada bir)
 ✓ Indexer çalıştı: 107 belge işlendi · indekste 107 belge
 Örnek arama: 'abone numarası kabul edilmiyor'
@@ -124,14 +124,71 @@ Kontrol: Mercek'te Elif → **"abone numarasını sistem kabul etmiyor"** → G�
 
 **Backend → AI Search** (sorgu): `<api>`'nin sistem kimliği `docs/AZURE-SQL.md` §4.1'de açıldıysa tekrar açmaya gerek yok.
 
-1. `<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → Rol: **Search Index Data Reader** → İleri
+1. `<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → Rol: **Search Index Data Reader** (Türkçe portalda **Arama Dizini Veri Okuyucusu**; aramaya `Arama` yazın, "Yönetilen Uygulama…" rolünü seçmeyin) → İleri
    → Erişim ata: **Yönetilen kimlik** → **+ Üye seç** → Yönetilen kimlik: **App Service** → `<api>` → Seç → **Gözden geçir + ata**.
-2. `<search>` → Anahtarlar → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı.
-3. `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula. Kod anahtar yoksa Entra token'ı kullanır.
-4. Rol atamasının etkinleşmesi 5–10 dk sürebilir; bu sürede `hata_ara` 403 alabilir (sohbet yine çalışır).
+2. `<search>` → **Ayarlar → Anahtarlar** (bazı portallarda Güvenlik ve ağ → Anahtarlar) → API Erişim denetimi **Her ikisi** (ya da **Rol tabanlı**) olmalı
+   (yalnızca "API anahtarı" seçiliyse rol atamaları dikkate alınmaz).
+3. Rol atamasının etkinleşmesi için **5–10 dk bekleyin**, sonra **API uygulamasını** açın (AI Search değil): `<api>` → Ortam değişkenleri → `SEARCH_API_KEY` satırını **silin** → Uygula.
+   Kod anahtar yoksa Entra token'ı (App Service'te Managed Identity) kullanır. Silinen sorgu anahtarını `<search>` → Anahtarlar →
+   Sorgu anahtarlarını yönet'ten de silebilirsiniz.
+4. Kontrol: Mercek'te "abone numarasını sistem kabul etmiyor" → Günlük akışında (F5) `ad=hata_ara ... sonuç=5` ve
+   `DefaultAzureCredential acquired a token from ManagedIdentityCredential`. `sonuç=Hata araması şu an yapılamıyor` ve üstünde
+   `hata_ara başarısız: Arama servisi 403` görürseniz rol ataması henüz etkinleşmemiştir (birkaç dakika sonra tekrar deneyin) ya da 1–2. adım eksiktir.
 
 **AI Search → SQL ve Foundry** (indexer, beceri, vektörleştirici) şimdilik SQL kullanıcısı ve Foundry anahtarıyla, AI Search içinde saklanır.
 Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücretsiz katmanda bulunmayabilir); ücretli katmanda ayrı adım.
+
+## 6. Hazır çözümler: `benzer_cozum_ara` (indeks `mercek-cozumler`, 5 dk)
+
+**Ne yapar:** kullanıcının sorununu 37 hazır çözüm şablonuyla (SOL-xxx) anlamca eşleştirir. Her şablon belgesine o şablonla
+**kapatılmış çağrıların notları** eklenir ("Kullanıcıların yazdıkları: adres bölümü kaydedilemiyor | …"): kullanıcı sorunu kendi
+kelimeleriyle anlatsa da eşleşir. Müşteri numarası ve kişi bilgisi indekse girmez (görünüm yalnızca not metnini alır).
+
+**Eşleşme yüzdesini kod hesaplar** (`backend/app/services/solution_index.py`): AI Search vektör puanı cosine benzerliğine çevrilir,
+0,40 → %0 ve 0,72 → %100 aralığına ölçeklenir, model hata kodunu da verdiyse ve şablonun hata kodu aynıysa +25 puan.
+Ölçüm (prova): doğru şablon 0,65–0,67 benzerlik, yakın ama yanlış 0,58–0,63, ilgisiz ~0,25. Birbirine yakın şablonları
+(ör. üç "zaman aşımı" şablonu) metin tek başına ayıramaz; hata kodu ayırır (SOL-031 `INSTITUTION_TIMEOUT`, SOL-032 `CORE_BANKING_TIMEOUT`).
+**%75** ve üstü eşleşmedir; altı "hazır çözüm yok" sayılır, model bunu çözüm gibi sunmaz.
+
+Akış `hata_ara` ile aynı: SQL görünümü `dbo.v_cozum_sablonlari` → veri kaynağı (yüksek su işareti: şablon ya da ona bağlı bir çağrı
+değişince) → indexer 5 dk'da bir → Foundry embedding → indeks. Free katmanda bu 2. indekstir (sınır 3).
+
+### 6.1 Kur (bilgisayarda, repo kökünde, 1–2 dk)
+`backend\.env` §3'teki gibi (yönetici anahtarıyla). Ek ayar gerekmez; indeks adı varsayılan `mercek-cozumler`.
+```cmd
+git pull
+uv run --directory backend python ..\scripts\build_search_index.py --indeks cozumler
+```
+Beklenen:
+```
+✓ SQL görünümleri: dbo.v_hata_turleri 107 hata türü · dbo.v_cozum_sablonlari 37 hazır çözüm
+✓ AI Search: veri kaynağı, indeks 'mercek-cozumler', embedding becerisi, indexer (5 dakikada bir)
+✓ Indexer çalıştı: 37 belge işlendi · indekste 37 belge
+Arama: 'müşteri adres bilgisini kaydedemiyorum' (eşik %75)
+  ✓ SOL-026 %NN (benzerlik 0.xxx) ...
+```
+Hackathon ortamında iki indeksi birden kurmak için: `--indeks hepsi`.
+
+### 6.2 Eşiği dene (isteğe bağlı, kurulum yapmaz)
+```cmd
+uv run --directory backend python ..\scripts\build_search_index.py --dene "adres değişikliği yapamıyorum, alan hatası veriyor"
+uv run --directory backend python ..\scripts\build_search_index.py --dene "Input string was not in a correct format"
+```
+İlki SOL-026'yı ✓ ile (≥ %75), ikincisi ✓'siz (hazır çözüm yok) göstermeli. `--dene` hata kodu vermez; sohbette model
+hata kodunu da verdiğinde (ör. INSTITUTION_TIMEOUT) aynı kodlu şablon +25 puan alır. Olmazsa çıktıyı paylaşın:
+`SIMILARITY_FLOOR` / `SIMILARITY_CEIL` (solution_index.py) ölçülen benzerliklere göre ayarlanır.
+
+### 6.3 App Service'e bağla
+`<api>` → **Ortam değişkenleri** → **+ Ekle**: `SEARCH_SOLUTION_INDEX` = `mercek-cozumler` → **Uygula**.
+Bu ayar yoksa araç modele sunulmaz (indeks kurulmadan önce açılmasın diye).
+Managed Identity (§5) kullanıyorsanız ek rol gerekmez: **Search Index Data Reader** hizmetteki tüm indeksleri kapsar.
+Backend paketini yeniden üretip yükleyin (`docs/AZURE-APP-SERVICE.md`; yalnızca API: `python scripts\package_azure.py --only api`).
+
+### 6.4 Kontrol
+- Zeynep → **"Müşteri adres değişikliği yapamıyorum, alan hatası veriyor"** → Günlük akışında `ad=benzer_cozum_ara` (ya da `cagri_ara`
+  yeterliyse çağrılmayabilir); cevapta **SOL-026** ve eşleşme yüzdesi.
+- Kerem → **"Müşteri güncelleme ekranında 'Input string was not in a correct format' hatası"** → `benzer_cozum_ara` çağrılır,
+  **hazır çözüm bulunmadığını** söyler (eşik altı), ekibe iletmeyi önerir.
 
 ## Sorun giderme
 
@@ -148,5 +205,7 @@ Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücre
 | Betik: `✗ Indexer 300 sn içinde bitmedi` | Ücretsiz SQL uykudan uyanıyor olabilir; portalda indexer **Yürütme geçmişi**'ne bakın, gerekirse betiği tekrar çalıştırın |
 | Sohbette `hata_ara` hiç çağrılmıyor | `<api>`'de `SEARCH_ENDPOINT` yok (araç sunulmaz) ya da kullanıcı ekran/hata kodunu zaten söyledi (o zaman gerekmez) |
 | Günlükte `hata_ara başarısız: Arama servisi 403` | App Service anahtarı yanlış ya da MI rol ataması henüz etkinleşmedi (5. adım) |
+| Günlükte `benzer_cozum_ara başarısız: Arama servisi 404` | `mercek-cozumler` indeksi yok: §6.1'i çalıştırın; `SEARCH_SOLUTION_INDEX` adı aynı mı |
+| `--dene`'de doğru şablon ✓ almıyor / ilgisiz şablon ✓ alıyor | Eşik ölçeği ayarı: çıktıdaki benzerlik değerlerini paylaşın (§6.2) |
 | Günlükte `hata_ara başarısız: Arama servisi 404` | İndeks yok: 3. adımı çalıştırın; `SEARCH_LOG_INDEX` adı aynı mı |
 | Ay ortasında Mercek "JSON verisine geçildi" diyor | Ücretsiz SQL kotası dolmuş olabilir (indexer zamanlaması açık kaldı); SQL'i Basic'e alın ya da zamanlamayı kapatın (§3 "SQL katmanı ve zamanlama") |

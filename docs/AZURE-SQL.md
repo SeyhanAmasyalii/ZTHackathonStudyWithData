@@ -124,8 +124,10 @@ Birkaç saniye sonra **Nesne (sorumlu) kimliği** görünür; kimliğin adı uyg
    SELECT name, type_desc FROM sys.database_principals WHERE name = '<api>';
    ```
    → bir satır, `EXTERNAL_USER`.
-   - Şimdilik yalnızca okuma yetkisi (`db_datareader`). Mercek SQL'e yazmaya başlayınca (konuşma geçmişi, çağrı kaydı)
-     `ALTER ROLE db_datawriter ADD MEMBER [<api>];` eklenir.
+   - Mercek konuşma geçmişini ve erişim kaydını SQL'e yazar (§5), bu yüzden yazma yetkisini de verin:
+     ```sql
+     ALTER ROLE db_datawriter ADD MEMBER [<api>];
+     ```
 
 ### 4.3 Parolayı App Service'ten kaldır
 `<api>` → **Ayarlar → Ortam değişkenleri** → `SQL_USER` ve `SQL_PASSWORD` satırlarında 🗑 → **Uygula** → **Onayla**.
@@ -146,6 +148,44 @@ Birkaç saniye sonra **Nesne (sorumlu) kimliği** görünür; kimliğin adı uyg
   bölümle başlayın: App Service'e `SQL_SERVER` + `SQL_DATABASE` girin, 4.1–4.2'yi yapın; yükleme için yukarıdaki `az login` yolu.
 - Foundry için de aynı yöntem kullanılabilir (anahtar yerine kimlik): ayrı adım, şu an kod anahtarla çalışıyor.
 
+## 5. Uygulama tabloları: kullanıcılar, erişim kaydı, konuşma geçmişi (3 dk)
+
+`load_sql.py` datav2 verisini yükler; Mercek'in **kendi** verisi ayrı tablolardadır ve `load_sql.py` bunları silmez:
+
+| Tablo | İçerik |
+|---|---|
+| `app_users` | Demo kullanıcıları (ad, unvan, birim, rol, `can_view_customers` = müşteri listesini görebilir mi) |
+| `audit_log` | KVKK erişim kaydı: kim, ne zaman, hangi sorguyla kaç müşteri gördü (müşteri bilgisi yazılmaz) |
+| `conversations`, `conversation_messages` | Konuşma geçmişi; sayfa yenilenince sohbet geri gelir, model önceki mesajları SQL'den alır |
+
+### 5.1 Tabloları kur (bilgisayarda, repo kökünde)
+```
+uv run --directory backend python ..\scripts\setup_app_tables.py
+```
+Beklenen: `✓ Tablolar hazır`, kullanıcı listesi (elif, zeynep, kerem — yalnızca kerem `müşteri listesi: evet`) ve tablo satır sayıları.
+Tekrar çalıştırmak güvenlidir: tablo varsa dokunulmaz, kullanıcılar güncellenir.
+Bir kullanıcının yetkisini değiştirmek için `app_users`'ta satırı güncelleyin; uygulama 1 dk içinde görür.
+
+### 5.2 Uygulamaya yazma yetkisi
+Managed Identity kullanıyorsanız (§4) sorgu düzenleyicisinde (Entra ile):
+```sql
+ALTER ROLE db_datawriter ADD MEMBER [<api>];
+```
+SQL kullanıcısıyla bağlanıyorsanız (`SQL_USER`) sunucu yöneticisinin zaten yazma yetkisi vardır.
+
+### 5.3 Kontrol
+Sohbette bir soru sorun, sayfayı F5 ile yenileyin → konuşma geri gelir. Sorgu düzenleyicisinde:
+```sql
+SELECT TOP 10 c.user_name, m.role, LEFT(m.content, 80) AS mesaj, m.created_at
+FROM dbo.conversation_messages m JOIN dbo.conversations c ON c.conversation_id = m.conversation_id
+ORDER BY m.message_id DESC;
+
+-- L2 (kerem) "Etkilenen müşteriler" düğmesine bastıktan sonra:
+SELECT TOP 10 created_at, user_name, action, row_count, detail FROM dbo.audit_log ORDER BY audit_id DESC;
+```
+SQL'e yazılamazsa sohbet durmaz; Günlük akışında `Konuşma mesajları yazılamadı` / `audit_log yazılamadı` ve sebep görünür
+(çoğunlukla 5.2 yapılmamıştır: `The INSERT permission was denied`).
+
 ## Sorun giderme
 
 | Belirti | Çözüm |
@@ -159,4 +199,6 @@ Birkaç saniye sonra **Nesne (sorumlu) kimliği** görünür; kimliğin adı uyg
 | MI sonrası: `Login failed for user '<token-identified principal>'` | 4.2 yapılmamış ya da `CREATE USER` adı uygulama adıyla aynı değil |
 | `CREATE USER` çalışırken: `Principal '<api>' could not be found` | 4.1'de kimlik açılmamış/kaydedilmemiş ya da ad yanlış yazılmış (tam uygulama adı) |
 | `CREATE USER` çalışırken: `Only connections established with Active Directory accounts can create other Active Directory users` | Sorgu düzenleyicisine SQL kullanıcısıyla girilmiş; çıkıp **Microsoft Entra** ile girin |
+| Günlükte `The INSERT permission was denied` | §5.2: `ALTER ROLE db_datawriter ADD MEMBER [<api>];` |
+| Günlükte `Invalid object name 'dbo.conversations'` (ya da `app_users`) | §5.1 betiği çalıştırılmamış |
 | MI sonrası: `DefaultAzureCredential failed to retrieve a token` | `<api>` → Kimlik → Sistem tarafından atanan **Açık** mı? Açtıktan sonra uygulamayı yeniden başlatın |
