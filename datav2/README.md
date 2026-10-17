@@ -30,3 +30,4 @@ Tablolar tek tek, onaylandıkça eklenir. Bu klasördeki veriler henüz betikler
 | `prevented_calls.json` | prevented_calls | 0 | ✅ onaylandı · boş başlar; ilk kayıt A senaryosunda demoda |
 | `kibana_logs_part01…07.json` | kibana_logs (parçalı) | 10.555 (7 parça) | `kibana_logs.json`'un her biri 4 milyon karakterin altındaki bölümleri; üretici `generators/split_kibana_logs.py` |
 | `ui/scenarios.ts` | Joyride senaryoları | 22 (9 ekran) | ✅ datav2 ile uyumlu sürüm; incidents.scenario_path bu dosyadaki `screen` ve `id`den üretilir |
+| `sql/kibana_logs_kmh_ornek.sql` | kibana_logs (manuel test) | 1 (log_id 10556) | KMH ek hesap kapatma hatası (ORA-20601) örüntüsünden sentetik kayıt; ekran HSPTKMHK katalogda yok; 09:00 sonrası, demo_reset siler |
