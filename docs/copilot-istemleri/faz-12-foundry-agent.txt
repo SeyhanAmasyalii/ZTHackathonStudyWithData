@@ -1,0 +1,27 @@
+LLM_MODE=agent iken model doğrudan değil, Foundry'deki "mercek-cagri" agent'ı çağrılır. Araçlar yine backend'de çalışır.
+Varsayılan LLM_MODE=chat (eski yol) aynen çalışmalı. Paket: azure-ai-projects (tam sürüm). Kimlik yalnızca Entra (DefaultAzureCredential).
+
+- config: llm_mode Literal["chat","agent"]="chat", foundry_project_endpoint (https://<kaynak>.services.ai.azure.com/api/projects/<proje>),
+  foundry_agent_name="mercek-cagri" (modül başına bir agent).
+- app/clients/agent.py: AgentReply(response_id, content, tool_calls), AgentClient Protocol respond(input_items, previous_response_id).
+  FoundryAgentClient: AIProjectClient(endpoint, DefaultAzureCredential()).get_openai_client(timeout, max_retries=1);
+  responses.create(input=…, extra_body={"agent_reference":{"name":…, "type":"agent_reference"}}, previous_response_id yalnızca varsa).
+  function_call çıktıları → ToolCall. Önceki cevap bulunamazsa PreviousResponseNotFound; diğer hatalar LLMError (tür + durum + servisin
+  kısa açıklaması; anahtar/token içermez). function_call_output(call_id, result).
+- chat.py: build_agent_instructions(screens, institutions) — aynı prompt, {{now}}/{{user_role}} yerine "BAĞLAM mesajında";
+  context_message: {"type":"message","role":"developer","content":"BAĞLAM — Şu an: … Kullanıcının görevi: …"} (kullanıcı kodu yok).
+  answer_with_agent(message, agent, context, history, previous_response_id, trace) → (cevap, response_id): her girdi
+  {"type":"message",…} (Foundry agent uç noktası type ister); araç sonuçları function_call_output ile önceki cevaba bağlanır;
+  previous yoksa ya da Foundry bulamazsa SQL geçmişi yeniden gönderilir. Ortak araç çalıştırma _run_calls (chat ve agent).
+- api/chat.py: get_llm (agent modunda None), get_agent (chat modunda None, istemci bir kez kurulur); agent modunda conversations.agent_response_id
+  okunur/yazılır. SQL ekran geçmişini, sahipliği, L2 düğmesini tutmaya devam eder.
+- app/services/agent_setup.py: agent_tools(settings) (tools_for kuralıyla aynı; {"type":"function", name, description, parameters,
+  "strict": False}), agent_definition (kind=prompt, model=chat_deployment, instructions, tools).
+- scripts/setup_agent.py: project.agents.create_version(agent_name, definition=PromptAgentDefinition(body)) → sürüm yazdırır → araçsız
+  kısa deneme. Prompt/araç değişince tekrar çalıştırılır (portalda düzenlenmez).
+- Testler (FakeAgent): araçlar backend'de çalışır ve function_call_output önceki cevaba bağlanır; previous_response_id varken geçmiş
+  gönderilmez; kaybolunca geçmiş yeniden gönderilir; girdilerde type=message ve kullanıcı adı yok; tur sınırı; agent tanımı ve araç listesi;
+  /api/chat agent modunda response_id saklar.
+
+Kabul: az login + setup_agent.py → "✓ Agent 'mercek-cagri' sürüm 1 … araçlar: …"; LLM_MODE=agent ile E1 aynı cevap; "Peki nasıl çözerim?"
+önceki konuyu hatırlar. Azure: <api> kimliğine Foundry kaynağında Azure AI User (yoksa Cognitive Services User / Data Contributor).

@@ -1,0 +1,16 @@
+frontend/: tek sayfa Mercek sohbeti. Next.js 16 rehberini (node_modules/next/dist/docs/) oku. Bağımlılık ekleme.
+
+- src/lib/session.ts: localStorage "mercek.session" (token + user); useSyncExternalStore için getSession (aynı içerik → aynı nesne),
+  getServerSession (undefined), subscribe (storage olayı dahil), saveSession, clearSession. Tüm localStorage erişimi try/catch.
+- src/lib/api.ts: API_URL = NEXT_PUBLIC_API_URL; request<T>() — ağ hatası "Sunucuya ulaşılamadı. Backend çalışıyor mu?",
+  401 → UnauthorizedError, diğer hatalarda backend'in detail'i. fetchUsers, login, sendChat(message, history, token)
+  (geçmiş son 20 mesaj, her biri 8000 karakter). MAX_MESSAGE_LENGTH=2000.
+- src/lib/markdown.ts: bağımlılıksız küçük ayrıştırıcı — başlık, madde (-,*,•), numaralı liste, girinti seviyesi (en fazla 3),
+  paragraf, satır içi **kalın** ve `kod`. HTML üretmez; src/components/markdown.tsx React öğeleriyle çizer.
+- src/components/login.tsx (/giris sayfası): kullanıcı kartları (ad, unvan · birim), seçince login → ana sayfa.
+- src/components/home.tsx: oturum yoksa /giris; başlık (Mercek, "Yaşadığınız sorunu yazın, birlikte bakalım.", sağda ad/birim/Çıkış).
+- src/components/chat.tsx: mesaj balonları (kullanıcı sağda mor, asistan solda gri Markdown), "Mercek düşünüyor…", hata kutusu
+  (role=alert), Enter gönderir / Shift+Enter satır, karakter sınırı, "Yeni sohbet", otomatik aşağı kaydırma, 401'de çıkış.
+- Türkçe metinler; erişilebilirlik (label, role, disabled).
+
+Kabul: npm run build/tsc/lint temiz; tarayıcıda giriş → soru → cevap; <script>alert(1)</script> metin olarak görünür.

@@ -1,0 +1,24 @@
+Mercek için boş bir monorepo iskeleti kur. Sistem talimatındaki kurallara uy.
+
+Backend (backend/):
+- uv projesi "mercek-api", Python >=3.12. Bağımlılıklar (tam sürüm): fastapi, uvicorn[standard], pydantic-settings, httpx, openai,
+  azure-identity. Dev: pytest, ruff. pyproject'te ruff line-length=100, lint seçimi ["E","F","I","UP","B"],
+  pytest pythonpath=["."].
+- app/main.py: FastAPI uygulaması; CORS (allow_origins ayarlardan, methods GET/POST, headers Content-Type/Authorization);
+  logging.basicConfig(level=INFO, format="%(levelname)s:     %(name)s: %(message)s").
+- app/config.py: Settings (pydantic-settings, env_file=backend/.env, extra=ignore). Alanlar: app_name, cors_origins
+  (JSON listesi ya da virgüllü metin kabul eden validator), azure_openai_endpoint, azure_openai_api_key,
+  chat_deployment="gpt-5.5", llm_timeout_seconds=60, llm_debug=False, data_dir (repodaki datav2/; Azure paketinde app yanındaki data/),
+  prompts_dir (repodaki prompts/; paketteki prompts/), demo_now (varsayılan 2026-10-17 09:15 Türkiye saati; boş verilirse gerçek saat),
+  session_secret="". TURKEY_TZ sabiti (+03:00) ve Settings.now() (demo_now ya da şimdiki zaman). get_settings() lru_cache.
+- app/api/health.py: GET /api/health → {"status":"ok"}.
+- tests/test_api.py: health testi. backend/.env.example (yalnızca <PLACEHOLDER>), README.md (kurulum, çalıştırma).
+- Çalıştırma: uv run uvicorn app.main:app --reload --port 8000
+
+Frontend (frontend/):
+- create-next-app ile Next.js 16, TypeScript, Tailwind v4, App Router, src/, @/* alias, ESLint. next.config.ts: output "standalone".
+- .env.example: NEXT_PUBLIC_API_URL=http://localhost:8000. Ana sayfa şimdilik "Mercek" başlığı.
+
+Kök: .gitignore (.venv, .env, .env.*, !.env.example, __pycache__, .pytest_cache, .ruff_cache, node_modules, .next, /build, /dist).
+
+Kabul: uv run pytest geçer; curl localhost:8000/api/health → {"status":"ok"}; npm run build başarılı.

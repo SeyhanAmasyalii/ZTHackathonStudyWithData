@@ -1,0 +1,21 @@
+Hazır çözüm şablonlarını (solution_templates, 37) anlamca eşleştiren araç. Eşleşme yüzdesi ve %75 eşiği KODDA.
+
+- db/search_views.sql: solution_templates ve incidents'a row_ver; VIEW dbo.v_cozum_sablonlari: şablon başına bir belge —
+  id, solution_template_id, title/symptom/root_cause/steps/error_code (mercek_assigned_*), closure_code, sub_closure_code,
+  department_id, closed_count (o şablonla KAPANMIŞ çağrı), user_notes (o çağrıların farklı notları ' | ' ile — müşteri no/kişi bilgisi YOK),
+  content ("Belirti: … Neden: … Hata kodu: … Kullanıcıların yazdıkları: …"), hwm (şablon ya da bağlı çağrının en yeni row_ver'i).
+- app/services/solution_index.py: index_definition (indeks "mercek-cozumler"), search_body (YALNIZCA vektör sorgusu — puan cosine'e
+  çevrilebilsin), cosine_from_score(score) = 2 - 1/score (AI Search cosine puanı 1/(2-cos)), match_score(cosine, sorgu_hata_kodu,
+  belge_hata_kodu) = ölçek(cos; 0,40→%0, 0,72→%100) + aynı hata kodu ise 0,25 (en fazla 1). MATCH_THRESHOLD=0.75.
+  parse_steps (JSON listesi ya da düz metin). SolutionSearch(client, index)(text, top).
+  (Ölçek provada ölçüldü: doğru şablon 0,65–0,67, yakın-yanlış 0,58–0,63, ilgisiz ~0,25.)
+- tools.benzer_cozum_ara: required description (≤300), opsiyonel error_code (^[A-Z0-9_]{3,60}$). Sonuç: threshold_percent=75,
+  matched, results (en fazla 3; match_percent, above_threshold, title, symptom, root_cause, steps, error_code, closure kodları,
+  closed_incident_count), note. tools_for: SEARCH_ENDPOINT ve SEARCH_SOLUTION_INDEX varsa.
+- Prompt: cagri_ara çözüm bulamazsa ya da ekran/hata no yoksa çağır; matched=true → SOL ve yüzde, adımlar yalnızca sonuçtan;
+  matched=false → hazır çözüm yok, ekibe ilet; eşik altı sonucun ADIMLARINI VERME, yalnızca "en yakın aday SOL-xxx (%NN)".
+- build_search_index.py --indeks cozumler ve --dene METİN (benzerlik + yüzde yazar).
+- Testler: cosine dönüşümü, ölçek ve bonus, eşik, girdi doğrulama, servis hatası, görünüm ↔ indeks alanları, kişisel veri yok.
+
+Kabul: --dene "adres değişikliği yapamıyorum, alan hatası veriyor" → ✓ SOL-026 ~%84; "Input string was not in a correct format" → ✓ yok;
+sohbette K5 → ad=benzer_cozum_ara, "hazır çözüm yok".

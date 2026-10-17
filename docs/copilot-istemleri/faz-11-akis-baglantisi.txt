@@ -1,0 +1,13 @@
+Önerilen hazır çözümün ekran turu (incidents.scenario_path) cevabın altında "▶ Akışı izle · SOL-xxx — başlık" bağlantısı olarak
+gösterilir. Bağlantıyı KOD seçer; adres modele gitmez, model adres yazmaz.
+
+- app/services/scenarios.py: safe_url (yalnızca https, host var, kullanıcı/parola yok, ≤1000), scenario_map(incidents) → şablon →
+  adres (o şablonla kayıtlı ilk geçerli adres), scenario_links(trace, mapping): bu turdaki cagri_ara.by_solution ve benzer_cozum_ara'nın
+  above_threshold sonuçları (en yeniden), tekrarsız, en fazla 2.
+- ChatResponse.scenario_links ve ConversationMessage.scenario_links (ScenarioLink: solution_template_id, title, url).
+  SQL'de affected_json kolonunda {"affected":…, "scenarios":[…]} (bağlantı yoksa eski biçim; eski kayıtlar okunabilmeli).
+- Prompt: "Akış bağlantısı cevabın altında kod tarafından gösterilir; adres yazma."
+- Frontend: src/components/scenario-links.tsx — yalnızca https, target=_blank, rel="noopener noreferrer"; geri yüklemede de görünür.
+- Testler: safe_url, seçim kuralları, kodlama geriye uyumu, sohbet → bağlantı döner ve araç sonucunda https adresi yok.
+
+Kabul: E1 → "▶ Akışı izle · SOL-031", tıklayınca Başkentgaz akışı yeni sekmede; F5 sonrası da görünür.

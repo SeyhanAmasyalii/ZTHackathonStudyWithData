@@ -1,0 +1,23 @@
+backend/app/repositories/datav2.py: datav2 JSON'larını sohbet kataloğuna dönüştür. Önce datav2/SCHEMA.md ve README.md'yi oku.
+
+- normalize(text): küçük harf + Türkçe karakter sadeleştirme (ı→i, ğ→g, ü→u, ş→s, ö→o, ç→c; casefold). Arama için.
+- Frozen dataclass'lar:
+  - LogEntry(log_time, log_level, user_name, customer_id, screen_code, error_number, error_code, institution_code, message, search_text).
+    Kaynak: kibana_logs.json. Yalnızca log_level Warning/Error. error_code message_response JSON'undaki errorCode; institution_code
+    message_fields JSON'undaki institutionCode; message exception_message ya da message. search_text = normalize(mesaj + ekran kodu +
+    ekran adı + hata kodu + kurum kodu + kurum adı + fatura türü (message_fields.billType)). error_number = app_exception_value.
+  - Incident(incident_id, created_at, status (acik/kapali), screen_code, error_number, error_code, institution_code, note,
+    resolution_note, closure_code, sub_closure_code, solution_template_id, solution_title, solution_text, scenario_path=None).
+    error_number/error_code çağrının kibana_correlation_id'sine bağlı logdan; yoksa mercek_assigned_error_code.
+    solution_title/text solution_templates.json'dan (mercek_assigned_title, solution_text).
+  - Screen(code, name, description), Institution(code, name, bill_type, screen_codes), Customer(customer_number, full_name, phone,
+    perm_phone, perm_sms, perm_email).
+- RawData (her tablo için ham satır demeti) ve read_json(data_dir). TABLES = kibana_logs, incidents, solution_templates, screens,
+  institutions, institution_screens, customers.
+- build_catalog(raw) → Catalog(logs (zamana göre sıralı), incidents, screens, institutions, customers: dict). json_catalog(data_dir) lru_cache.
+- app/repositories/catalog.py: get_catalog() — şimdilik JSON; thread-safe (Lock) ve bir kez yüklenir. main.py lifespan'de arka plan
+  thread'iyle ön yükleme.
+- Testler (tests/test_datav2.py): normalize("Doğalgaz") == "dogalgaz"; katalogda 2002 Warning/Error log, 700 çağrı;
+  ODMTTLMT + GAZ02 + 110731 logları var; SOL-031 ile kapanmış 6 çağrı var.
+
+Kabul: testler geçer, ruff temiz.

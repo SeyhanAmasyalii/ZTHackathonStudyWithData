@@ -1,0 +1,21 @@
+app/services/tools.py: modelin çağırdığı araçlar. Model parametre seçer, sorguyu kod çalıştırır ve doğrular.
+
+- ToolContext(user_name, now, logs, incidents=(), user_role="", search_logs=None, search_solutions=None) frozen dataclass.
+- kibana_sorgula (OpenAI function şeması, additionalProperties=false): required start_time, end_time (YYYY-MM-DDTHH:MM, Türkiye saati),
+  only_mine (bool); opsiyonel screen_code, institution_code, error_number (int), keyword (tüm kelimeler search_text'te geçmeli,
+  normalize edilerek). Kurallar: end_time şimdiden sonra olamaz (kırpılır); aralık en fazla 7 gün (başlangıç kırpılır);
+  start>=end → hata. only_mine=true → yalnızca context.user_name'in logları.
+  filter_logs(args, context) → (loglar, normalize sorgu) ayrı fonksiyon (Faz 8'de tekrar kullanılır).
+  Sonuç: query, total, distinct_customers, by_error (ekran+hata no+hata kodu+kurum, en çok 10, sayıya göre), samples (en yeni 20;
+  kullanıcı adı ve müşteri no YOK).
+- cagri_ara: required screen_code, error_number; opsiyonel institution_code. created_at <= now olan çağrılar. Sonuç: query, total,
+  closed, open, by_solution (hazır çözüm başına: solution_template_id, title, count, institutions, closure_code, sub_closure_code,
+  solution_text; sayıya göre), samples (en yeni 5: incident_id, tarih, durum, kurum, not, çözüm, çözüm notu).
+- run_tool(name, arguments_json, context): bilinmeyen araç / bozuk JSON / ToolInputError → {"error": "…"} (asla exception fırlatma).
+- tools_for(context): [kibana_sorgula, cagri_ara] (+ AI Search araçları Faz 9–10'da).
+- answer() araç tanımlarını tools_for'dan alır.
+- Testler (gerçek datav2 ile, NOW = 2026-10-17 09:15):
+  E1: elif, son 30 dk, only_mine, ODMTTLMT → total 7, GAZ02 110731. cagri_ara(ODMTTLMT, 110731) → SOL-031 ile 6 kapalı.
+  Herkes son 30 dk → 23. 7 gün sınırı, gelecek zamanın kırpılması, keyword ("doğalgaz"→dogalgaz), geçersiz girdiler.
+
+Kabul: testler geçer; sohbette "ODMTTLMT ekranında hata alıyorum" (elif) → 7 hata, SOL-031.

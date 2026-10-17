@@ -1,0 +1,20 @@
+L2 kullanıcısı (can_view_customers) son kibana sorgusundaki etkilenen müşterileri bilgilendirme araması için görebilir.
+Liste MODELE HİÇ GİTMEZ; kod üretir, frontend gösterir.
+
+- models: AffectedQuery (kibana sorgu alanları, regex/uzunluk doğrulamalı), AffectedSummary(AffectedQuery + customer_count),
+  AffectedCustomer(customer_number, full_name, phone, can_call, channel, last_error_time, screen_code, error_number, institution_code),
+  AffectedCustomersResponse(total_customers, callable_customers, truncated, rows).
+- /api/chat: ChatResponse.affected_customers — yalnızca L2 ve bu turdaki MÜŞTERİ BULUNAN EN SON kibana_sorgula sonucundan
+  (paralel sorgularda son sorgu 0 olsa da düğme kaybolmasın).
+- app/services/affected.py: filter_logs ile aynı sorgu → müşteri başına son hata; mask_phone ("+90 5•• ••• •• 64": ülke kodu,
+  operatör ilk rakamı, son iki rakam açık); kanal: Telefon / SMS / E-posta / İzin yok / Kayıt yok; telefon izni yoksa numara maskeli;
+  en fazla 500 satır (truncated).
+- POST /api/affected-customers: L2 değilse 403 ve audit "affected_customers_denied"; L2 ise audit "affected_customers_view"
+  (sorgu + satır sayısı; müşteri bilgisi YAZILMAZ) + "mercek.audit" logger satırı.
+- Prompt: liste istenirse "sende yok, L2 ise cevabın altındaki düğmeden görebilir" (mercek-chat.md'de var).
+- Frontend: src/components/affected-customers.tsx — "Etkilenen müşteriler (N)" düğmesi; açılınca tablo (Aranabilir rozeti,
+  maskeli telefon, kanal, son hata, kurum); tablo varken asistan balonu tam genişlik. CSV yok.
+- Testler: maskeleme, kanal, 403 + audit, sorgu tutarlılığı, son-müşterili-sorgu kuralı.
+
+Kabul: Kerem → "Müşteriye fatura talimatı tanımlanamıyor, aktif talimat zaten var diyor. Kaç müşteri etkilendi?" →
+"Etkilenen müşteriler (31)", 11 aranabilir; Elif'te düğme yok.

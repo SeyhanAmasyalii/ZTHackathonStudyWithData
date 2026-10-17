@@ -1,0 +1,25 @@
+Mercek'in kendi verisi SQL'de: app_users, audit_log, conversations, conversation_messages.
+
+- db/app_tables.sql: tablolar yoksa oluşturulur, varsa dokunulmaz (veri silinmez). app_users(user_name PK, full_name, title, unit,
+  role, can_view_customers BIT, is_active BIT, sort_order). audit_log(audit_id identity, created_at DATETIMEOFFSET default
+  SYSDATETIMEOFFSET(), user_name, action, detail NVARCHAR(MAX) JSON, row_count). conversations(conversation_id CHAR(32) PK, user_name,
+  created_at, updated_at, agent_response_id NVARCHAR(100) NULL — ALTER ile eklenir) + index (user_name, updated_at DESC).
+  conversation_messages(message_id identity, conversation_id FK ON DELETE CASCADE, role CHECK user/assistant, content, affected_json,
+  created_at) + index.
+- scripts/setup_app_tables.py: tabloları kurar, DEMO_USERS'ı MERGE + OPENJSON ile yazar, kullanıcıları ve satır sayılarını yazdırır.
+- app/repositories/app_store.py: StoredMessage(role, content, affected=None, scenarios=None). AppStore Protocol: list_users,
+  write_audit(user, action, detail, row_count), create_conversation(user) → uuid4().hex, get_conversation(id, user) → mesajlar ya da
+  None (yoksa ya da başkasınınsa), append_messages, get/set_agent_response_id. MemoryAppStore (testler/yerel) ve SqlAppStore
+  (tüm yazmalar parametreli; metinler OPENJSON ile ASCII kaçışlı JSON; kullanıcılar 60 sn önbellek, okunamazsa DEMO_USERS;
+  SQL hatası sohbeti DURDURMAZ, loglanır). get_app_store(): SQL_SERVER varsa SQL.
+- /api/users ve get_current_user kullanıcıları store'dan alır.
+- /api/chat: conversation_id varsa geçmiş store'dan (son 20, her biri 8000 karakter); yoksa yeni konuşma açılır, istemcinin geçmişi
+  kullanılır. Cevaptan sonra kullanıcı + asistan mesajı yazılır; ChatResponse.conversation_id döner.
+- GET /api/conversations/{id} (regex ^[0-9a-f]{32}$): yalnızca sahibi; yoksa 404 "Konuşma bulunamadı.".
+- Frontend: konuşma kimliği localStorage "mercek.conversation.<user>" (yalnızca kimlik, regex kontrollü); sayfa yenilenince
+  fetchConversation ile geri yüklenir; bulunamazsa kimlik silinir; "Yeni sohbet" kimliği temizler.
+- Testler: sahiplik (başkasının konuşması None/404), sunucu tarafı geçmiş akışı, kimlik doğrulaması, audit kayıtları,
+  SQL deposunun ASCII yükü, kullanıcı fallback'i.
+
+Kabul: soru sor → F5 → konuşma geri gelir; başka kullanıcı göremez; SQL'de conversation_messages dolu.
+Azure: Managed Identity kullanıcısına db_datareader + db_datawriter (docs/AZURE-SQL.md §4–§5).
