@@ -14782,13 +14782,13 @@
     "channel_id": 2,
     "call_id": "CM-2026101759420",
     "client_id": "fineart-cagri",
-    "user_name": "g9009u05",
+    "user_name": "zeynep",
     "current_date": "2026-10-17",
     "customer_id": "10025878",
     "customer_branch_id": 601,
     "session_id": "8f136e6429974fd0b66d19dbbffe9ed5",
     "session_start_date": "2026-10-17T07:25:32.235+03:00",
-    "event_original": "{\"@timestamp\": \"2026-10-17T05:33:38.235Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"ca86639be214467d86950c1fb8036d9f\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"g9009u05\", \"CustomerId\": \"10025878\"}",
+    "event_original": "{\"@timestamp\": \"2026-10-17T05:33:38.235Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"ca86639be214467d86950c1fb8036d9f\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"zeynep\", \"CustomerId\": \"10025878\"}",
     "mercek_assigned_error_number": null
   },
   {
@@ -15599,13 +15599,13 @@
     "channel_id": 2,
     "call_id": "CM-2026101770763",
     "client_id": "fineart-cagri",
-    "user_name": "g9009u11",
+    "user_name": "zeynep",
     "current_date": "2026-10-17",
     "customer_id": "10030912",
     "customer_branch_id": 601,
     "session_id": "c77bc7a226f34cf68c850782b3d121e2",
     "session_start_date": "2026-10-17T08:29:39.059+03:00",
-    "event_original": "{\"@timestamp\": \"2026-10-17T05:43:35.059Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"9982bfc87fb84cd28b617dc3f914bf8d\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"g9009u11\", \"CustomerId\": \"10030912\"}",
+    "event_original": "{\"@timestamp\": \"2026-10-17T05:43:35.059Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"9982bfc87fb84cd28b617dc3f914bf8d\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"zeynep\", \"CustomerId\": \"10030912\"}",
     "mercek_assigned_error_number": null
   },
   {
@@ -16244,13 +16244,13 @@
     "channel_id": 2,
     "call_id": "CM-2026101732991",
     "client_id": "fineart-cagri",
-    "user_name": "g9009u08",
+    "user_name": "zeynep",
     "current_date": "2026-10-17",
     "customer_id": "10014722",
     "customer_branch_id": 601,
     "session_id": "395fd910c52246a1a95ad89b4e7240ac",
     "session_start_date": "2026-10-17T07:53:35.399+03:00",
-    "event_original": "{\"@timestamp\": \"2026-10-17T05:54:44.399Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"38428a1867d24d1ab286ad5d0a1b3bdb\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"g9009u08\", \"CustomerId\": \"10014722\"}",
+    "event_original": "{\"@timestamp\": \"2026-10-17T05:54:44.399Z\", \"LogLevel\": \"Error\", \"AppName\": \"fineart\", \"Application\": \"Fineart.Odeme\", \"SourceContext\": \"Fineart.Odeme.Talimat.Services.AboneDogrulamaService\", \"ActionId\": 1102, \"ActionName\": \"AboneDogrula\", \"RequestPath\": \"/api/odm/talimat/abone-dogrula\", \"HttpStatusCode\": 504, \"CorrelationId\": \"38428a1867d24d1ab286ad5d0a1b3bdb\", \"Message\": \"ODMTTLMT AboneDogrula: GAZ02 kurum servisi 8000 ms içinde yanıt vermedi.\", \"AppExceptionValue\": 110731, \"ScreenId\": \"ODMTTLMT\", \"BranchId\": 9009, \"BranchType\": \"G\", \"ChannelId\": 2, \"UserName\": \"zeynep\", \"CustomerId\": \"10014722\"}",
     "mercek_assigned_error_number": null
   },
   {
