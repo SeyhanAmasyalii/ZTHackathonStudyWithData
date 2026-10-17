@@ -49,7 +49,8 @@ class Settings(BaseSettings):
     search_endpoint: str = ""
     search_api_key: str = ""
     search_log_index: str = "mercek-loglar"
-    # Foundry'deki embedding deploy'u (anlam araması için metni vektöre çevirir).
+    # Foundry'deki embedding deploy'u; AI Search indexer'ı ve vektörleştiricisi kullanır
+    # (kurulum: scripts/build_search_index.py). Backend kendisi çağırmaz.
     embedding_deployment: str = "text-embedding-3-small"
     prompts_dir: Path = _bundled_or_repo("prompts", "prompts")
     # Veri 2026-10-17 09:00'da bitiyor; demoda "şu an" 09:15'e sabitlenir.

@@ -1,4 +1,5 @@
 import json
+import re
 
 import httpx
 import pytest
@@ -11,9 +12,13 @@ from app.services import tools
 from app.services.chat import answer
 from app.services.log_index import (
     LogSearch,
-    log_documents,
-    log_index_definition,
+    SearchNames,
+    datasource_definition,
+    index_definition,
+    indexer_connection_string,
+    indexer_definition,
     search_body,
+    skillset_definition,
 )
 from app.services.tools import ToolContext, run_tool, tools_for
 from tests.conftest import FakeLLMClient, tool_call
@@ -21,50 +26,75 @@ from tests.conftest import FakeLLMClient, tool_call
 NOW = json_catalog(REPO_ROOT / "datav2").logs[-1].log_time
 
 
-@pytest.fixture
-def documents(data_dir):
-    rules = json.loads((data_dir / "error_handling_rules.json").read_text(encoding="utf-8"))
-    return log_documents(json_catalog(data_dir), rules)
+SETTINGS = Settings(
+    azure_openai_endpoint="https://f.openai.azure.com/openai/v1/",
+    azure_openai_api_key="foundry-key",
+    sql_server="mercek-sql.database.windows.net",
+    sql_user="mercekadmin",
+    sql_password="p;a}ss",
+)
+NAMES = SearchNames("mercek-loglar")
 
 
-def test_documents_group_all_error_logs(documents):
-    assert len(documents) == 107
-    assert sum(doc["log_count"] for doc in documents) == 2002
-    assert len({doc["id"] for doc in documents}) == len(documents)
-    top = documents[0]
-    assert (top["screen_code"], top["error_number"], top["institution_code"]) == (
-        "ODMTTLMT",
-        110412,
-        "SU01",
-    )
-    assert top["log_count"] == 400
-    assert "İSKİ (Su)" in top["content"] and "13 hane" in top["content"]
-    assert top["explanation"]  # error_handling_rules ipucu
-    assert ".." not in top["content"]
-    assert all("user_name" not in doc and "customer_id" not in doc for doc in documents)
-
-
-def test_index_definition_has_key_vector_and_turkish_analyzer():
-    definition = log_index_definition("mercek-loglar", dimensions=8)
+def test_index_definition_has_vectorizer_and_turkish_analyzer():
+    definition = index_definition("mercek-loglar", SETTINGS)
     fields = {field["name"]: field for field in definition["fields"]}
     assert fields["id"]["key"] is True
-    assert fields["content_vector"]["dimensions"] == 8
+    assert fields["content_vector"]["dimensions"] == 1536
     assert fields["content"]["analyzer"] == "tr.microsoft"
     assert fields["screen_code"]["filterable"] is True
+    vectorizer = definition["vectorSearch"]["vectorizers"][0]["azureOpenAIParameters"]
+    assert vectorizer["resourceUri"] == "https://f.openai.azure.com"
+    assert vectorizer["deploymentId"] == "text-embedding-3-small"
+    assert definition["vectorSearch"]["profiles"][0]["vectorizer"] == "foundry"
 
 
-def test_document_fields_match_index(documents):
-    fields = {field["name"] for field in log_index_definition("x")["fields"]}
-    assert set(documents[0]) | {"content_vector"} == fields
+def test_index_fields_match_sql_view_columns():
+    view = (REPO_ROOT / "db" / "search_views.sql").read_text(encoding="utf-8")
+    select = view[view.index("SELECT\n    CONCAT_WS") : view.index("FROM g")]
+    columns = re.findall(r"(?:AS (\w+)|^    \w+\.(\w+),?$)", select, re.M)
+    names = {alias or column for alias, column in columns}
+    fields = {field["name"] for field in index_definition("x", SETTINGS)["fields"]}
+    assert fields - {"content_vector"} <= names
+    assert "hwm" in names
 
 
-def test_search_body_is_hybrid_with_optional_filter():
-    body = search_body("abone no", [0.1, 0.2], "ODMTTLMT", 5)
+def test_datasource_uses_view_and_high_water_mark():
+    connection = indexer_connection_string(SETTINGS)
+    assert "Server=tcp:mercek-sql.database.windows.net,1433;" in connection
+    assert "Password={p;a}}ss};" in connection
+    definition = datasource_definition(NAMES, connection)
+    assert definition["name"] == "mercek-loglar-sql"
+    assert definition["container"]["name"] == "v_hata_turleri"
+    assert definition["dataChangeDetectionPolicy"]["highWaterMarkColumnName"] == "hwm"
+
+
+def test_indexer_connection_string_requires_sql_user():
+    with pytest.raises(ValueError):
+        indexer_connection_string(Settings(sql_server="x"))
+
+
+def test_skillset_and_indexer_definitions():
+    skill = skillset_definition(NAMES, SETTINGS)["skills"][0]
+    assert skill["@odata.type"].endswith("AzureOpenAIEmbeddingSkill")
+    assert skill["inputs"][0]["source"] == "/document/content"
+    indexer = indexer_definition(NAMES)
+    assert indexer["schedule"] == {"interval": "PT5M"}
+    assert indexer["dataSourceName"] == "mercek-loglar-sql"
+    assert indexer["skillsetName"] == "mercek-loglar-embedding"
+    assert indexer["fieldMappings"][0]["mappingFunction"]["name"] == "base64Encode"
+    assert indexer["outputFieldMappings"][0]["targetFieldName"] == "content_vector"
+    assert "schedule" not in indexer_definition(NAMES, schedule=None)
+
+
+def test_search_body_is_hybrid_with_text_vector_query():
+    body = search_body("abone no", "ODMTTLMT", 5)
     assert body["search"] == "abone no"
-    assert body["vectorQueries"][0]["vector"] == [0.1, 0.2]
-    assert body["vectorQueries"][0]["k"] == 5
+    assert body["vectorQueries"] == [
+        {"kind": "text", "text": "abone no", "fields": "content_vector", "k": 5}
+    ]
     assert body["filter"] == "screen_code eq 'ODMTTLMT'"
-    assert "filter" not in search_body("x", [0.0], None, 3)
+    assert "filter" not in search_body("x", None, 3)
 
 
 class FakeSearch:
@@ -160,12 +190,7 @@ def test_chat_uses_hata_ara_then_answers(data_dir):
     assert json.loads(tool_message["content"])["results"][0]["error_number"] == 110412
 
 
-class FakeEmbedder:
-    def embed(self, texts):
-        return [[float(len(text)), 0.0] for text in texts]
-
-
-def test_log_search_embeds_and_searches():
+def test_log_search_sends_hybrid_query():
     seen = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -178,12 +203,12 @@ def test_log_search_embeds_and_searches():
         Settings(search_endpoint="https://s.search.windows.net/", search_api_key="k"),
         http=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    hits = LogSearch(client, FakeEmbedder(), "mercek-loglar")("abone", None, 5)
+    hits = LogSearch(client, "mercek-loglar")("abone", None, 5)
     assert hits == [HIT]
     assert seen["url"].startswith("https://s.search.windows.net/indexes/mercek-loglar/docs/search")
     assert "api-version=" in seen["url"]
     assert seen["headers"]["api-key"] == "k"
-    assert seen["body"]["vectorQueries"][0]["vector"] == [5.0, 0.0]
+    assert seen["body"]["vectorQueries"][0]["text"] == "abone"
 
 
 def test_search_client_errors():
@@ -205,4 +230,4 @@ def test_delete_index_ignores_missing():
         Settings(search_endpoint="https://s.search.windows.net", search_api_key="k"),
         http=httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(404, text="no"))),
     )
-    client.delete_index("yok")
+    client.delete("indexes", "yok")

@@ -1,4 +1,4 @@
-"""Azure AI Search REST istemcisi (indeks oluşturma, belge yükleme, hibrit arama).
+"""Azure AI Search REST istemcisi (indeks/indexer kurulumu, hibrit arama).
 
 Kimlik: SEARCH_API_KEY verilirse `api-key` başlığı, verilmezse Microsoft Entra token'ı
 (yerelde `az login`, App Service'te Managed Identity). Anahtar loglanmaz.
@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 API_VERSION = "2024-07-01"
 TOKEN_SCOPE = "https://search.azure.com/.default"
-UPLOAD_BATCH = 500
 
 
 class SearchError(Exception):
@@ -56,21 +55,22 @@ class AzureSearchClient:
             raise SearchError(f"Arama servisi {response.status_code}: {response.text[:300]}")
         return response
 
-    def delete_index(self, name: str) -> None:
+    def put(self, kind: str, definition: dict[str, Any]) -> None:
+        """Veri kaynağı, beceri kümesi ya da indexer oluşturur/günceller (kind: datasources...)."""
+        self._request("PUT", f"/{kind}/{definition['name']}", definition)
+
+    def delete(self, kind: str, name: str) -> None:
         try:
-            self._request("DELETE", f"/indexes/{name}")
+            self._request("DELETE", f"/{kind}/{name}")
         except SearchError as exc:
             if " 404:" not in str(exc):
                 raise
 
-    def put_index(self, definition: dict[str, Any]) -> None:
-        self._request("PUT", f"/indexes/{definition['name']}", definition)
+    def post(self, path: str) -> None:
+        self._request("POST", path)
 
-    def upload(self, index: str, documents: list[dict[str, Any]]) -> None:
-        for start in range(0, len(documents), UPLOAD_BATCH):
-            batch = documents[start : start + UPLOAD_BATCH]
-            body = {"value": [{"@search.action": "upload", **doc} for doc in batch]}
-            self._request("POST", f"/indexes/{index}/docs/index", body)
+    def get(self, path: str) -> dict[str, Any]:
+        return self._request("GET", path).json()
 
     def count(self, index: str) -> int:
         return int(self._request("GET", f"/indexes/{index}/docs/$count").text.strip("﻿ "))

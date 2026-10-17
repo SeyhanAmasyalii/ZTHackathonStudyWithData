@@ -5,7 +5,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.auth import get_current_user
-from app.clients.embeddings import AzureEmbedder
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.clients.search import AzureSearchClient, SearchError
 from app.config import Settings, get_settings
@@ -37,10 +36,8 @@ def get_log_search() -> LogSearchFn | None:
     if not settings.search_endpoint:
         return None
     try:
-        return LogSearch(
-            AzureSearchClient(settings), AzureEmbedder(settings), settings.search_log_index
-        )
-    except (SearchError, LLMError) as exc:
+        return LogSearch(AzureSearchClient(settings), settings.search_log_index)
+    except SearchError as exc:
         logger.error("AI Search yapılandırılamadı: %s", exc)
         return None
 

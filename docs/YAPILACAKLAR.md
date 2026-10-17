@@ -24,6 +24,6 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 ## Sonra
 - [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
-- [ ] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`) kod hazır → portal kurulumu + indeks yükleme (prova)
+- [ ] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`; SQL görünümünden indexer, 5 dk) kod hazır → portal kurulumu + `build_search_index.py` (prova)
 - [ ] Azure AI Search: `benzer_cozum_ara` (çözüm şablonları + çağrı notları)
 - [ ] KVKK: modele gitmeden önce kişisel veri maskeleme
