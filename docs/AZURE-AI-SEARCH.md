@@ -34,7 +34,7 @@ Aşağıda `<search>` = arama hizmeti adı (ör. `mercek-search-<takım>`), `<rg
    Hackathon aboneliğinde takıma verilen katman neyse o.
 3. **Gözden geçir + oluştur** → **Oluştur** → **Kaynağa git**.
 4. **Genel Bakış → Url** (`https://<search>.search.windows.net`) not edin.
-5. **Ayarlar → Anahtarlar** → API Erişim denetimi: **Her ikisi** → Kaydet. **Birincil yönetici anahtarı**'nı kopyalayın
+5. **Güvenlik ve ağ → Anahtarlar** (eski portalda Ayarlar → Anahtarlar) → API Erişim denetimi: **Her ikisi** → Kaydet. **Birincil yönetici anahtarı**'nı kopyalayın
    (yalnızca bilgisayarınızdaki `backend\.env`'e yazılır).
 
 ## 3. İndeksi doldur (bilgisayarda, 1 dk)
@@ -79,7 +79,7 @@ Betik indeksi her seferinde silip yeniden kurar; tekrar çalıştırmak güvenli
 | `SEARCH_ENDPOINT` | `https://<search>.search.windows.net` |
 | `SEARCH_LOG_INDEX` | `mercek-loglar` |
 | `EMBEDDING_DEPLOYMENT` | `text-embedding-3-small` |
-| `SEARCH_API_KEY` | **Sorgu anahtarı** (`<search>` → Anahtarlar → **Sorgu anahtarlarını yönet** → Ekle; yalnızca arama yapabilir). 5. adımı yaparsanız bu satırı eklemeyin |
+| `SEARCH_API_KEY` | **Sorgu anahtarı** (`<search>` → Güvenlik ve ağ → Anahtarlar → **Sorgu anahtarlarını yönet** → Ekle; yalnızca arama yapabilir). 5. adımı yaparsanız bu satırı eklemeyin |
 
 Backend paketini yeniden üretip yükleyin (yeni kod + `azure-identity`, `httpx`):
 
