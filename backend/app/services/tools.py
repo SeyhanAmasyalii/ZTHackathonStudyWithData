@@ -11,6 +11,12 @@ from typing import Any
 
 from app.config import TURKEY_TZ
 from app.repositories.datav2 import Incident, LogEntry, normalize
+from app.services.solution_index import (
+    MATCH_THRESHOLD,
+    cosine_from_score,
+    match_score,
+    parse_steps,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -115,14 +121,49 @@ HATA_ARA = {
     },
 }
 
+BENZER_COZUM_ARA = {
+    "type": "function",
+    "function": {
+        "name": "benzer_cozum_ara",
+        "description": (
+            "Sorunun tarifine anlamca en çok benzeyen hazır çözüm şablonlarını (SOL-xxx) "
+            "bulur (Azure AI Search). Her sonuçta eşleşme yüzdesi (kodla hesaplanır), belirti, "
+            "kök neden, adımlar, önerilen kapanış kodu ve bu şablonla kapanmış çağrı sayısı "
+            "vardır. matched=false ise %75 eşiğini geçen hazır çözüm yoktur."
+        ),
+        "parameters": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["description"],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": (
+                        "Sorunun kısa tarifi (ekran, belirti, hata mesajı). "
+                        "Kişisel veri (ad, müşteri no, telefon) yazma."
+                    ),
+                },
+                "error_code": {
+                    "type": "string",
+                    "description": "Biliniyorsa hata kodu, ör. INSTITUTION_TIMEOUT",
+                },
+            },
+        },
+    },
+}
+
 TOOLS = [KIBANA_SORGULA, CAGRI_ARA]
 MAX_INCIDENT_SAMPLES = 5
 HATA_ARA_TOP = 5
+COZUM_ARA_TOP = 3
 MAX_DESCRIPTION = 300
 _SCREEN_CODE = re.compile(r"^[A-Z0-9]{3,20}$")
+_ERROR_CODE = re.compile(r"^[A-Z0-9_]{3,60}$")
 
 # (tarif, ekran filtresi, en fazla sonuç) → arama sonuçları. AI Search yapılandırılmamışsa None.
 LogSearchFn = Callable[[str, str | None, int], list[dict[str, Any]]]
+# (tarif, en fazla sonuç) → hazır çözüm arama sonuçları (vektör puanıyla).
+SolutionSearchFn = Callable[[str, int], list[dict[str, Any]]]
 
 
 class ToolInputError(ValueError):
@@ -138,11 +179,17 @@ class ToolContext:
     # Prompt'a giden görev bilgisi (ör. "L2 Destek · 9010 BT Destek (L2)"); kullanıcı kodu değil.
     user_role: str = ""
     search_logs: LogSearchFn | None = None
+    search_solutions: SolutionSearchFn | None = None
 
 
 def tools_for(context: ToolContext) -> list[dict[str, Any]]:
-    """Modele sunulan araçlar; hata_ara yalnızca AI Search yapılandırılmışsa."""
-    return [*TOOLS, HATA_ARA] if context.search_logs else list(TOOLS)
+    """Modele sunulan araçlar; arama araçları yalnızca AI Search yapılandırılmışsa."""
+    tools = list(TOOLS)
+    if context.search_logs:
+        tools.append(HATA_ARA)
+    if context.search_solutions:
+        tools.append(BENZER_COZUM_ARA)
+    return tools
 
 
 def _parse_time(value: Any, name: str) -> datetime:
@@ -343,7 +390,60 @@ def hata_ara(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
     }
 
 
-_HANDLERS = {"kibana_sorgula": kibana_sorgula, "cagri_ara": cagri_ara, "hata_ara": hata_ara}
+def benzer_cozum_ara(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    if context.search_solutions is None:
+        return {"error": "Çözüm araması yapılandırılmamış"}
+    description = _optional_str(args, "description")
+    if not description:
+        raise ToolInputError("description gerekli")
+    description = description[:MAX_DESCRIPTION]
+    error_code = _optional_str(args, "error_code")
+    if error_code is not None:
+        error_code = error_code.upper()
+        if not _ERROR_CODE.match(error_code):
+            raise ToolInputError("error_code geçersiz")
+    query = {"description": description, "error_code": error_code}
+    try:
+        hits = context.search_solutions(description, COZUM_ARA_TOP)
+    except Exception as exc:  # arama servisi hatası sohbeti durdurmasın
+        logger.error("benzer_cozum_ara başarısız: %s", exc)
+        return {"query": query, "error": "Çözüm araması şu an yapılamıyor"}
+
+    results = []
+    for hit in hits:
+        cosine = cosine_from_score(hit.get("@search.score") or 0)
+        score = match_score(cosine, error_code, hit.get("error_code"))
+        results.append(
+            {
+                "solution_template_id": hit.get("solution_template_id"),
+                "match_percent": round(score * 100),
+                "above_threshold": score >= MATCH_THRESHOLD,
+                "title": hit.get("title"),
+                "symptom": hit.get("symptom"),
+                "root_cause": hit.get("root_cause"),
+                "steps": parse_steps(hit.get("steps")),
+                "error_code": hit.get("error_code"),
+                "closure_code": hit.get("closure_code"),
+                "sub_closure_code": hit.get("sub_closure_code"),
+                "closed_incident_count": hit.get("closed_count"),
+            }
+        )
+    results.sort(key=lambda item: item["match_percent"], reverse=True)
+    return {
+        "query": query,
+        "threshold_percent": round(MATCH_THRESHOLD * 100),
+        "matched": any(item["above_threshold"] for item in results),
+        "note": "Eşiğin altındaki sonuçlar eşleşme sayılmaz; yalnızca olası aday olarak anılabilir",
+        "results": results,
+    }
+
+
+_HANDLERS = {
+    "kibana_sorgula": kibana_sorgula,
+    "cagri_ara": cagri_ara,
+    "hata_ara": hata_ara,
+    "benzer_cozum_ara": benzer_cozum_ara,
+}
 
 
 def run_tool(name: str, arguments: str, context: ToolContext) -> dict[str, Any]:

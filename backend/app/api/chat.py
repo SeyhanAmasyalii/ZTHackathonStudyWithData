@@ -23,7 +23,8 @@ from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
 from app.services.chat import answer
 from app.services.log_index import LogSearch
-from app.services.tools import LogSearchFn, ToolContext
+from app.services.solution_index import SolutionSearch
+from app.services.tools import LogSearchFn, SolutionSearchFn, ToolContext
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,19 @@ def get_log_search() -> LogSearchFn | None:
         return None
 
 
+@lru_cache
+def get_solution_search() -> SolutionSearchFn | None:
+    """AI Search yapılandırılmışsa benzer_cozum_ara aracının arama fonksiyonu, değilse None."""
+    settings = get_settings()
+    if not settings.search_endpoint or not settings.search_solution_index:
+        return None
+    try:
+        return SolutionSearch(AzureSearchClient(settings), settings.search_solution_index)
+    except SearchError as exc:
+        logger.error("AI Search yapılandırılamadı: %s", exc)
+        return None
+
+
 @router.post("/chat", response_model=ChatResponse, response_model_exclude_none=True)
 def chat(
     request: ChatRequest,
@@ -62,6 +76,7 @@ def chat(
     settings: Annotated[Settings, Depends(get_settings)],
     catalog: Annotated[Catalog, Depends(get_catalog)],
     search_logs: Annotated[LogSearchFn | None, Depends(get_log_search)],
+    search_solutions: Annotated[SolutionSearchFn | None, Depends(get_solution_search)],
     store: Annotated[AppStore, Depends(get_app_store)],
 ) -> ChatResponse:
     context = ToolContext(
@@ -71,6 +86,7 @@ def chat(
         logs=catalog.logs,
         incidents=catalog.incidents,
         search_logs=search_logs,
+        search_solutions=search_solutions,
     )
     # Konuşma hafızası sunucuda (SQL): kayıt varsa geçmiş oradan okunur. Kayıt yoksa (yeni sohbet
     # ya da sunucu belleği sıfırlandıysa) yeni konuşma açılır, frontend'in geçmişi kullanılır.

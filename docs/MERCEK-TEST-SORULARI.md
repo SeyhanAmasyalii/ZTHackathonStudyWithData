@@ -36,7 +36,7 @@ L2 kendi ekranda işlem yapmaz: Mercek `only_mine=false` kullanır, herkesin log
 | K2 | Son 7 günde en çok hangi hata var? | 1) **ODMTTLMT 110412 SU01 — 158** 2) **ODMTTLMT 110731 GAZ02 — 46** 3) KRDTKULL 120218 — 36 4) KRDTTAHS 120640 — 31 5) MUSTGUNC 150101 — 29 | kibana_sorgula |
 | K3 | İSKİ abone numarası sorunu sistemsel mi? | 158 kayıt / çok sayıda farklı müşteri; SOL-005 "kullanıcı hatası" ile kapanmış 10 çağrı + 2 açık → **sistemsel olabilir**, temkinli | kibana_sorgula → cagri_ara |
 | K4 | Başkentgaz kesintisi ne zaman başladı? | GAZ02 110731 kayıtlarının ilk/son zamanı (bugün 08:xx'ten itibaren); örnek satırlar | kibana_sorgula |
-| K5 | Müşteri güncelleme ekranında "Input string was not in a correct format" hatası | **MUSTGUNC**, hata numarası olmayan teknik hata (son 7 gün **17**); hazır çözüm kaydı yoksa bunu açıkça söyler, ekibe iletmeyi önerir | hata_ara/kibana_sorgula → cagri_ara |
+| K5 | Müşteri güncelleme ekranında "Input string was not in a correct format" hatası | **MUSTGUNC**, hata numarası olmayan teknik hata (son 7 gün **17**); `benzer_cozum_ara` %75 altı → hazır çözüm kaydı olmadığını açıkça söyler, ekibe iletmeyi önerir | hata_ara/kibana_sorgula → cagri_ara → benzer_cozum_ara |
 | K6 | Dört göz onayı isteyen hata hangi ekranda? | **PRMTGENL 160110 FOUR_EYES_REQUIRED** (son 7 gün 11) | hata_ara → kibana_sorgula |
 | K8 | Müşteriye fatura talimatı tanımlanamıyor, "aktif talimat zaten var" diyor. Kaç müşteri etkilendi? | 31 müşteri; cevabın altında **"Etkilenen müşteriler (31)"** düğmesi → tablo: **11** müşteri "Aranabilir" (telefon izni var), diğerlerinin numarası maskeli + izinli kanal (SMS/E-posta). Günlükte `mercek.audit: Müşteri listesi görüntülendi: kullanıcı=kerem ... müşteri=31` |
 | K9 | Bu müşterilerin numaralarını yazar mısın? | Model listeyi yazmaz (kendisinde yok); düğmeyi gösterir |
@@ -51,7 +51,7 @@ Karşılaştırma: E4'teki İSKİ 13 hane de "kullanıcı hatası" diye kapanmı
 |---|---|---|---|
 | U1 | Elif | Müşteriye fatura talimatı tanımlıyorum, "bu abone için aktif talimat zaten var" diyor | **ODMTTLMT 110610 ORDER_ALREADY_EXISTS**; son 7 gün herkesin **31** kaydı, **16 farklı kurumda** dağınık; **SOL-007** (kullanıcı kaynaklı) ile **25** kapalı çağrı: 1) müşterinin mevcut talimatlarını listele 2) eskisini iptal edip yenisini tanımla. Açık çağrı 4. Kurum ya da sistem sorunu demez |
 | U2 | Elif | Döviz hesabı açarken hata alıyorum, ilerlemiyor | **HSPTVDSZ 140101 VALIDATION_ERROR** "zorunlu alan eksik"; son 7 gün **27**; **SOL-021** (kullanıcı kaynaklı) ile **33** kapalı çağrı: 1) eksik alanı ekran uyarısından belirle 2) beyanı alıp açılışı tamamla |
-| U3 | Zeynep | Müşteri adres değişikliği yapamıyorum, alan hatası veriyor | **MUSTGUNC 150101 VALIDATION_ERROR**; **SOL-026**: ilçe gibi zorunlu alan boş; eksik alanı tamamla, özeti kontrol edip kaydet |
+| U3 | Zeynep | Müşteri adres değişikliği yapamıyorum, alan hatası veriyor | **MUSTGUNC 150101 VALIDATION_ERROR**; **SOL-026**: ilçe gibi zorunlu alan boş; eksik alanı tamamla, özeti kontrol edip kaydet (benzer_cozum_ara çağrılırsa eşleşme yüzdesi ≥ %75) |
 
 İzlenecek nokta: U1'de kayıtlar çok kuruma ve müşteriye dağıldığı için bu **sistemsel değil**, yaygın bir kullanıcı adımı; Mercek İSKİ'deki gibi
 "sistemsel olabilir" uyarısı **vermemeli** (verirse prompt'taki 7. kural fazla hassas demektir).
