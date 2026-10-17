@@ -51,7 +51,9 @@ CREATE TABLE dbo.incidents (
     resolution_note            NVARCHAR(MAX)     NULL,
     closure_code               NVARCHAR(50)      NULL,
     sub_closure_code           NVARCHAR(50)      NULL,
-    solution_template_id       NVARCHAR(20)      NULL
+    solution_template_id       NVARCHAR(20)      NULL,
+    reporter_user_name         NVARCHAR(50)      NULL,
+    scenario_path              NVARCHAR(400)     NULL
 );
 GO
 

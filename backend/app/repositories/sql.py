@@ -35,6 +35,8 @@ TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
         "closure_code",
         "sub_closure_code",
         "solution_template_id",
+        "reporter_user_name",
+        "scenario_path",
     ),
     "kibana_logs": (
         "log_id",

@@ -1,4 +1,4 @@
-from app.config import Settings
+from app.config import REPO_ROOT, Settings
 from app.repositories import catalog as catalog_module
 from app.repositories import sql
 from app.repositories.datav2 import TABLES, build_catalog, json_catalog, read_json
@@ -68,6 +68,18 @@ def test_select_sql_reads_datetimes_as_iso_text():
 
 def test_every_table_has_columns():
     assert set(sql.TABLE_COLUMNS) == set(TABLES)
+
+
+def test_incident_columns_exist_in_data_and_schema(data_dir):
+    columns = sql.TABLE_COLUMNS["incidents"]
+    assert {"reporter_user_name", "scenario_path"} <= set(columns)
+    first = read_json(data_dir).incidents[0]
+    assert set(columns) <= set(first)
+    schema = (REPO_ROOT / "db" / "schema.sql").read_text(encoding="utf-8")
+    for table, table_columns in sql.TABLE_COLUMNS.items():
+        assert f"CREATE TABLE dbo.{table} (" in schema
+        for column in table_columns:
+            assert f"    {column} " in schema, (table, column)
 
 
 def test_read_raw_builds_same_catalog_as_json(data_dir):
