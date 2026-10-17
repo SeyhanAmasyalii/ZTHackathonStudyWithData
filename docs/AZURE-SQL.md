@@ -24,6 +24,8 @@ Portal → arama: `SQL veritabanları` → **+ Oluştur**
 
 Sunucu adresi: veritabanı → **Genel Bakış → Sunucu adı** (`<sql>.database.windows.net`).
 
+> Ücretsiz teklifin sade oluşturma ekranında **Ağ** sekmesi yoktur. Oluşturduktan sonra: SQL sunucusu (`<sql>`) → **Güvenlik → Ağ İletişimi** → Genel ağ erişimi **Seçili ağlar** → **+ İstemci IPv4 adresinizi ekleyin** → Özel durumlar: **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver** ✓ → **Kaydet**.
+
 ## 2. Veriyi yükle (bilgisayarda, 2 dk)
 
 `backend\.env` dosyasına ekleyin (bu dosya git'e girmez):
@@ -85,7 +87,7 @@ Sohbette "ODMTTLMT ekranında hata alıyorum" → aynı cevap (7 hata, GAZ02 110
 
 | Belirti | Çözüm |
 |---|---|
-| Betik: `Client with IP address ... is not allowed` | SQL sunucusu → **Ağ** → Güvenlik duvarı kuralları → **İstemci IP adresinizi ekleyin** → Kaydet (ev/ofis IP'si değişince tekrar) |
+| Betik: `Client with IP address ... is not allowed` | SQL sunucusu → **Güvenlik → Ağ İletişimi** → Güvenlik duvarı kuralları → **İstemci IP adresinizi ekleyin** → Kaydet (ev/ofis IP'si değişince tekrar) |
 | Betik: `✗ SQL'den okunan veri JSON ile aynı değil` | Yükleme yarım kalmış ya da tablo elle değiştirilmiş; betiği tekrar çalıştırın (tablolar baştan kurulur) |
 | Betik: `Login failed for user` | `SQL_USER` / `SQL_PASSWORD` yanlış; parola portaldan sıfırlanabilir (SQL sunucusu → Genel Bakış → Parolayı sıfırla) |
 | İlk bağlantı 30–60 sn sürüyor ya da `database ... is not currently available` | Ücretsiz/serverless veritabanı uykudaydı; kod 3 kez dener. Tekrar çalıştırın |
