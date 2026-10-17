@@ -28,6 +28,8 @@ class StoredMessage:
     role: str  # user / assistant
     content: str
     affected: dict[str, Any] | None = None
+    # Çözüm akışı bağlantıları: [{"solution_template_id", "title", "url"}]
+    scenarios: list[dict[str, str]] | None = None
 
 
 class AppStore(Protocol):
@@ -45,6 +47,12 @@ class AppStore(Protocol):
 
     def append_messages(self, conversation_id: str, messages: list[StoredMessage]) -> None: ...
 
+    def get_agent_response_id(self, conversation_id: str) -> str | None:
+        """Foundry agent'ının bu konuşmadaki son cevap kimliği (LLM_MODE=agent)."""
+        ...
+
+    def set_agent_response_id(self, conversation_id: str, response_id: str) -> None: ...
+
 
 def new_conversation_id() -> str:
     return uuid.uuid4().hex
@@ -57,6 +65,7 @@ class MemoryAppStore:
         self._lock = threading.Lock()
         self._owners: dict[str, str] = {}
         self._messages: dict[str, list[StoredMessage]] = {}
+        self._agent_responses: dict[str, str] = {}
         self.audit: list[dict[str, Any]] = []
 
     def list_users(self) -> tuple[DemoUser, ...]:
@@ -86,6 +95,30 @@ class MemoryAppStore:
     def append_messages(self, conversation_id: str, messages: list[StoredMessage]) -> None:
         with self._lock:
             self._messages.setdefault(conversation_id, []).extend(messages)
+
+    def get_agent_response_id(self, conversation_id: str) -> str | None:
+        with self._lock:
+            return self._agent_responses.get(conversation_id)
+
+    def set_agent_response_id(self, conversation_id: str, response_id: str) -> None:
+        with self._lock:
+            self._agent_responses[conversation_id] = response_id
+
+
+def _encode_extras(message: StoredMessage) -> str | None:
+    """affected_json kolonu: düğme bilgileri. Akış bağlantısı yoksa eski biçim (yalnızca sorgu)."""
+    if message.scenarios:
+        return json.dumps({"affected": message.affected, "scenarios": message.scenarios})
+    return json.dumps(message.affected) if message.affected else None
+
+
+def _decode_extras(value: str | None) -> tuple[dict[str, Any] | None, list[dict[str, str]] | None]:
+    if not value:
+        return None, None
+    data = json.loads(value)
+    if isinstance(data, dict) and "scenarios" in data:
+        return data.get("affected"), data.get("scenarios")
+    return data, None
 
 
 def _payload(rows: list[dict[str, Any]]) -> str:
@@ -186,8 +219,7 @@ class SqlAppStore:
             logger.exception("Konuşma geçmişi okunamadı")
             return None
         return [
-            StoredMessage(role, content, json.loads(affected) if affected else None)
-            for role, content, affected in rows
+            StoredMessage(role, content, *_decode_extras(extras)) for role, content, extras in rows
         ]
 
     def append_messages(self, conversation_id: str, messages: list[StoredMessage]) -> None:
@@ -196,7 +228,7 @@ class SqlAppStore:
                 "conversation_id": conversation_id,
                 "role": message.role,
                 "content": message.content,
-                "affected_json": json.dumps(message.affected) if message.affected else None,
+                "affected_json": _encode_extras(message),
             }
             for message in messages
         ]
@@ -209,6 +241,27 @@ class SqlAppStore:
             )
         except Exception:
             logger.exception("Konuşma mesajları yazılamadı")
+
+    def get_agent_response_id(self, conversation_id: str) -> str | None:
+        try:
+            rows = self._run(
+                "SELECT agent_response_id FROM dbo.conversations WHERE conversation_id = ?",
+                [conversation_id],
+                fetch=True,
+            )
+        except Exception:
+            logger.exception("Agent cevap kimliği okunamadı; geçmiş yeniden gönderilecek")
+            return None
+        return rows[0][0] if rows and rows[0][0] else None
+
+    def set_agent_response_id(self, conversation_id: str, response_id: str) -> None:
+        try:
+            self._run(
+                "UPDATE dbo.conversations SET agent_response_id = ? WHERE conversation_id = ?",
+                [response_id, conversation_id],
+            )
+        except Exception:
+            logger.exception("Agent cevap kimliği yazılamadı")
 
 
 @lru_cache

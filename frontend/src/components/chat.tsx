@@ -4,9 +4,11 @@ import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 
 
 import { AffectedCustomersPanel } from "@/components/affected-customers";
 import { Markdown } from "@/components/markdown";
+import { ScenarioLinks } from "@/components/scenario-links";
 import {
   type AffectedSummary,
   fetchConversation,
+  type ScenarioLink,
   MAX_MESSAGE_LENGTH,
   sendChat,
   UnauthorizedError,
@@ -18,6 +20,7 @@ type Message = {
   role: "user" | "assistant";
   text: string;
   affected?: AffectedSummary;
+  scenarios?: ScenarioLink[];
 };
 
 type ChatProps = { token: string; userName: string; onUnauthorized: () => void };
@@ -50,6 +53,7 @@ export function Chat({ token, userName, onUnauthorized }: ChatProps) {
             role: item.role,
             text: item.content,
             affected: item.affected_customers,
+            scenarios: item.scenario_links,
           })),
         );
       })
@@ -62,9 +66,14 @@ export function Chat({ token, userName, onUnauthorized }: ChatProps) {
     };
   }, [token, userName, onUnauthorized]);
 
-  function addMessage(role: Message["role"], text: string, affected?: AffectedSummary) {
+  function addMessage(
+    role: Message["role"],
+    text: string,
+    affected?: AffectedSummary,
+    scenarios?: ScenarioLink[],
+  ) {
     const id = nextId.current++;
-    setMessages((current) => [...current, { id, role, text, affected }]);
+    setMessages((current) => [...current, { id, role, text, affected, scenarios }]);
   }
 
   async function submit() {
@@ -79,7 +88,7 @@ export function Chat({ token, userName, onUnauthorized }: ChatProps) {
     setLoading(true);
     try {
       const data = await sendChat(text, history, token, conversationId);
-      addMessage("assistant", data.reply, data.affected_customers);
+      addMessage("assistant", data.reply, data.affected_customers, data.scenario_links);
       if (data.conversation_id) {
         setConversationId(data.conversation_id);
         saveConversationId(userName, data.conversation_id);
@@ -136,6 +145,7 @@ export function Chat({ token, userName, onUnauthorized }: ChatProps) {
                 className={`${message.affected ? "w-full" : "max-w-[80%]"} rounded-2xl bg-black/5 px-4 py-3 dark:bg-white/10`}
               >
                 <Markdown text={message.text} />
+                {message.scenarios && <ScenarioLinks links={message.scenarios} />}
                 {message.affected && (
                   <AffectedCustomersPanel
                     summary={message.affected}

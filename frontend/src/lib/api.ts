@@ -80,9 +80,13 @@ export type AffectedCustomers = {
   rows: AffectedCustomer[];
 };
 
+/** Eşleşen hazır çözümün ekran akışı (tur); bağlantıyı backend seçer. */
+export type ScenarioLink = { solution_template_id: string; title: string; url: string };
+
 export type ChatReply = {
   reply: string;
   affected_customers?: AffectedSummary;
+  scenario_links?: ScenarioLink[];
   conversation_id?: string;
 };
 
@@ -90,6 +94,7 @@ export type ConversationMessage = {
   role: "user" | "assistant";
   content: string;
   affected_customers?: AffectedSummary;
+  scenario_links?: ScenarioLink[];
 };
 
 /** Sunucudaki (SQL) konuşma; sayfa yenilenince sohbeti geri yüklemek için. */

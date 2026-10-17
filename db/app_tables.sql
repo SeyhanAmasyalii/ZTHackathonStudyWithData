@@ -55,3 +55,8 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_conversation_messages_conv')
     CREATE INDEX ix_conversation_messages_conv ON dbo.conversation_messages (conversation_id, message_id);
 GO
+
+-- Foundry agent'ının son cevap kimliği (LLM_MODE=agent): model önceki turları Foundry'den hatırlar.
+IF COL_LENGTH('dbo.conversations', 'agent_response_id') IS NULL
+    ALTER TABLE dbo.conversations ADD agent_response_id NVARCHAR(100) NULL;
+GO
