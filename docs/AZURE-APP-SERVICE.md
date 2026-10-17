@@ -97,8 +97,11 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 3. Komutlar (`-n` uygulamanın **adı**dır, uzun adres değil):
    ```bash
    az webapp deploy -g <rg> -n <api> --src-path mercek-api.zip --type zip
-   az webapp deploy -g <rg> -n <web> --src-path mercek-web.zip --type zip
+   az webapp deploy -g <rg> -n <web> --src-path mercek-web.zip --type zip --clean true
+   az webapp restart -g <rg> -n <web>
    ```
+   > **Frontend'i her zaman `--clean true` ile yükleyin.** Onsuz eski dosyalar sitede kalabiliyor ve yükleme "başarılı" görünse de
+   > eski arayüz çalışmaya devam edebiliyor (provada yaşandı). Sol üstteki **sürüm** paketlemedeki `Sürüm:` satırıyla aynı olmalı.
    İlk backend yüklemesinde `requirements.txt` kurulur (2–4 dk).
 
 > Bilgisayarda Azure CLI varsa aynı komutlar `--src-path dist\mercek-api.zip` ile çalışır.
@@ -124,7 +127,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 | Arada bir "Oturum geçersiz" | `SESSION_SECRET` tanımlı değil (her yeniden başlatmada yeni anahtar üretilir) |
 | `az webapp deploy` yetki hatası | Hesabın bu kaynakta yetkisi yok; resource group sahibine sor |
 | Chrome adres çubuğunda kırmızı **"Tehlikeli"** | Google Güvenli Tarama yeni `azurewebsites.net` adresindeki giriş sayfasını kimlik avı sanmış olabilir; kod sorunu değil. https://safebrowsing.google.com/safebrowsing/report_error/ ile bildir; demodan önce jürinin tarayıcısında kontrol et |
-| Yeni özellik (ör. düğme) görünmüyor | Sol üstteki **sürüm** paketlemedekiyle aynı mı? Değilse `mercek-web.zip` için `az webapp deploy` çalıştırılmamış ya da eski zip yüklenmiş (`ls -l *.zip` ile tarih); aynıysa Ctrl+F5 / gizli pencere |
+| Yeni özellik (ör. düğme) görünmüyor | Sol üstteki **sürüm** paketlemedekiyle aynı mı? Değilse frontend'i **`--clean true`** ile yeniden yükleyip `az webapp restart` yapın (eski dosyalar kalmış olabilir); `ls -l *.zip` ile zip'in tarihine de bakın. Sürüm aynıysa Ctrl+F5 / gizli pencere |
 | Web 503 / açılmıyor | `<web>` Log stream; başlangıç komutu `node server.js` ve `HOSTNAME=0.0.0.0` mi? |
 
 ## Notlar
