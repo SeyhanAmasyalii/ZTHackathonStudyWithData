@@ -49,7 +49,8 @@ Portal → **Kaynak oluştur** → **Web App**
 | `AZURE_OPENAI_ENDPOINT` | Foundry uç noktası (ör. `https://<kaynak>.openai.azure.com`) |
 | `AZURE_OPENAI_API_KEY` | Foundry anahtarı |
 | `CHAT_DEPLOYMENT` | `gpt-5.5` (Foundry'deki deploy adı) |
-| `CORS_ORIGINS` | `https://<web>.azurewebsites.net` |
+| `CORS_ORIGINS` | `https://<web>.azurewebsites.net` (sol üstte küçük **sürüm** yazısı) | Paketlemede yazılan sürümle aynı (`Sürüm: <commit> · <tarih saat>`); farklıysa eski frontend çalışıyor ya da tarayıcı önbelleği → **Ctrl+F5** / gizli pencere |
+| `https://<web>.azurewebsites.net` |
 | `SESSION_SECRET` | Uzun rastgele bir metin. Üretmek için: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
 | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `true` (yüklemede `requirements.txt` kurulur) |
 
@@ -123,6 +124,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 | Arada bir "Oturum geçersiz" | `SESSION_SECRET` tanımlı değil (her yeniden başlatmada yeni anahtar üretilir) |
 | `az webapp deploy` yetki hatası | Hesabın bu kaynakta yetkisi yok; resource group sahibine sor |
 | Chrome adres çubuğunda kırmızı **"Tehlikeli"** | Google Güvenli Tarama yeni `azurewebsites.net` adresindeki giriş sayfasını kimlik avı sanmış olabilir; kod sorunu değil. https://safebrowsing.google.com/safebrowsing/report_error/ ile bildir; demodan önce jürinin tarayıcısında kontrol et |
+| Yeni özellik (ör. düğme) görünmüyor | Sol üstteki **sürüm** paketlemedekiyle aynı mı? Değilse `mercek-web.zip` için `az webapp deploy` çalıştırılmamış ya da eski zip yüklenmiş (`ls -l *.zip` ile tarih); aynıysa Ctrl+F5 / gizli pencere |
 | Web 503 / açılmıyor | `<web>` Log stream; başlangıç komutu `node server.js` ve `HOSTNAME=0.0.0.0` mi? |
 
 ## Notlar

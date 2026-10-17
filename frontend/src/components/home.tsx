@@ -6,6 +6,9 @@ import { useEffect, useSyncExternalStore } from "react";
 import { Chat } from "@/components/chat";
 import { clearSession, getServerSession, getSession, subscribe } from "@/lib/session";
 
+/** Paketleme anında gömülür (scripts/package_azure.py): Azure'da hangi sürümün çalıştığı görülür. */
+const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID;
+
 /** Oturum yoksa giriş sayfasına yönlendirir; varsa başlık + sohbet. */
 export function Home() {
   const router = useRouter();
@@ -27,6 +30,7 @@ export function Home() {
         <div>
           <h1 className="text-xl font-semibold">Mercek</h1>
           <p className="text-sm opacity-70">Yaşadığınız sorunu yazın, birlikte bakalım.</p>
+          {BUILD_ID && <p className="text-[10px] opacity-40">sürüm {BUILD_ID}</p>}
         </div>
         <div className="text-right text-sm">
           <p className="font-medium">{session.user.name}</p>
