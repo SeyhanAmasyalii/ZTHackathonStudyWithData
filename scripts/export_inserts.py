@@ -63,6 +63,18 @@ def table_inserts(table: str, rows: list[dict], types: dict[str, str]) -> list[s
     return out + [""]
 
 
+def plain_inserts(table: str, rows: list[dict], types: dict[str, str]) -> list[str]:
+    """Yalnızca INSERT: satır başına bir cümle; DELETE, GO, koşul yok."""
+    columns = [column for column, sql_type in types.items() if "IDENTITY" not in sql_type]
+    names = ", ".join(f"[{column}]" for column in columns)
+    return [
+        f"INSERT INTO dbo.{table} ({names}) VALUES ("
+        + ", ".join(literal(row.get(c), types[c]) for c in columns)
+        + ");"
+        for row in rows
+    ]
+
+
 def app_users_inserts() -> list[str]:
     columns = list(APP_USERS_TYPES)
     out = ["-- dbo.app_users: demo kullanıcılar (varsa dokunulmaz)"]
@@ -80,6 +92,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--cikti", default=str(ROOT / "dist" / "mercek-inserts.sql"))
     parser.add_argument("--tablo", action="append", help="yalnızca bu tablo(lar)")
+    parser.add_argument(
+        "--yalin", action="store_true", help="yalnızca satır satır INSERT cümleleri"
+    )
     args = parser.parse_args()
 
     schema = parse_schema((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
@@ -89,14 +104,18 @@ def main() -> None:
     if unknown:
         sys.exit(f"Bilinmeyen tablo: {', '.join(unknown)}")
 
-    lines = [
-        "-- Mercek: datav2 verisinin INSERT cümleleri (T-SQL). ÜRETİLMİŞ DOSYA.",
-        "-- Üretmek için: uv run --directory backend python ../scripts/export_inserts.py",
-        "-- Önce db/schema.sql ve db/app_tables.sql çalıştırılmış olmalı.",
-        "SET NOCOUNT ON;",
-        "GO",
-        "",
-    ]
+    lines = (
+        []
+        if args.yalin
+        else [
+            "-- Mercek: datav2 verisinin INSERT cümleleri (T-SQL). ÜRETİLMİŞ DOSYA.",
+            "-- Üretmek için: uv run --directory backend python ../scripts/export_inserts.py",
+            "-- Önce db/schema.sql ve db/app_tables.sql çalıştırılmış olmalı.",
+            "SET NOCOUNT ON;",
+            "GO",
+            "",
+        ]
+    )
     counts: dict[str, int] = {}
     for name in names:
         if name == "app_users":
@@ -104,10 +123,15 @@ def main() -> None:
         missing = set().union(*(row.keys() for row in tables[name])) - set(schema.get(name, {}))
         if missing:
             sys.exit(f"db/schema.sql eski ({name}: {sorted(missing)}). Önce: build_schema.py")
-        lines += table_inserts(name, tables[name], schema[name])
+        build = plain_inserts if args.yalin else table_inserts
+        lines += build(name, tables[name], schema[name])
         counts[name] = len(tables[name])
     if not args.tablo or "app_users" in args.tablo:
-        lines += app_users_inserts()
+        lines += (
+            plain_inserts("app_users", user_rows(), APP_USERS_TYPES)
+            if args.yalin
+            else app_users_inserts()
+        )
         counts["app_users"] = len(user_rows())
 
     output = Path(args.cikti)
