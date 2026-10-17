@@ -3,7 +3,7 @@
 > Hedef: Kibana hata türleri Azure AI Search'te (`mercek-loglar`, hibrit arama: kelime + vektör) dursun ve
 > **veriyi Azure SQL'den kendisi, 5 dakikada bir alsın**. Mercek kullanıcının tarifinden (ör. "abone numarasını kabul etmiyor")
 > doğru ekranı ve hatayı `hata_ara` aracıyla bulsun. Sayım, zaman aralığı ve "yalnızca benim loglarım" yine `kibana_sorgula`'da (kodda).
-> Ön koşul: `docs/AZURE-APP-SERVICE.md` ve `docs/AZURE-SQL.md` (veri SQL'de yüklü). **Anahtar/parola repoya yazılmaz.**
+> Ön koşul: `docs/AZURE-APP-SERVICE.md` ve `docs/AZURE-SQL.md` (veri SQL'de yüklü; 5 dk zamanlama için SQL **Basic**, §1.1). **Anahtar/parola repoya yazılmaz.**
 
 Aşağıda `<search>` = arama hizmeti adı (ör. `mercek-search-<takım>`), `<rg>` = resource group, `<api>` = backend uygulama adı.
 
@@ -85,14 +85,18 @@ Bundan sonra **betiği tekrar çalıştırmak gerekmez**: indexer 5 dakikada bir
 Portalda kontrol: `<search>` → **Arama yönetimi → Dizin oluşturucular** → `mercek-loglar-indexer` → **Yürütme geçmişi** (5 dk'da bir satır);
 **Dizinler** → `mercek-loglar` → belge sayısı **107**; **Arama gezgini**'nde `abone` → Ara.
 
-### Ücretsiz SQL ile zamanlama (prova)
-Indexer 5 dakikada bir sorgu attığı için **ücretsiz (serverless) SQL veritabanı uykuya geçemez** ve aylık ücretsiz kota
-(100.000 vCore-saniye) birkaç günde biter; dolunca veritabanı ay sonuna kadar durur (Mercek JSON'a düşer). Bu yüzden provadan sonra:
+### SQL katmanı ve zamanlama
+Indexer 5 dakikada bir SQL'e bağlandığı için **SQL veritabanı uykuya geçemez**:
 
-- Zamanlamayı kapatmak için: `uv run --directory backend python ..\scripts\build_search_index.py --zamanlamasiz`
-  (indeks yine kurulur ve bir kez dolar; sonra kendiliğinden çalışmaz) **ya da** portalda `mercek-loglar-indexer` → **Zamanlama** → **Bir kez**.
-- Demodan önce zamanlamayı açmak için betiği `--zamanlamasiz` olmadan tekrar çalıştırın.
-- Hackathon ortamındaki SQL ücretli bir katmandaysa bu sorun yoktur; 5 dk açık kalabilir.
+| SQL katmanı | 5 dk zamanlama | Maliyet |
+|---|---|---|
+| **Basic (5 DTU)** — önerilen | Sürekli açık kalabilir | ~5 $/ay, sabit (`docs/AZURE-SQL.md` §1.1) |
+| Ücretsiz (serverless) | Yalnızca test/demo günlerinde (aylık kota ~2 günde biter, dolunca veritabanı ay sonuna kadar durur) | 0 $ |
+| Hackathon ortamının SQL'i (takıma verilen, ücretli) | Sürekli açık kalabilir | Takımın değil |
+
+Ücretsiz SQL kullanıyorsanız provadan sonra zamanlamayı kapatın:
+`uv run --directory backend python ..\scripts\build_search_index.py --zamanlamasiz` (indeks yine kurulur ve bir kez dolar)
+**ya da** portalda `mercek-loglar-indexer` → **Zamanlama** → **Bir kez**. Demodan önce betiği `--zamanlamasiz` olmadan tekrar çalıştırın.
 
 ## 4. App Service'e bağla (3 dk)
 
@@ -145,4 +149,4 @@ Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücre
 | Sohbette `hata_ara` hiç çağrılmıyor | `<api>`'de `SEARCH_ENDPOINT` yok (araç sunulmaz) ya da kullanıcı ekran/hata kodunu zaten söyledi (o zaman gerekmez) |
 | Günlükte `hata_ara başarısız: Arama servisi 403` | App Service anahtarı yanlış ya da MI rol ataması henüz etkinleşmedi (5. adım) |
 | Günlükte `hata_ara başarısız: Arama servisi 404` | İndeks yok: 3. adımı çalıştırın; `SEARCH_LOG_INDEX` adı aynı mı |
-| Ay ortasında Mercek "JSON verisine geçildi" diyor | Ücretsiz SQL kotası dolmuş olabilir (indexer zamanlaması açık kaldı); §3 "Ücretsiz SQL ile zamanlama" |
+| Ay ortasında Mercek "JSON verisine geçildi" diyor | Ücretsiz SQL kotası dolmuş olabilir (indexer zamanlaması açık kaldı); SQL'i Basic'e alın ya da zamanlamayı kapatın (§3 "SQL katmanı ve zamanlama") |
