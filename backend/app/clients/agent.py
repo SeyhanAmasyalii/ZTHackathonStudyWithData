@@ -97,7 +97,7 @@ class FoundryAgentClient:
 
 
 def _describe(exc: Exception) -> str:
-    """Hata türü + servisin kısa açıklaması (anahtar/token içermez; kullanıcı metni zaten taranmış)."""
+    """Hata türü + servisin kısa açıklaması (anahtar/token içermez)."""
     status = getattr(exc, "status_code", None)
     detail = str(getattr(exc, "message", "") or exc).replace("\n", " ")[:300]
     return f"Agent çağrısı başarısız: {type(exc).__name__} {status or ''} {detail}".strip()
