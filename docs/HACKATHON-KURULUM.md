@@ -130,7 +130,7 @@ Ortam değişkenlerini şimdi değil §7'de toplu girin.
 |---|---|---|
 | SQL (`mercekdb` → Sorgu düzenleyicisi, **Entra ile giriş**) | `CREATE USER [<api>] FROM EXTERNAL PROVIDER;`<br>`ALTER ROLE db_datareader ADD MEMBER [<api>];`<br>`ALTER ROLE db_datawriter ADD MEMBER [<api>];` | `docs/AZURE-SQL.md` §4.2, §5.2 |
 | `<search>` → Erişim denetimi (IAM) | **Search Index Data Reader** → Yönetilen kimlik → App Service → `<api>` | Türkçe portalda "Arama Dizini Veri Okuyucusu"; aramaya `Arama` yazın; "Yönetilen Uygulama…" rolünü **seçmeyin** |
-| `<foundry>` → Erişim denetimi (IAM) | **Azure AI User**; listede yoksa **Cognitive Services User**; o da yoksa **Cognitive Services Data Contributor (Preview)** → Yönetilen kimlik → `<api>` | Provada *Azure AI Developer* `403` verdi; *OpenAI User* ve *Data Reader* agent çağrısına yetmez |
+| `<foundry>` → Erişim denetimi (IAM) | **Azure AI User**; listede yoksa **Cognitive Services User**; o da yoksa **Cognitive Services Data Contributor (Preview)** → Yönetilen kimlik → `<api>` | Provada Türkçe portalda ilk ikisi yoktu; **Data Contributor (Preview) ile çalıştı**. *Azure AI Developer* `403` verdi; *OpenAI User* ve *Data Reader* yetmez |
 
 Rol atamaları **5–10 dk**'da etkinleşir; sonra `<api>` → **Yeniden başlat**.
 

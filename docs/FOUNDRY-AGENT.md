@@ -91,7 +91,7 @@ Agent'ın çalıştırma ve belirteç (token) sayıları **İzleme** sekmesinde 
    - Pencerenin altındaki **gizlilik bildirimi**: izlerde kullanıcı mesajları ve araç sonuçları saklanır; projede
      *Log Analytics Reader* rolü olan herkes görür. Mercek'te araç sonuçlarında kişisel veri yok ve kullanıcı metni Foundry'ye
      gitmeden taranıyor; yine de bu rolü yalnızca takıma verin (KVKK).
-3. Mercek'te birkaç soru sorun → 2–5 dk sonra **İzlemeler** sekmesi: her çalıştırma satırına tıklayınca girdiler, `function_call`
+3. Mercek'te birkaç soru sorun → 2–5 dk sonra **İzlemeler** sekmesi (provada doğrulandı): her çalıştırma satırına tıklayınca girdiler, `function_call`
    (ör. `kibana_sorgula`), backend'in döndürdüğü `function_call_output` ve cevap sırayla görünür.
    **İzleme** sekmesinde çalıştırma sayısı, gecikme, belirteç ve hata oranı grafikleri.
 4. **Değerlendirme** sekmesi (isteğe bağlı): otomatik kalite/güvenlik değerlendirmesi planlanabilir; demo için şart değil.
@@ -105,8 +105,8 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 
 1. **Kimlik yetkisi:** `<foundry>` → **Erişim denetimi (IAM)** → **Rol ataması ekle** → **Azure AI User**
    (portal listesinde yoksa — prova portalında çıkmadı — **Cognitive Services User**, o da yoksa **Cognitive Services Data
-   Contributor (Preview)** — "data plane API çağırma"; provada yalnızca *Azure AI Developer* ile agent çağrısı `403 Forbidden`
-   verdi. *Data Reader* ve *OpenAI User* agent çağrısına yetmez) →
+   Contributor (Preview)** — "data plane API çağırma"; **provada doğrulandı**: yalnızca *Azure AI Developer* ile `403 Forbidden`,
+   *Cognitive Services Data Contributor (Preview)* eklenince çalıştı. *Data Reader* ve *OpenAI User* agent çağrısına yetmez) →
    Erişim ata: **Yönetilen kimlik** → **App Service** → `<api>` → **Gözden geçir + ata** (5–10 dk'da etkinleşir).
 2. `<api>` → **Ayarlar → Ortam değişkenleri** → ekleyin → **Uygula**:
 
