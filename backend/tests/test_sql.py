@@ -1,10 +1,12 @@
-import json
-import re
+import sys
 
 from app.config import REPO_ROOT, Settings
 from app.repositories import catalog as catalog_module
 from app.repositories import sql
 from app.repositories.datav2 import TABLES, build_catalog, json_catalog, read_json
+
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from datav2_tables import parse_schema  # noqa: E402
 
 
 class FakeCursor:
@@ -18,7 +20,7 @@ class FakeCursor:
     def execute(self, statement):
         self.executed.append(statement)
         table = statement.rsplit("dbo.", 1)[1]
-        columns = tuple(sql.TABLE_COLUMNS[table])
+        columns = sql.TABLE_COLUMNS[table]
         rows = getattr(self.raw, table)
         self.rows = [tuple(row.get(column) for column in columns) for row in rows]
 
@@ -56,28 +58,9 @@ def test_connection_string_without_user_uses_entra():
     assert "Pwd" not in text
 
 
-def test_insert_sql_uses_one_json_parameter():
-    statement = sql.insert_sql("institution_screens")
-    assert statement == (
-        "INSERT INTO dbo.institution_screens (institution_code, screen_code) "
-        "SELECT institution_code, screen_code FROM OPENJSON(?) WITH ("
-        "institution_code NVARCHAR(20) '$.institution_code', "
-        "screen_code NVARCHAR(20) '$.screen_code')"
-    )
-
-
-def test_rows_payload_is_ascii_and_keeps_turkish_text():
-    rows = [{"institution_code": "GAZ02", "name": "Başkentgaz", "bill_type": "Doğalgaz", "x": 1}]
-    payload = sql.rows_payload("institutions", rows)
-    assert payload.isascii()
-    assert json.loads(payload) == [
-        {"institution_code": "GAZ02", "name": "Başkentgaz", "bill_type": "Doğalgaz"}
-    ]
-
-
 def test_select_sql_reads_datetimes_with_offset():
     statement = sql.select_sql("incidents")
-    assert "CONVERT(NVARCHAR(40), created_at, 126) AS created_at" in statement
+    assert "CONVERT(NVARCHAR(40), [created_at], 126) AS [created_at]" in statement
     assert statement.endswith("FROM dbo.incidents")
 
 
@@ -85,19 +68,15 @@ def test_every_table_has_columns():
     assert set(sql.TABLE_COLUMNS) == set(TABLES)
 
 
-def test_incident_columns_exist_in_data_and_schema(data_dir):
+def test_read_columns_exist_in_data_and_schema(data_dir):
     columns = sql.TABLE_COLUMNS["incidents"]
     assert {"reporter_user_name", "scenario_path"} <= set(columns)
-    first = read_json(data_dir).incidents[0]
-    assert set(columns) <= set(first)
-    schema = (REPO_ROOT / "db" / "schema.sql").read_text(encoding="utf-8")
+    assert set(columns) <= set(read_json(data_dir).incidents[0])
+    schema = parse_schema((REPO_ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
     for table, table_columns in sql.TABLE_COLUMNS.items():
-        body = re.search(rf"CREATE TABLE dbo\.{table} \((.*?)\n\);", schema, re.S).group(1)
-        for column, sql_type in table_columns.items():
-            assert re.search(rf"^\s+{column}\s+{re.escape(sql_type)}\s", body, re.M), (
-                table,
-                column,
-            )
+        assert set(table_columns) <= set(schema[table]), table
+    for column in sql.DATETIME_COLUMNS:
+        assert any(schema[t].get(column, "").startswith("DATETIMEOFFSET") for t in schema)
 
 
 def test_read_raw_builds_same_catalog_as_json(data_dir):

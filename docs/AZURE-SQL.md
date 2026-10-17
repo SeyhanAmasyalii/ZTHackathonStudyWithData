@@ -45,8 +45,13 @@ git pull
 uv run --directory backend python ..\scripts\load_sql.py
 ```
 
-Beklenen: 6 tablo için `✓ ... satır` ve son satırda `✓ Kontrol: 2002 hata logu, 700 çağrı; JSON ile aynı`.
-Betik tabloları her çalıştırmada silip yeniden oluşturur (`db/schema.sql`); tekrar çalıştırmak güvenlidir.
+Beklenen: 21 tablonun her biri için `✓ <tablo>: N satır, içerik JSON ile aynı` ve son satırda
+`✓ Kontrol: 21 tablo; sohbet kataloğu 2002 hata logu, 700 çağrı` (1–2 dk; `customers` 40.005, `loans` 33.000 satır).
+
+- Yüklenen: `datav2/*.json`'daki tüm tablolar, tüm kolonlarıyla + `datav2/ui/scenarios.ts` → `scenarios` tablosu.
+  Yüklenmeyen: `*.stats.json` (özet) ve `kibana_logs_partNN.json` (`kibana_logs.json`'un parçaları).
+- Betik tabloları her çalıştırmada silip yeniden oluşturur (`db/schema.sql`); tekrar çalıştırmak güvenlidir.
+- Veride kolon/tablo değişirse önce şemayı yeniden üretin: `python scripts\build_schema.py` (tipler veriden çıkarılır).
 
 Yerelde backend'i (`uv run uvicorn app.main:app --reload --port 8000`) başlatınca terminalde
 `Veri kaynağı: Azure SQL (mercekdb) · 2002 hata logu · 700 çağrı` satırı görünür.
