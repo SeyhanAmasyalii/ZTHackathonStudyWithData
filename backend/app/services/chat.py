@@ -11,7 +11,7 @@ from app.clients.llm import LLMClient, LLMError
 from app.config import get_settings
 from app.models.chat import HistoryMessage
 from app.repositories.datav2 import Institution, Screen
-from app.services.tools import TOOLS, ToolContext, run_tool
+from app.services.tools import ToolContext, run_tool, tools_for
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,9 @@ def answer(
         *({"role": item.role, "content": item.content} for item in history),
         {"role": "user", "content": message.strip()},
     ]
+    tools = tools_for(context)
     for turn in range(MAX_TURNS):
-        reply = llm.chat(messages, TOOLS)
+        reply = llm.chat(messages, tools)
         if not reply.tool_calls:
             if not reply.content:
                 raise LLMError("Model boş yanıt döndü")

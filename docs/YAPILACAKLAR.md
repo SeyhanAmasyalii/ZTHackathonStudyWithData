@@ -24,5 +24,7 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 ## Sonra
 - [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
-- [ ] Azure AI Search: benzer çözüm arama aracı
+- [x] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`; SQL görünümünden indexer, 5 dk; SQL Basic) — prova: "abone numarasını sistem kabul etmiyor" → ODMTTLMT 110412, 165 kayıt, SOL-005 temkinli. Rehber: `docs/AZURE-AI-SEARCH.md`
+- [ ] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader; `docs/AZURE-AI-SEARCH.md` §5)
+- [ ] Azure AI Search: `benzer_cozum_ara` (çözüm şablonları + çağrı notları)
 - [ ] KVKK: modele gitmeden önce kişisel veri maskeleme

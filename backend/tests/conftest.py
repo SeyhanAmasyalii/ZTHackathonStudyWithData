@@ -2,8 +2,9 @@ import json
 import os
 from collections.abc import Callable
 
-# Testler her zaman datav2 JSON'larıyla çalışır; backend/.env'deki SQL ayarı kullanılmaz.
+# Testler datav2 JSON'larıyla ve AI Search olmadan çalışır; backend/.env'deki ayarlar kullanılmaz.
 os.environ["SQL_SERVER"] = ""
+os.environ["SEARCH_ENDPOINT"] = ""
 
 import pytest
 

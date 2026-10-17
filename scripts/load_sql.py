@@ -7,6 +7,7 @@ Kullanım (repo kökünden):
 2. Her tablo 500 satırlık partiler halinde, tek JSON parametresiyle (OPENJSON) eklenir.
 3. Her tablo SQL'den geri okunup JSON ile alan alan karşılaştırılır; sohbet kataloğu da kontrol
    edilir.
+4. AI Search indexer'ının okuduğu görünüm (db/search_views.sql) yenilenir.
 
 Bağlantı backend/.env'den okunur: SQL_SERVER, SQL_DATABASE ve (SQL kimlik doğrulaması için)
 SQL_USER, SQL_PASSWORD. SQL_USER boşsa Microsoft Entra kullanılır (önce `az login`).
@@ -143,6 +144,13 @@ def main() -> None:
             if difference:
                 sys.exit(f"✗ {difference}")
             print(f"✓ {table}: {len(rows)} satır, içerik JSON ile aynı")
+
+        # AI Search indexer'ının okuduğu görünüm (tablolar yeniden kurulunca o da yenilenir).
+        views = ROOT / "db" / "search_views.sql"
+        for batch in schema_batches(views.read_text(encoding="utf-8")):
+            cursor.execute(batch)
+        connection.commit()
+        print("✓ AI Search görünümü güncellendi (db/search_views.sql)")
 
         # Sohbetin okuduğu katalog (backend) SQL'den de aynı kuruluyor mu?
         from_sql = build_catalog(sql.read_raw(connection))

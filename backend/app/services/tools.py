@@ -1,13 +1,18 @@
 """Mercek'in kullanabildiği araçlar. Model parametreleri seçer, sorguyu kod çalıştırır."""
 
 import json
+import logging
+import re
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
 from app.config import TURKEY_TZ
 from app.repositories.datav2 import Incident, LogEntry, normalize
+
+logger = logging.getLogger(__name__)
 
 MAX_RANGE = timedelta(days=7)
 MAX_SAMPLES = 20
@@ -79,8 +84,45 @@ CAGRI_ARA = {
     },
 }
 
+HATA_ARA = {
+    "type": "function",
+    "function": {
+        "name": "hata_ara",
+        "description": (
+            "Kullanıcının tarif ettiği soruna anlamca en çok benzeyen hata türlerini bulur "
+            "(Azure AI Search, kelime + anlam araması). Ekran ya da hata numarası belli değilken "
+            "kullan. Her sonuçta ekran, hata numarası/kodu, kurum, mesaj ve son 30 günün toplam "
+            "kayıt sayısı vardır; güncel sayım ve zaman aralığı için sonra kibana_sorgula çağır."
+        ),
+        "parameters": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["description"],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": (
+                        "Sorunun kısa tarifi, ör. 'abone numarası kabul edilmiyor'. "
+                        "Kişisel veri (ad, müşteri no, telefon) yazma."
+                    ),
+                },
+                "screen_code": {
+                    "type": "string",
+                    "description": "İsteğe bağlı ekran filtresi, ör. ODMTTLMT",
+                },
+            },
+        },
+    },
+}
+
 TOOLS = [KIBANA_SORGULA, CAGRI_ARA]
 MAX_INCIDENT_SAMPLES = 5
+HATA_ARA_TOP = 5
+MAX_DESCRIPTION = 300
+_SCREEN_CODE = re.compile(r"^[A-Z0-9]{3,20}$")
+
+# (tarif, ekran filtresi, en fazla sonuç) → arama sonuçları. AI Search yapılandırılmamışsa None.
+LogSearchFn = Callable[[str, str | None, int], list[dict[str, Any]]]
 
 
 class ToolInputError(ValueError):
@@ -95,6 +137,12 @@ class ToolContext:
     incidents: tuple[Incident, ...] = ()
     # Prompt'a giden görev bilgisi (ör. "L2 Destek · 9010 BT Destek (L2)"); kullanıcı kodu değil.
     user_role: str = ""
+    search_logs: LogSearchFn | None = None
+
+
+def tools_for(context: ToolContext) -> list[dict[str, Any]]:
+    """Modele sunulan araçlar; hata_ara yalnızca AI Search yapılandırılmışsa."""
+    return [*TOOLS, HATA_ARA] if context.search_logs else list(TOOLS)
 
 
 def _parse_time(value: Any, name: str) -> datetime:
@@ -244,7 +292,49 @@ def cagri_ara(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
     }
 
 
-_HANDLERS = {"kibana_sorgula": kibana_sorgula, "cagri_ara": cagri_ara}
+def hata_ara(args: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    if context.search_logs is None:
+        return {"error": "Hata araması yapılandırılmamış"}
+    description = _optional_str(args, "description")
+    if not description:
+        raise ToolInputError("description gerekli")
+    description = description[:MAX_DESCRIPTION]
+    screen_code = _optional_str(args, "screen_code")
+    if screen_code is not None:
+        screen_code = screen_code.upper()
+        if not _SCREEN_CODE.match(screen_code):
+            raise ToolInputError("screen_code geçersiz")
+    query = {"description": description, "screen_code": screen_code}
+    try:
+        hits = context.search_logs(description, screen_code, HATA_ARA_TOP)
+    except Exception as exc:  # arama servisi hatası sohbeti durdurmasın
+        logger.error("hata_ara başarısız: %s", exc)
+        return {"query": query, "error": "Hata araması şu an yapılamıyor"}
+    return {
+        "query": query,
+        "total": len(hits),
+        "note": "log_count/customer_count son 30 günün toplamıdır; güncel sayı için kibana_sorgula",
+        "results": [
+            {
+                "screen_code": hit.get("screen_code"),
+                "screen_name": hit.get("screen_name"),
+                "error_number": hit.get("error_number"),
+                "error_code": hit.get("error_code"),
+                "institution_code": hit.get("institution_code"),
+                "institution_name": hit.get("institution_name"),
+                "message": hit.get("message"),
+                "explanation": hit.get("explanation"),
+                "log_count": hit.get("log_count"),
+                "customer_count": hit.get("customer_count"),
+                "last_seen": hit.get("last_seen"),
+                "score": round(hit.get("@search.score") or 0, 4),
+            }
+            for hit in hits
+        ],
+    }
+
+
+_HANDLERS = {"kibana_sorgula": kibana_sorgula, "cagri_ara": cagri_ara, "hata_ara": hata_ara}
 
 
 def run_tool(name: str, arguments: str, context: ToolContext) -> dict[str, Any]:

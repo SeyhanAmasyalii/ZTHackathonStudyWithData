@@ -24,6 +24,26 @@ Portal → arama: `SQL veritabanları` → **+ Oluştur**
 
 Sunucu adresi: veritabanı → **Genel Bakış → Sunucu adı** (`<sql>.database.windows.net`).
 
+### 1.1 Katman seçimi: AI Search indexer'ı 5 dk'da bir çalışacaksa **Basic** (~5 $/ay)
+
+AI Search indexer'ı (`docs/AZURE-AI-SEARCH.md`) SQL'e 5 dakikada bir bağlanır. **Ücretsiz/serverless** veritabanı bu yüzden hiç
+uyuyamaz; aylık ücretsiz kota (~55 saat uyanık kalma) birkaç günde biter. Sürekli açık bir indexer için en ucuz seçenek
+**Basic (5 DTU, 2 GB)**: sabit ücret (bölgeye göre ~5 $/ay; portal kesin fiyatı gösterir), uyku yok, kota yok. Verimiz ~100 MB'ın altında.
+
+**Var olan veritabanını Basic'e almak (veri korunur, 2–5 dk):**
+1. `mercekdb` (SQL veritabanı) → **Ayarlar → İşlem + depolama**.
+2. Üstte ücretsiz teklif açıksa: **Ücretsiz teklif** seçeneğini **kaldırın** (ücretsiz teklifteki veritabanı başka katmana ancak teklif kaldırılınca geçer).
+3. **Hizmet katmanı:** **Basic** (DTU tabanlı satın alma modeli altında; "Temel" yazabilir) · DTU: **5** · Veri en fazla boyutu: **2 GB**.
+4. Sağdaki maliyet özeti **~5 $/ay** göstermeli → **Uygula**. Ölçekleme sırasında veritabanı birkaç saniye bağlantı kesebilir.
+5. **Genel Bakış → Fiyatlandırma katmanı: Basic** görünmeli. Sunucu adı, veritabanı adı, kullanıcılar ve Managed Identity aynı kalır;
+   kodda ve App Service ayarlarında değişiklik gerekmez.
+
+Portal bu ekranda Basic'e izin vermezse: SQL sunucusu → **+ Veritabanı oluştur** → ad `mercekdb2`, **İşlem + depolama → Yapılandır → Basic** →
+oluşturun; `backend\.env` ve App Service'te `SQL_DATABASE=mercekdb2` yapıp `scripts\load_sql.py`'yi çalıştırın (Managed Identity
+kullanıcısını §4.2'deki komutlarla yeni veritabanında da açın). Eski ücretsiz veritabanını sonra silebilirsiniz.
+
+Basic'te ilk yükleme (`load_sql.py`) ücretsiz katmandan biraz daha uzun sürebilir (birkaç dakika); sohbetin okuma hızı fark etmez.
+
 > Ücretsiz teklifin sade oluşturma ekranında **Ağ** sekmesi yoktur. Oluşturduktan sonra: SQL sunucusu (`<sql>`) → **Güvenlik → Ağ İletişimi** → Genel ağ erişimi **Seçili ağlar** → **+ İstemci IPv4 adresinizi ekleyin** → Özel durumlar: **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver** ✓ → **Kaydet**.
 
 ## 2. Veriyi yükle (bilgisayarda, 2 dk)
@@ -133,7 +153,7 @@ Birkaç saniye sonra **Nesne (sorumlu) kimliği** görünür; kimliğin adı uyg
 | Betik: `Client with IP address ... is not allowed` | SQL sunucusu → **Güvenlik → Ağ İletişimi** → Güvenlik duvarı kuralları → **İstemci IP adresinizi ekleyin** → Kaydet (ev/ofis IP'si değişince tekrar) |
 | Betik: `✗ SQL'den okunan veri JSON ile aynı değil` | Yükleme yarım kalmış ya da tablo elle değiştirilmiş; betiği tekrar çalıştırın (tablolar baştan kurulur) |
 | Betik: `Login failed for user` | `SQL_USER` / `SQL_PASSWORD` yanlış; parola portaldan sıfırlanabilir (SQL sunucusu → Genel Bakış → Parolayı sıfırla) |
-| İlk bağlantı 30–60 sn sürüyor ya da `database ... is not currently available` | Ücretsiz/serverless veritabanı uykudaydı; kod 3 kez dener. Tekrar çalıştırın |
+| İlk bağlantı 30–60 sn sürüyor ya da `database ... is not currently available` | Ücretsiz/serverless veritabanı uykudaydı; kod 3 kez dener. Tekrar çalıştırın (Basic katmanda uyku yoktur) |
 | Günlük akışında `Azure SQL okunamadı; JSON verisine geçildi` | Uygulama çalışır ama JSON'dan okur. Satırın altındaki hatayı okuyun: güvenlik duvarı ("Azure hizmetlerine izin ver"), kullanıcı/parola ya da Managed Identity kullanıcısı |
 | `SQL_SERVER tanımlı değil` | `backend\.env` dosyasında `SQL_SERVER` satırı yok |
 | MI sonrası: `Login failed for user '<token-identified principal>'` | 4.2 yapılmamış ya da `CREATE USER` adı uygulama adıyla aynı değil |
