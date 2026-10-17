@@ -23,7 +23,7 @@ def _bundled_or_repo(bundled: str, in_repo: str) -> Path:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=BACKEND_ROOT / ".env", extra="ignore")
 
     app_name: str = "Mercek API"
     # JSON listesi ya da virgülle ayrılmış adresler: https://a.azurewebsites.net,http://localhost:3000
@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     llm_debug: bool = False
 
     data_dir: Path = _bundled_or_repo("data", "datav2")
+    # Azure SQL. SQL_SERVER boşsa veri data_dir'deki JSON'lardan okunur.
+    # SQL_USER boşsa Microsoft Entra ile bağlanılır (yerelde az login, Azure'da Managed Identity).
+    sql_server: str = ""
+    sql_database: str = "mercekdb"
+    sql_user: str = ""
+    sql_password: str = ""
     prompts_dir: Path = _bundled_or_repo("prompts", "prompts")
     # Veri 2026-10-17 09:00'da bitiyor; demoda "şu an" 09:15'e sabitlenir.
     # Gerçek saat için ortamda DEMO_NOW boş bırakılır (DEMO_NOW=).

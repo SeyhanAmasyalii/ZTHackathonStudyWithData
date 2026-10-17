@@ -5,6 +5,7 @@ description = "Mercek backend: sohbet API'si (FastAPI + Azure AI Foundry)"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.143.3",
+    "mssql-python==1.15.0",
     "openai==3.32.0",
     "pydantic-settings==2.16.0",
     "uvicorn[standard]==0.54.0",

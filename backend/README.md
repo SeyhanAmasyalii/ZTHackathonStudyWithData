@@ -11,11 +11,13 @@ FastAPI. Mercek sohbet mesajını Azure AI Foundry'deki modele (`gpt-5.5`) ileti
 
 **Oturum:** şifresiz demo girişi; backend imzalı ve süreli (12 saat) bir token verir (HMAC-SHA256, `SESSION_SECRET`). Sohbetteki kullanıcı adı yalnızca token'dan okunur; model kullanıcı adını görmez, `only_mine=true` filtresini backend uygular.
 
-Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `app/repositories` (`datav2` JSON) / `app/clients` (model). System prompt: `../prompts/mercek-chat.md`.
+Katmanlar: `app/api` (HTTP) → `app/services` (iş mantığı, araçlar) → `app/repositories` (Azure SQL ya da `datav2` JSON) / `app/clients` (model). System prompt: `../prompts/mercek-chat.md`.
 
 **Araçlar** (model parametreleri seçer, backend `datav2` JSON'larında çalıştırır; en fazla 5 tur):
 - `kibana_sorgula`: ekran, kurum, hata no, zaman aralığı (en fazla 7 gün), yalnızca kullanıcının logları mı, anahtar kelime → `kibana_logs.json` (Warning/Error).
 - `cagri_ara`: ekran + hata no (+ kurum) → `incidents.json` geçmiş çağrıları, kapananların hazır çözümü (`solution_templates.json`), açık çağrı sayısı.
+
+**Veri kaynağı:** `SQL_SERVER` tanımlıysa Azure SQL (`db/schema.sql`, yükleme `scripts/load_sql.py`), değilse `datav2` JSON. Veri açılışta bir kez belleğe alınır; SQL'e ulaşılamazsa JSON'a düşülür (log: `Veri kaynağı: ...`). Kurulum: `docs/AZURE-SQL.md`.
 
 **Hata ayıklama:** `.env`'de `LLM_DEBUG=true` → modele giden ve dönen her şey terminale yazılır (yalnızca yerelde).
 

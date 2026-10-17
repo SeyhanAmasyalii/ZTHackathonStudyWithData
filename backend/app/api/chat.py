@@ -7,12 +7,8 @@ from app.api.auth import get_current_user
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.config import Settings, get_settings
 from app.models.chat import ChatRequest, ChatResponse
-from app.repositories.datav2 import (
-    load_error_logs,
-    load_incidents,
-    load_institutions,
-    load_screens,
-)
+from app.repositories.catalog import get_catalog
+from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
 from app.services.chat import answer
 from app.services.tools import ToolContext
@@ -37,21 +33,22 @@ def chat(
     user: Annotated[DemoUser, Depends(get_current_user)],
     llm: Annotated[LLMClient, Depends(get_llm)],
     settings: Annotated[Settings, Depends(get_settings)],
+    catalog: Annotated[Catalog, Depends(get_catalog)],
 ) -> ChatResponse:
     context = ToolContext(
         user_name=user.user_name,
         user_role=f"{user.title} · {user.unit}",
         now=settings.now(),
-        logs=load_error_logs(settings.data_dir),
-        incidents=load_incidents(settings.data_dir),
+        logs=catalog.logs,
+        incidents=catalog.incidents,
     )
     try:
         reply = answer(
             request.message,
             llm,
             context,
-            load_screens(settings.data_dir),
-            load_institutions(settings.data_dir),
+            catalog.screens,
+            catalog.institutions,
             request.history,
         )
     except LLMError as exc:

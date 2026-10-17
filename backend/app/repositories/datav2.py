@@ -1,4 +1,4 @@
-"""datav2/*.json dosyalarını ilk erişimde bir kez belleğe alır (salt okunur)."""
+"""datav2 verisini (JSON ya da Azure SQL'den gelen ham satırlar) sohbet kataloğuna dönüştürür."""
 
 import json
 from dataclasses import dataclass
@@ -104,43 +104,57 @@ def _to_entry(
     )
 
 
-def _read(data_dir: Path, name: str) -> list[dict]:
-    return json.loads((data_dir / name).read_text(encoding="utf-8"))
+# Ham tablolar: JSON dosya adı = SQL tablo adı (db/schema.sql).
+TABLES = (
+    "screens",
+    "institutions",
+    "institution_screens",
+    "solution_templates",
+    "incidents",
+    "kibana_logs",
+)
 
 
-@lru_cache
-def _kibana_rows(data_dir: Path) -> tuple[dict, ...]:
-    return tuple(_read(data_dir, "kibana_logs.json"))
+@dataclass(frozen=True)
+class RawData:
+    """Kaynaktan (JSON ya da Azure SQL) okunan ham satırlar; alan adları datav2 şemasıyla aynı."""
+
+    screens: tuple[dict, ...]
+    institutions: tuple[dict, ...]
+    institution_screens: tuple[dict, ...]
+    solution_templates: tuple[dict, ...]
+    incidents: tuple[dict, ...]
+    kibana_logs: tuple[dict, ...]
 
 
-@lru_cache
-def load_error_logs(data_dir: Path) -> tuple[LogEntry, ...]:
-    """kibana_logs.json içinden yalnızca Warning/Error kayıtları, zamana göre sıralı."""
-    rows = _kibana_rows(data_dir)
-    screen_names = {screen.code: screen.name for screen in load_screens(data_dir)}
-    institution_names = {inst.code: inst.name for inst in load_institutions(data_dir)}
-    entries = [
-        _to_entry(row, screen_names, institution_names)
-        for row in rows
-        if row.get("log_level") in ERROR_LEVELS
-    ]
-    return tuple(sorted(entries, key=lambda entry: entry.log_time))
+@dataclass(frozen=True)
+class Catalog:
+    """Sohbetin kullandığı veri: hata logları, çağrılar, ekranlar, kurumlar."""
+
+    logs: tuple[LogEntry, ...]
+    incidents: tuple[Incident, ...]
+    screens: tuple[Screen, ...]
+    institutions: tuple[Institution, ...]
 
 
-@lru_cache
-def load_screens(data_dir: Path) -> tuple[Screen, ...]:
-    rows = json.loads((data_dir / "screens.json").read_text(encoding="utf-8"))
-    screens = (Screen(row["code"], row["name"], row.get("description") or "") for row in rows)
+def read_json(data_dir: Path) -> RawData:
+    def read(name: str) -> tuple[dict, ...]:
+        return tuple(json.loads((data_dir / f"{name}.json").read_text(encoding="utf-8")))
+
+    return RawData(**{name: read(name) for name in TABLES})
+
+
+def build_screens(raw: RawData) -> tuple[Screen, ...]:
+    screens = (
+        Screen(row["code"], row["name"], row.get("description") or "") for row in raw.screens
+    )
     return tuple(sorted(screens, key=lambda screen: screen.code))
 
 
-@lru_cache
-def load_institutions(data_dir: Path) -> tuple[Institution, ...]:
+def build_institutions(raw: RawData) -> tuple[Institution, ...]:
     """Fatura kurumları ve işlem gördükleri ekranlar (institution_screens)."""
-    rows = json.loads((data_dir / "institutions.json").read_text(encoding="utf-8"))
-    links = json.loads((data_dir / "institution_screens.json").read_text(encoding="utf-8"))
     screens_by_code: dict[str, list[str]] = {}
-    for link in links:
+    for link in raw.institution_screens:
         screens_by_code.setdefault(link["institution_code"], []).append(link["screen_code"])
     institutions = (
         Institution(
@@ -149,26 +163,37 @@ def load_institutions(data_dir: Path) -> tuple[Institution, ...]:
             bill_type=row.get("bill_type") or "",
             screen_codes=tuple(sorted(set(screens_by_code.get(row["institution_code"], [])))),
         )
-        for row in rows
+        for row in raw.institutions
     )
     return tuple(sorted(institutions, key=lambda institution: institution.code))
 
 
-@lru_cache
-def load_incidents(data_dir: Path) -> tuple[Incident, ...]:
+def build_error_logs(
+    raw: RawData, screens: tuple[Screen, ...], institutions: tuple[Institution, ...]
+) -> tuple[LogEntry, ...]:
+    """Yalnızca Warning/Error kayıtları, zamana göre sıralı."""
+    screen_names = {screen.code: screen.name for screen in screens}
+    institution_names = {inst.code: inst.name for inst in institutions}
+    entries = [
+        _to_entry(row, screen_names, institution_names)
+        for row in raw.kibana_logs
+        if row.get("log_level") in ERROR_LEVELS
+    ]
+    return tuple(sorted(entries, key=lambda entry: entry.log_time))
+
+
+def build_incidents(raw: RawData) -> tuple[Incident, ...]:
     """Çağrılar; hata numarası bağlı logdan, çözüm metni hazır çözüm şablonundan."""
     log_errors = {
         row["correlation_id"]: (
             row.get("app_exception_value"),
             _json_field(row.get("message_response")).get("errorCode"),
         )
-        for row in _kibana_rows(data_dir)
+        for row in raw.kibana_logs
     }
-    templates = {
-        row["solution_template_id"]: row for row in _read(data_dir, "solution_templates.json")
-    }
+    templates = {row["solution_template_id"]: row for row in raw.solution_templates}
     incidents = []
-    for row in _read(data_dir, "incidents.json"):
+    for row in raw.incidents:
         error_number, error_code = log_errors.get(row.get("kibana_correlation_id"), (None, None))
         template = templates.get(row.get("solution_template_id") or "", {})
         incidents.append(
@@ -190,3 +215,36 @@ def load_incidents(data_dir: Path) -> tuple[Incident, ...]:
             )
         )
     return tuple(sorted(incidents, key=lambda incident: incident.created_at))
+
+
+def build_catalog(raw: RawData) -> Catalog:
+    screens = build_screens(raw)
+    institutions = build_institutions(raw)
+    return Catalog(
+        logs=build_error_logs(raw, screens, institutions),
+        incidents=build_incidents(raw),
+        screens=screens,
+        institutions=institutions,
+    )
+
+
+@lru_cache
+def json_catalog(data_dir: Path) -> Catalog:
+    """datav2/*.json dosyalarından katalog (ilk erişimde bir kez okunur)."""
+    return build_catalog(read_json(data_dir))
+
+
+def load_error_logs(data_dir: Path) -> tuple[LogEntry, ...]:
+    return json_catalog(data_dir).logs
+
+
+def load_screens(data_dir: Path) -> tuple[Screen, ...]:
+    return json_catalog(data_dir).screens
+
+
+def load_institutions(data_dir: Path) -> tuple[Institution, ...]:
+    return json_catalog(data_dir).institutions
+
+
+def load_incidents(data_dir: Path) -> tuple[Incident, ...]:
+    return json_catalog(data_dir).incidents

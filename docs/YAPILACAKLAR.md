@@ -13,13 +13,14 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] Konuşma hafızası (ilk sürüm): frontend son 20 mesajı gönderir, "Yeni sohbet" sıfırlar
 - [x] Cevap biçimlendirme: kalın, kod, madde/numaralı liste, başlık (bağımlılıksız, HTML çalıştırmaz)
 - [x] Azure App Service (prova, kişisel abonelik, F1): `mercek-api`, `mercek-web` portaldan; paket `scripts/package_azure.py`, yükleme Cloud Shell. Rehber: `docs/AZURE-APP-SERVICE.md`
+- [x] Azure SQL: `db/schema.sql`, `scripts/load_sql.py` (JSON → SQL), backend `SQL_SERVER` varsa SQL'den okur (yoksa/ulaşamazsa JSON). Rehber: `docs/AZURE-SQL.md`
 
 ## Sırada
+- [ ] Azure SQL'i portalda açıp veriyi yükleme ve App Service'e bağlama (prova)
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra
 - [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
-- [ ] Azure SQL: `datav2` JSON'larını SQL'e taşıma (`backend/app/repositories/datav2.py` yerine SQL deposu)
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
 - [ ] Azure AI Search: benzer çözüm arama aracı
 - [ ] KVKK: modele gitmeden önce kişisel veri maskeleme

@@ -66,8 +66,15 @@ def package_api() -> None:
         shutil.copy2(ROOT / "datav2" / name, out / "data" / name)
     shutil.copytree(ROOT / "prompts", out / "prompts")
     run(
-        ["uv", "export", "--no-dev", "--no-hashes", "--no-emit-project", "-o",
-         str(out / "requirements.txt")],
+        [
+            "uv",
+            "export",
+            "--no-dev",
+            "--no-hashes",
+            "--no-emit-project",
+            "-o",
+            str(out / "requirements.txt"),
+        ],
         BACKEND,
     )
     zip_dir(out, DIST / "mercek-api.zip")
@@ -91,7 +98,9 @@ def package_web(api_url: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--api-url", help="Backend adresi, ör. https://mercek-api-xyz.azurewebsites.net")
+    parser.add_argument(
+        "--api-url", help="Backend adresi, ör. https://mercek-api-xyz.azurewebsites.net"
+    )
     parser.add_argument("--only", choices=["api", "web"], help="Yalnızca bir paketi üret")
     args = parser.parse_args()
     if args.only != "web":

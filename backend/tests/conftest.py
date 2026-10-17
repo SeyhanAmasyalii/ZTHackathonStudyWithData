@@ -1,5 +1,9 @@
 import json
+import os
 from collections.abc import Callable
+
+# Testler her zaman datav2 JSON'larıyla çalışır; backend/.env'deki SQL ayarı kullanılmaz.
+os.environ["SQL_SERVER"] = ""
 
 import pytest
 
