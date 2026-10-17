@@ -130,3 +130,25 @@ def test_catalog_reads_sql_when_configured(monkeypatch, data_dir):
         assert loaded is not json_catalog(data_dir)
     finally:
         catalog_module._load.cache_clear()
+
+
+def test_connect_does_not_retry_firewall_error(monkeypatch):
+    import mssql_python
+
+    calls = []
+
+    def refuse(_text):
+        calls.append(1)
+        raise mssql_python.ProgrammingError(
+            "Client with IP address '1.2.3.4' is not allowed to access the server.", ""
+        )
+
+    monkeypatch.setattr(mssql_python, "connect", refuse)
+    monkeypatch.setattr(sql.time, "sleep", lambda _s: None)
+    settings = Settings(sql_server="x.database.windows.net", sql_user="u", sql_password="p")
+    try:
+        with sql.connect(settings):
+            pass
+    except mssql_python.Error:
+        pass
+    assert calls == [1]

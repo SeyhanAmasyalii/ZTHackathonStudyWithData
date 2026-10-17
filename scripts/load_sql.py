@@ -14,6 +14,7 @@ SQL_USER, SQL_PASSWORD. SQL_USER boşsa Microsoft Entra kullanılır (önce `az 
 """
 
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -151,5 +152,27 @@ def main() -> None:
     print(f"✓ Kontrol: {len(schema)} tablo; sohbet kataloğu {logs} hata logu, {incidents} çağrı")
 
 
+HINTS = {
+    "is not allowed to access the server": (
+        "Bu bilgisayarın IP adresi SQL güvenlik duvarında yok (ev/ofis IP'si değişmiş olabilir).\n"
+        "Portal → SQL sunucusu → Güvenlik → Ağ İletişimi → + İstemci IPv4 adresinizi ekleyin →"
+        " Kaydet. Sonra 1–2 dk bekleyip tekrar çalıştırın."
+    ),
+    "Login failed": "SQL_USER / SQL_PASSWORD yanlış (backend/.env).",
+}
+
+
+def run() -> None:
+    try:
+        main()
+    except Exception as exc:  # sürücü hataları: kısa, anlaşılır mesaj
+        message = str(exc)
+        hint = next((text for key, text in HINTS.items() if key in message), None)
+        if hint is None:
+            raise
+        ip = re.search(r"IP address '([^']+)'", message)
+        sys.exit(f"✗ SQL'e bağlanılamadı{f' (IP: {ip.group(1)})' if ip else ''}.\n{hint}")
+
+
 if __name__ == "__main__":
-    main()
+    run()

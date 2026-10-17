@@ -58,6 +58,8 @@ DATETIME_COLUMNS = {"created_at", "log_time"}
 
 CONNECT_ATTEMPTS = 3
 RETRY_SECONDS = 10
+# Beklemekle düzelmeyen hatalar (güvenlik duvarı, kullanıcı/parola): tekrar denenmez.
+PERMANENT_ERRORS = ("is not allowed to access the server", "Login failed")
 
 
 def _quote(value: str) -> str:
@@ -96,7 +98,7 @@ def connect(settings: Settings) -> Iterator[Any]:
             connection = mssql_python.connect(connection_string(settings))
             break
         except mssql_python.Error as exc:
-            if attempt == CONNECT_ATTEMPTS:
+            if attempt == CONNECT_ATTEMPTS or any(text in str(exc) for text in PERMANENT_ERRORS):
                 raise
             logger.warning(
                 "SQL bağlantısı kurulamadı (deneme %d/%d): %s",
