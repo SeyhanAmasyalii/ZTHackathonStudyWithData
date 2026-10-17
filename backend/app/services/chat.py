@@ -16,7 +16,9 @@ from app.services.tools import ToolContext, run_tool, tools_for
 
 logger = logging.getLogger(__name__)
 
-MAX_TURNS = 5
+# Bir soruda araç zinciri: hata_ara → kibana_sorgula (kendi) → kibana_sorgula (herkes) → cagri_ara
+# → benzer_cozum_ara → cevap = 6 tur; pay bırakılır.
+MAX_TURNS = 8
 
 
 @lru_cache
