@@ -62,7 +62,13 @@ def test_index_fields_match_sql_view_columns():
 def test_datasource_uses_view_and_high_water_mark():
     connection = indexer_connection_string(SETTINGS)
     assert "Server=tcp:mercek-sql.database.windows.net,1433;" in connection
-    assert "Password={p;a}}ss};" in connection
+    assert 'Password="p;a}ss";' in connection
+    plain = indexer_connection_string(
+        Settings(sql_server="s", sql_user="u", sql_password="Abc{1}x")
+    )
+    assert "User ID=u;Password=Abc{1}x;" in plain
+    quoted = indexer_connection_string(Settings(sql_server="s", sql_user="u", sql_password='a"b'))
+    assert 'Password="a""b";' in quoted
     definition = datasource_definition(NAMES, connection)
     assert definition["name"] == "mercek-loglar-sql"
     assert definition["container"]["name"] == "v_hata_turleri"

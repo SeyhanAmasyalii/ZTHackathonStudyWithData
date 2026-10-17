@@ -143,7 +143,7 @@ Bunları da kimliğe çevirmek AI Search'ün sistem kimliğini gerektirir (Ücre
 | Betik: `SQL'e bağlanılamadı ... IP` | SQL güvenlik duvarına IP'nizi ekleyin (`docs/AZURE-SQL.md`) |
 | Betik: `Arama servisi 403` | Yönetici anahtarı yanlış/eksik (sorgu anahtarı indeks/indexer oluşturamaz) |
 | Betik: `✗ Indexer: transientFailure/persistentFailure ... Cannot open server` | AI Search SQL'e ulaşamıyor: SQL sunucusu → Ağ İletişimi → **Azure hizmetlerinin erişmesine izin ver** işaretli mi |
-| Betik: `✗ Indexer: ... Login failed` | `.env`'deki SQL kullanıcısı/parolası yanlış |
+| Betik: `Arama servisi 400 ... Login failed for user` (veri kaynağı oluşturulurken) ya da `✗ Indexer: ... Login failed` | AI Search SQL'e `.env`'deki kullanıcıyla bağlanamadı: parola yanlış ya da eski betik sürümü (ADO.NET biçimi düzeltildi; `git pull` yapıp tekrar çalıştırın) |
 | Betik: `✗ Indexer: ... embedding` / `DeploymentNotFound` / `401` | Foundry'de embedding deploy'u yok, adı `EMBEDDING_DEPLOYMENT` ile aynı değil ya da `AZURE_OPENAI_API_KEY` yanlış |
 | Betik: `✗ Indexer 300 sn içinde bitmedi` | Ücretsiz SQL uykudan uyanıyor olabilir; portalda indexer **Yürütme geçmişi**'ne bakın, gerekirse betiği tekrar çalıştırın |
 | Sohbette `hata_ara` hiç çağrılmıyor | `<api>`'de `SEARCH_ENDPOINT` yok (araç sunulmaz) ya da kullanıcı ekran/hata kodunu zaten söyledi (o zaman gerekmez) |

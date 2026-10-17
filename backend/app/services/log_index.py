@@ -129,11 +129,19 @@ def indexer_connection_string(settings: Settings) -> str:
     server = settings.sql_server.strip().removeprefix("tcp:")
     if "," not in server:
         server = f"{server},1433"
-    password = settings.sql_password.replace("}", "}}")
     return (
-        f"Server=tcp:{server};Database={settings.sql_database};User ID={settings.sql_user};"
-        f"Password={{{password}}};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+        f"Server=tcp:{server};Database={settings.sql_database};"
+        f"User ID={_ado_value(settings.sql_user)};Password={_ado_value(settings.sql_password)};"
+        "Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
     )
+
+
+def _ado_value(value: str) -> str:
+    """ADO.NET bağlantı dizesi değeri (ODBC'deki {…} değil): ; ' " ya da baş/son boşluk varsa
+    çift tırnak içine alınır, içteki çift tırnak ikilenir."""
+    if any(char in value for char in ";'\"") or value != value.strip():
+        return '"' + value.replace('"', '""') + '"'
+    return value
 
 
 def datasource_definition(names: SearchNames, connection_string: str) -> dict[str, Any]:
