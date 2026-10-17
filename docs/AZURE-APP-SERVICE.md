@@ -49,8 +49,7 @@ Portal → **Kaynak oluştur** → **Web App**
 | `AZURE_OPENAI_ENDPOINT` | Foundry uç noktası (ör. `https://<kaynak>.openai.azure.com`) |
 | `AZURE_OPENAI_API_KEY` | Foundry anahtarı |
 | `CHAT_DEPLOYMENT` | `gpt-5.5` (Foundry'deki deploy adı) |
-| `CORS_ORIGINS` | `https://<web>.azurewebsites.net` (sol üstte küçük **sürüm** yazısı) | Paketlemede yazılan sürümle aynı (`Sürüm: <commit> · <tarih saat>`); farklıysa eski frontend çalışıyor ya da tarayıcı önbelleği → **Ctrl+F5** / gizli pencere |
-| `https://<web>.azurewebsites.net` |
+| `CORS_ORIGINS` | `https://<web>.azurewebsites.net` |
 | `SESSION_SECRET` | Uzun rastgele bir metin. Üretmek için: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
 | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `true` (yüklemede `requirements.txt` kurulur) |
 
@@ -111,6 +110,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 |---|---|
 | `https://<api>.azurewebsites.net/api/health` | `{"status":"ok"}` (F1'de ilk açılış 30–60 sn) |
 | `https://<api>.azurewebsites.net/api/users` | Elif, Zeynep, Kerem |
+| `https://<web>.azurewebsites.net` (sol üstte küçük **sürüm** yazısı) | Paketlemede yazılan sürümle aynı (`Sürüm: <commit> · <tarih saat>`); farklıysa eski frontend çalışıyor ya da tarayıcı önbelleği → **Ctrl+F5** / gizli pencere |
 | `https://<web>.azurewebsites.net` | Giriş ekranı → Elif → "ODMTTLMT ekranında hata alıyorum" → 7 hata, GAZ02 110731, SOL-031 |
 
 ## 7. Sorun giderme
