@@ -1,0 +1,91 @@
+"""Mercek sohbeti: model gerektiğinde araç çağırır, sonunda kullanıcıya cevap yazar."""
+
+import json
+import logging
+from collections.abc import Sequence
+from datetime import datetime
+from functools import lru_cache
+from typing import Any
+
+from app.clients.llm import LLMClient, LLMError
+from app.config import get_settings
+from app.models.chat import HistoryMessage
+from app.repositories.datav2 import Institution, Screen
+from app.services.tools import TOOLS, ToolContext, run_tool
+
+logger = logging.getLogger(__name__)
+
+MAX_TURNS = 5
+
+
+@lru_cache
+def _prompt_template() -> str:
+    path = get_settings().prompts_dir / "mercek-chat.md"
+    return path.read_text(encoding="utf-8").strip()
+
+
+def build_system_prompt(
+    now: datetime,
+    screens: tuple[Screen, ...],
+    institutions: tuple[Institution, ...],
+    user_role: str = "",
+) -> str:
+    screen_lines = "\n".join(
+        f"{screen.code} · {screen.name} — {screen.description}" for screen in screens
+    )
+    institution_lines = "\n".join(
+        f"{inst.code} · {inst.name} ({inst.bill_type}) → ekran: "
+        f"{', '.join(inst.screen_codes) or '-'}"
+        for inst in institutions
+    )
+    return (
+        _prompt_template()
+        .replace("{{now}}", now.strftime("%Y-%m-%d %H:%M"))
+        .replace("{{user_role}}", user_role or "belirtilmedi")
+        .replace("{{screens}}", screen_lines)
+        .replace("{{institutions}}", institution_lines)
+    )
+
+
+def answer(
+    message: str,
+    llm: LLMClient,
+    context: ToolContext,
+    screens: tuple[Screen, ...],
+    institutions: tuple[Institution, ...],
+    history: Sequence[HistoryMessage] = (),
+) -> str:
+    messages: list[dict[str, Any]] = [
+        {
+            "role": "system",
+            "content": build_system_prompt(context.now, screens, institutions, context.user_role),
+        },
+        # Konuşma hafızası: önceki kullanıcı mesajları ve Mercek'in son cevapları.
+        *({"role": item.role, "content": item.content} for item in history),
+        {"role": "user", "content": message.strip()},
+    ]
+    for turn in range(MAX_TURNS):
+        reply = llm.chat(messages, TOOLS)
+        if not reply.tool_calls:
+            if not reply.content:
+                raise LLMError("Model boş yanıt döndü")
+            return reply.content
+
+        messages.append(reply.as_message())
+        for call in reply.tool_calls:
+            result = run_tool(call.name, call.arguments, context)
+            logger.info(
+                "Araç çağrısı: tur=%d ad=%s sorgu=%s sonuç=%s",
+                turn + 1,
+                call.name,
+                json.dumps(result.get("query", call.arguments), ensure_ascii=False),
+                result.get("total", result.get("error")),
+            )
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": call.id,
+                    "content": json.dumps(result, ensure_ascii=False),
+                }
+            )
+    raise LLMError(f"{MAX_TURNS} turda cevap üretilemedi")
