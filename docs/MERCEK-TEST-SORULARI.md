@@ -1,7 +1,8 @@
 # Mercek — deneme soruları ve beklenen cevaplar
 
 Demo saati 2026-10-17 09:15 (DEMO_NOW). Sayılar `datav2` verisinden; model cümleyi farklı kurabilir ama **sayılar ve kayıt numaraları** aynı olmalı.
-Her kullanıcıda **Yeni sohbet** ile başlayın. Günlük akışında (F5) hangi aracın çağrıldığı görünür.
+Her kullanıcıda **Yeni sohbet** ile başlayın.
+Çözüm önerilen cevapların altında **▶ Akışı izle · SOL-xxx** bağlantısı çıkar (çözümün ekran turu, `incidents.scenario_path`; ör. E1 → SOL-031 `…/ODMTTLMT/odm-baskentgaz-zaman-asimi`). Bağlantıyı kod seçer, model yazmaz; yeni sekmede açılır. Günlük akışında (F5) hangi aracın çağrıldığı görünür.
 
 ## Elif Demir — Şube Müşteri Temsilcisi (601 Kızılay)
 

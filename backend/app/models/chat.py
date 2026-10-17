@@ -36,10 +36,19 @@ class AffectedSummary(AffectedQuery):
     customer_count: int
 
 
+class ScenarioLink(BaseModel):
+    """Eşleşen hazır çözümün ekran akışı (tur); bağlantıyı kod seçer, model yazmaz."""
+
+    solution_template_id: str
+    title: str
+    url: str
+
+
 class ChatResponse(BaseModel):
     reply: str
     # Yalnızca yetkili kullanıcıya (L2) ve son sorguda müşteri varsa: "Etkilenen müşteriler".
     affected_customers: AffectedSummary | None = None
+    scenario_links: list[ScenarioLink] | None = None
     conversation_id: str | None = None
 
 
@@ -66,6 +75,7 @@ class ConversationMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str
     affected_customers: AffectedSummary | None = None
+    scenario_links: list[ScenarioLink] | None = None
 
 
 class ConversationOut(BaseModel):

@@ -46,6 +46,8 @@ class Incident:
     solution_template_id: str | None
     solution_title: str
     solution_text: str
+    # Çözümün ekran akışı (tur) adresi; kullanıcıya "Akışı izle" bağlantısı olarak gösterilir.
+    scenario_path: str | None = None
 
 
 @dataclass(frozen=True)
@@ -228,6 +230,7 @@ def build_incidents(raw: RawData) -> tuple[Incident, ...]:
                 solution_template_id=row.get("solution_template_id"),
                 solution_title=template.get("mercek_assigned_title") or "",
                 solution_text=template.get("solution_text") or "",
+                scenario_path=row.get("scenario_path") or None,
             )
         )
     return tuple(sorted(incidents, key=lambda incident: incident.created_at))

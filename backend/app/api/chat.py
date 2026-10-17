@@ -17,6 +17,7 @@ from app.models.chat import (
     ConversationMessage,
     ConversationOut,
     HistoryMessage,
+    ScenarioLink,
 )
 from app.repositories.app_store import AppStore, StoredMessage, get_app_store
 from app.repositories.catalog import get_catalog
@@ -24,6 +25,7 @@ from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
 from app.services.chat import answer, answer_with_agent
 from app.services.log_index import LogSearch
+from app.services.scenarios import scenario_links, scenario_map
 from app.services.solution_index import SolutionSearch
 from app.services.tools import LogSearchFn, SolutionSearchFn, ToolContext
 
@@ -147,14 +149,22 @@ def chat(
         logger.error("Sohbet yanıtı üretilemedi: %s", exc)
         raise HTTPException(status_code=502, detail="Şu an yanıt üretilemiyor.") from exc
     affected = _affected_summary(user, trace)
+    links = scenario_links(trace, scenario_map(catalog.incidents))
     store.append_messages(
         conversation_id,
         [
             StoredMessage("user", request.message.strip()),
-            StoredMessage("assistant", reply, affected.model_dump() if affected else None),
+            StoredMessage(
+                "assistant", reply, affected.model_dump() if affected else None, links or None
+            ),
         ],
     )
-    return ChatResponse(reply=reply, affected_customers=affected, conversation_id=conversation_id)
+    return ChatResponse(
+        reply=reply,
+        affected_customers=affected,
+        scenario_links=[ScenarioLink(**link) for link in links] or None,
+        conversation_id=conversation_id,
+    )
 
 
 @router.get(
@@ -181,6 +191,9 @@ def get_conversation(
                     AffectedSummary(**item.affected)
                     if item.affected and user.can_view_customers
                     else None
+                ),
+                scenario_links=(
+                    [ScenarioLink(**link) for link in item.scenarios] if item.scenarios else None
                 ),
             )
             for item in stored

@@ -28,6 +28,8 @@ class StoredMessage:
     role: str  # user / assistant
     content: str
     affected: dict[str, Any] | None = None
+    # Çözüm akışı bağlantıları: [{"solution_template_id", "title", "url"}]
+    scenarios: list[dict[str, str]] | None = None
 
 
 class AppStore(Protocol):
@@ -101,6 +103,22 @@ class MemoryAppStore:
     def set_agent_response_id(self, conversation_id: str, response_id: str) -> None:
         with self._lock:
             self._agent_responses[conversation_id] = response_id
+
+
+def _encode_extras(message: StoredMessage) -> str | None:
+    """affected_json kolonu: düğme bilgileri. Akış bağlantısı yoksa eski biçim (yalnızca sorgu)."""
+    if message.scenarios:
+        return json.dumps({"affected": message.affected, "scenarios": message.scenarios})
+    return json.dumps(message.affected) if message.affected else None
+
+
+def _decode_extras(value: str | None) -> tuple[dict[str, Any] | None, list[dict[str, str]] | None]:
+    if not value:
+        return None, None
+    data = json.loads(value)
+    if isinstance(data, dict) and "scenarios" in data:
+        return data.get("affected"), data.get("scenarios")
+    return data, None
 
 
 def _payload(rows: list[dict[str, Any]]) -> str:
@@ -201,8 +219,7 @@ class SqlAppStore:
             logger.exception("Konuşma geçmişi okunamadı")
             return None
         return [
-            StoredMessage(role, content, json.loads(affected) if affected else None)
-            for role, content, affected in rows
+            StoredMessage(role, content, *_decode_extras(extras)) for role, content, extras in rows
         ]
 
     def append_messages(self, conversation_id: str, messages: list[StoredMessage]) -> None:
@@ -211,7 +228,7 @@ class SqlAppStore:
                 "conversation_id": conversation_id,
                 "role": message.role,
                 "content": message.content,
-                "affected_json": json.dumps(message.affected) if message.affected else None,
+                "affected_json": _encode_extras(message),
             }
             for message in messages
         ]
