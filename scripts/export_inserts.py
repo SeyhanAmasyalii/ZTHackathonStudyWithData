@@ -95,6 +95,7 @@ def main() -> None:
     parser.add_argument(
         "--yalin", action="store_true", help="yalnızca satır satır INSERT cümleleri"
     )
+    parser.add_argument("--go", action="store_true", help="--yalin ile: her INSERT'ten sonra GO")
     args = parser.parse_args()
 
     schema = parse_schema((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
@@ -134,6 +135,8 @@ def main() -> None:
         )
         counts["app_users"] = len(user_rows())
 
+    if args.yalin and args.go:
+        lines = [line + "\nGO" for line in lines]
     output = Path(args.cikti)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(lines), encoding="utf-8-sig")  # BOM: SSMS Türkçe'yi doğru okur
