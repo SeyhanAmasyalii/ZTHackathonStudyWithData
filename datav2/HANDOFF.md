@@ -44,6 +44,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 2. 🔔 **KVKK** — Foundry'ye göndermeden önce maskeleme yardımcısı + tüm metin alanlarında otomatik tarama (TCKN algoritması, telefon, `@ornek.test` dışı e-posta, IBAN, Luhn kart no, kişi adı listesi, IP/makine adı) → validate'te "✓ KVKK taraması · 0 bulgu" + birim testi. Bilinçli bulgu: EML-0032 (yok_sayildi, Foundry'ye gitmez). loans'ta IBAN kaldırıldı.
 3. 📎 **Maliyet Tahminleme Formu (Excel)** — kullanıcı tekrar ekleyecek, detayı verecek.
 4. 🧭 **§5 büyük güncellemenin planı** — kullanıcıyla birlikte.
+5. 🌿 **`claude/sleepy-hamilton-vfzco4` dalı** — 17.10 03:30'da main'e birleştirildi (32cb803), kullanıcı isteğiyle şimdilik tutuluyor. Oturum devam ederken önce `git pull origin main`; iş bitip yeniden birleşince dal silinecek.
 
 **Bu oturumun kararları (özet):** Mercek pilotu 15–16.10 (yalnızca çağrı önerisi; örüntü taraması ve e-posta taraması demoda açılır). Demo kayıtları (CAG-2051/-NN, CAG-2052, DUY-0419, İSKİ duyurusu, TLP-1043/1044/1045, prevented_calls) dosyalarda yok, canlı üretilir. Çağrılar logların 30 gününe hizalı. G takvimi 19.10→23.10.
 
