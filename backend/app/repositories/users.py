@@ -1,4 +1,9 @@
-"""Demo kullanıcıları (sentetik). user_name, kibana_logs.user_name ile aynıdır."""
+"""Demo kullanıcıları (sentetik). user_name, kibana_logs.user_name ile aynıdır.
+
+Bu liste app_users tablosunun tohumudur (scripts/setup_app_tables.py); SQL yoksa doğrudan
+kullanılır.
+Uygulama kullanıcıları app_store.get_app_store().list_users() ile okur.
+"""
 
 from dataclasses import dataclass
 
@@ -19,8 +24,5 @@ DEMO_USERS: tuple[DemoUser, ...] = (
     DemoUser("kerem", "Kerem Aydın", "L2 Destek", "9010 BT Destek (L2)", can_view_customers=True),
 )
 
-_BY_NAME = {user.user_name: user for user in DEMO_USERS}
-
-
-def find_user(user_name: str) -> DemoUser | None:
-    return _BY_NAME.get(user_name)
+# app_users.role ve sıralama (tohum için)
+ROLES = {"elif": "sube", "zeynep": "cagri_merkezi", "kerem": "l2"}

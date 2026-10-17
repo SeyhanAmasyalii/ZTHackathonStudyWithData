@@ -6,10 +6,12 @@ import { AffectedCustomersPanel } from "@/components/affected-customers";
 import { Markdown } from "@/components/markdown";
 import {
   type AffectedSummary,
+  fetchConversation,
   MAX_MESSAGE_LENGTH,
   sendChat,
   UnauthorizedError,
 } from "@/lib/api";
+import { clearConversationId, loadConversationId, saveConversationId } from "@/lib/session";
 
 type Message = {
   id: number;
@@ -18,10 +20,11 @@ type Message = {
   affected?: AffectedSummary;
 };
 
-type ChatProps = { token: string; onUnauthorized: () => void };
+type ChatProps = { token: string; userName: string; onUnauthorized: () => void };
 
-export function Chat({ token, onUnauthorized }: ChatProps) {
+export function Chat({ token, userName, onUnauthorized }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +34,33 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Sayfa yenilenince son konuşmayı sunucudan (SQL) geri yükle.
+  useEffect(() => {
+    const saved = loadConversationId(userName);
+    if (!saved) return;
+    let cancelled = false;
+    fetchConversation(saved, token)
+      .then((data) => {
+        if (cancelled) return;
+        setConversationId(data.conversation_id);
+        setMessages(
+          data.messages.map((item) => ({
+            id: nextId.current++,
+            role: item.role,
+            text: item.content,
+            affected: item.affected_customers,
+          })),
+        );
+      })
+      .catch((err: unknown) => {
+        if (err instanceof UnauthorizedError) onUnauthorized();
+        else clearConversationId(userName); // konuşma bulunamadı: yeni sohbetle devam
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, userName, onUnauthorized]);
 
   function addMessage(role: Message["role"], text: string, affected?: AffectedSummary) {
     const id = nextId.current++;
@@ -48,8 +78,12 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
     setError(null);
     setLoading(true);
     try {
-      const data = await sendChat(text, history, token);
+      const data = await sendChat(text, history, token, conversationId);
       addMessage("assistant", data.reply, data.affected_customers);
+      if (data.conversation_id) {
+        setConversationId(data.conversation_id);
+        saveConversationId(userName, data.conversation_id);
+      }
     } catch (err) {
       if (err instanceof UnauthorizedError) {
         onUnauthorized();
@@ -64,6 +98,8 @@ export function Chat({ token, onUnauthorized }: ChatProps) {
   function newConversation() {
     setMessages([]);
     setError(null);
+    setConversationId(null);
+    clearConversationId(userName);
   }
 
   function onSubmit(event: FormEvent) {

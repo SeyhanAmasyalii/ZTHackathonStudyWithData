@@ -72,3 +72,33 @@ export function clearSession() {
   }
   notify();
 }
+
+/** Sunucudaki konuşmanın kimliği (yalnızca kimlik; mesajlar SQL'de). Sayfa yenilenince geçmiş geri yüklenir. */
+function conversationKey(userName: string): string {
+  return `mercek.conversation.${userName}`;
+}
+
+export function loadConversationId(userName: string): string | null {
+  try {
+    const value = window.localStorage.getItem(conversationKey(userName));
+    return value && /^[0-9a-f]{32}$/.test(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveConversationId(userName: string, conversationId: string) {
+  try {
+    window.localStorage.setItem(conversationKey(userName), conversationId);
+  } catch {
+    // Depolama kapalıysa geçmiş yalnızca bu sayfada kalır.
+  }
+}
+
+export function clearConversationId(userName: string) {
+  try {
+    window.localStorage.removeItem(conversationKey(userName));
+  } catch {
+    // yok say
+  }
+}

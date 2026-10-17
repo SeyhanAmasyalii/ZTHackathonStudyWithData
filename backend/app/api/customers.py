@@ -9,13 +9,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.api.auth import get_current_user
 from app.config import Settings, get_settings
 from app.models.chat import AffectedCustomersResponse, AffectedQuery
+from app.repositories.app_store import AppStore, get_app_store
 from app.repositories.catalog import get_catalog
 from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
 from app.services.affected import affected_customers
 from app.services.tools import ToolContext, ToolInputError
 
-# Erişim kaydı (KVKK): kim, ne zaman, hangi sorgu, kaç müşteri. Müşteri bilgisi yazılmaz.
+# Erişim kaydı (KVKK): kim, ne zaman, hangi sorgu, kaç müşteri; SQL'de audit_log + uygulama logu.
+# Müşteri bilgisi yazılmaz.
 audit = logging.getLogger("mercek.audit")
 
 router = APIRouter(tags=["customers"])
@@ -27,9 +29,11 @@ def list_affected_customers(
     user: Annotated[DemoUser, Depends(get_current_user)],
     settings: Annotated[Settings, Depends(get_settings)],
     catalog: Annotated[Catalog, Depends(get_catalog)],
+    store: Annotated[AppStore, Depends(get_app_store)],
 ) -> AffectedCustomersResponse:
     if not user.can_view_customers:
         audit.warning("Müşteri listesi reddedildi: kullanıcı=%s", user.user_name)
+        store.write_audit(user.user_name, "affected_customers_denied", query.model_dump(), None)
         raise HTTPException(status_code=403, detail="Bu listeyi görme yetkiniz yok.")
     context = ToolContext(user_name=user.user_name, now=settings.now(), logs=catalog.logs)
     try:
@@ -41,5 +45,8 @@ def list_affected_customers(
         user.user_name,
         json.dumps(result["query"], ensure_ascii=False),
         result["total_customers"],
+    )
+    store.write_audit(
+        user.user_name, "affected_customers_view", result["query"], result["total_customers"]
     )
     return AffectedCustomersResponse(**result)

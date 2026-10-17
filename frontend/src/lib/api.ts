@@ -80,19 +80,42 @@ export type AffectedCustomers = {
   rows: AffectedCustomer[];
 };
 
-export type ChatReply = { reply: string; affected_customers?: AffectedSummary };
+export type ChatReply = {
+  reply: string;
+  affected_customers?: AffectedSummary;
+  conversation_id?: string;
+};
 
-/** Mesajı ve aynı sohbetin önceki mesajlarını backend'e (POST /api/chat) gönderir. */
+export type ConversationMessage = {
+  role: "user" | "assistant";
+  content: string;
+  affected_customers?: AffectedSummary;
+};
+
+/** Sunucudaki (SQL) konuşma; sayfa yenilenince sohbeti geri yüklemek için. */
+export function fetchConversation(
+  conversationId: string,
+  token: string,
+): Promise<{ conversation_id: string; messages: ConversationMessage[] }> {
+  return request(`/api/conversations/${encodeURIComponent(conversationId)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/** Mesajı, konuşma kimliğini ve yedek olarak önceki mesajları backend'e (POST /api/chat) gönderir. */
 export async function sendChat(
   message: string,
   history: HistoryMessage[],
   token: string,
+  conversationId: string | null = null,
 ): Promise<ChatReply> {
   return request<ChatReply>("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
       message,
+      // Geçmiş sunucuda tutulur; frontend'in geçmişi yalnızca sunucuda kayıt yoksa kullanılır.
+      conversation_id: conversationId,
       history: history
         .slice(-MAX_HISTORY)
         .map((item) => ({ ...item, content: item.content.slice(0, MAX_HISTORY_CONTENT) })),

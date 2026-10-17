@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.config import Settings, get_settings
 from app.models.auth import LoginRequest, LoginResponse, UserOut
-from app.repositories.users import DEMO_USERS, DemoUser, find_user
+from app.repositories.app_store import get_app_store
+from app.repositories.users import DemoUser
 from app.services.auth import AuthError, create_token, new_secret, verify_token
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,11 @@ def _session_secret(configured: str) -> str:
         "(yeniden başlatmada oturumlar düşer)."
     )
     return new_secret()
+
+
+def find_user(user_name: str) -> DemoUser | None:
+    """Kullanıcılar SQL'deki app_users tablosundan (yoksa koddaki demo listesi)."""
+    return next((u for u in get_app_store().list_users() if u.user_name == user_name), None)
 
 
 def _to_out(user: DemoUser) -> UserOut:
@@ -53,7 +59,7 @@ def get_current_user(
 @router.get("/users", response_model=list[UserOut])
 def list_users() -> list[UserOut]:
     """Giriş ekranındaki demo kullanıcı listesi."""
-    return [_to_out(user) for user in DEMO_USERS]
+    return [_to_out(user) for user in get_app_store().list_users()]
 
 
 @router.post("/login", response_model=LoginResponse)

@@ -40,7 +40,12 @@ export function Home() {
           </button>
         </div>
       </header>
-      <Chat key={session.user.user_name} token={session.token} onUnauthorized={logout} />
+      <Chat
+        key={session.user.user_name}
+        token={session.token}
+        userName={session.user.user_name}
+        onUnauthorized={logout}
+      />
     </main>
   );
 }

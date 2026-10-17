@@ -2,13 +2,22 @@ import logging
 from functools import lru_cache
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 
 from app.api.auth import get_current_user
 from app.clients.llm import AzureLLMClient, LLMClient, LLMError
 from app.clients.search import AzureSearchClient, SearchError
 from app.config import Settings, get_settings
-from app.models.chat import AffectedSummary, ChatRequest, ChatResponse
+from app.models.chat import (
+    MAX_HISTORY,
+    AffectedSummary,
+    ChatRequest,
+    ChatResponse,
+    ConversationMessage,
+    ConversationOut,
+    HistoryMessage,
+)
+from app.repositories.app_store import AppStore, StoredMessage, get_app_store
 from app.repositories.catalog import get_catalog
 from app.repositories.datav2 import Catalog
 from app.repositories.users import DemoUser
@@ -17,6 +26,8 @@ from app.services.log_index import LogSearch
 from app.services.tools import LogSearchFn, ToolContext
 
 logger = logging.getLogger(__name__)
+
+MAX_HISTORY_CONTENT = 8000
 
 router = APIRouter(tags=["chat"])
 
@@ -51,6 +62,7 @@ def chat(
     settings: Annotated[Settings, Depends(get_settings)],
     catalog: Annotated[Catalog, Depends(get_catalog)],
     search_logs: Annotated[LogSearchFn | None, Depends(get_log_search)],
+    store: Annotated[AppStore, Depends(get_app_store)],
 ) -> ChatResponse:
     context = ToolContext(
         user_name=user.user_name,
@@ -60,6 +72,19 @@ def chat(
         incidents=catalog.incidents,
         search_logs=search_logs,
     )
+    # Konuşma hafızası sunucuda (SQL): kayıt varsa geçmiş oradan okunur. Kayıt yoksa (yeni sohbet
+    # ya da sunucu belleği sıfırlandıysa) yeni konuşma açılır, frontend'in geçmişi kullanılır.
+    history = list(request.history)
+    conversation_id = request.conversation_id
+    stored = store.get_conversation(conversation_id, user.user_name) if conversation_id else None
+    if stored is None:
+        conversation_id = store.create_conversation(user.user_name)
+    else:
+        history = [
+            HistoryMessage(role=item.role, content=item.content[:MAX_HISTORY_CONTENT])
+            for item in stored[-MAX_HISTORY:]
+        ]
+
     trace: list[tuple[str, dict]] = []
     try:
         reply = answer(
@@ -68,13 +93,52 @@ def chat(
             context,
             catalog.screens,
             catalog.institutions,
-            request.history,
+            history,
             trace,
         )
     except LLMError as exc:
         logger.error("Sohbet yanıtı üretilemedi: %s", exc)
         raise HTTPException(status_code=502, detail="Şu an yanıt üretilemiyor.") from exc
-    return ChatResponse(reply=reply, affected_customers=_affected_summary(user, trace))
+    affected = _affected_summary(user, trace)
+    store.append_messages(
+        conversation_id,
+        [
+            StoredMessage("user", request.message.strip()),
+            StoredMessage("assistant", reply, affected.model_dump() if affected else None),
+        ],
+    )
+    return ChatResponse(reply=reply, affected_customers=affected, conversation_id=conversation_id)
+
+
+@router.get(
+    "/conversations/{conversation_id}",
+    response_model=ConversationOut,
+    response_model_exclude_none=True,
+)
+def get_conversation(
+    conversation_id: Annotated[str, Path(pattern=r"^[0-9a-f]{32}$")],
+    user: Annotated[DemoUser, Depends(get_current_user)],
+    store: Annotated[AppStore, Depends(get_app_store)],
+) -> ConversationOut:
+    """Sayfa yenilenince sohbeti geri yüklemek için; yalnızca konuşmanın sahibi görür."""
+    stored = store.get_conversation(conversation_id, user.user_name)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Konuşma bulunamadı.")
+    return ConversationOut(
+        conversation_id=conversation_id,
+        messages=[
+            ConversationMessage(
+                role=item.role,
+                content=item.content,
+                affected_customers=(
+                    AffectedSummary(**item.affected)
+                    if item.affected and user.can_view_customers
+                    else None
+                ),
+            )
+            for item in stored
+        ],
+    )
 
 
 def _affected_summary(user: DemoUser, trace: list[tuple[str, dict]]) -> AffectedSummary | None:

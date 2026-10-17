@@ -35,7 +35,9 @@ def test_health():
 def test_chat_returns_model_reply(fake_llm, auth):
     response = client.post("/api/chat", json={"message": "  merhaba  "}, headers=auth)
     assert response.status_code == 200
-    assert response.json() == {"reply": "Merhaba, ben Mercek."}
+    body = response.json()
+    assert body["reply"] == "Merhaba, ben Mercek."
+    assert len(body["conversation_id"]) == 32
     system, user = fake_llm.calls[0]
     assert "Mercek" in system["content"]
     assert user == {"role": "user", "content": "merhaba"}

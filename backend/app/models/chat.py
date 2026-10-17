@@ -16,6 +16,8 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     # Konuşma hafızası: frontend o sohbetteki son mesajları gönderir (eskiden yeniye).
     history: list[HistoryMessage] = Field(default_factory=list, max_length=MAX_HISTORY)
+    # Sunucudaki konuşma (SQL). Verilirse geçmiş sunucudan okunur; yoksa yeni konuşma açılır.
+    conversation_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
 
 
 class AffectedQuery(BaseModel):
@@ -38,6 +40,7 @@ class ChatResponse(BaseModel):
     reply: str
     # Yalnızca yetkili kullanıcıya (L2) ve son sorguda müşteri varsa: "Etkilenen müşteriler".
     affected_customers: AffectedSummary | None = None
+    conversation_id: str | None = None
 
 
 class AffectedCustomer(BaseModel):
@@ -57,3 +60,14 @@ class AffectedCustomersResponse(BaseModel):
     callable_customers: int
     truncated: bool
     rows: list[AffectedCustomer]
+
+
+class ConversationMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+    affected_customers: AffectedSummary | None = None
+
+
+class ConversationOut(BaseModel):
+    conversation_id: str
+    messages: list[ConversationMessage]

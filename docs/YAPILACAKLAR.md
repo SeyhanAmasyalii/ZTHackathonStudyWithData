@@ -11,6 +11,7 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] `cagri_ara` aracı: geçmiş kapanmış çağrılar ve çözümleri → çözüm önerisi
 - [x] Giriş ekranı: demo kullanıcı seçimi, imzalı oturum token'ı; sohbetteki kullanıcı token'dan
 - [x] Konuşma hafızası (ilk sürüm): frontend son 20 mesajı gönderir, "Yeni sohbet" sıfırlar
+- [x] Konuşma geçmişi, kullanıcılar ve KVKK erişim kaydı Azure SQL'de (`app_users`, `audit_log`, `conversations`, `conversation_messages`); sayfa yenilenince sohbet geri gelir. Kurulum: `scripts/setup_app_tables.py`, rehber `docs/AZURE-SQL.md` §5
 - [x] Cevap biçimlendirme: kalın, kod, madde/numaralı liste, başlık (bağımlılıksız, HTML çalıştırmaz)
 - [x] Azure App Service (prova, kişisel abonelik, F1): `mercek-api`, `mercek-web` portaldan; paket `scripts/package_azure.py`, yükleme Cloud Shell. Rehber: `docs/AZURE-APP-SERVICE.md`
 - [x] Azure SQL: datav2'nin 21 tablosu (+ `scenarios.ts`) tüm kolonlarıyla; şema `scripts/build_schema.py` → `db/schema.sql`, yükleme+doğrulama `scripts/load_sql.py`; backend `SQL_SERVER` varsa SQL'den okur (yoksa/ulaşamazsa JSON). Rehber: `docs/AZURE-SQL.md`
@@ -24,7 +25,6 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra
-- [ ] Konuşma geçmişini sunucuda tutma (Azure SQL ile birlikte)
 - [ ] `.github/workflows/ci-cd.yml` (arkadaş yapıyor)
 - [x] Azure AI Search: `hata_ara` (loglar, `mercek-loglar`; SQL görünümünden indexer, 5 dk; SQL Basic) — prova: "abone numarasını sistem kabul etmiyor" → ODMTTLMT 110412, 165 kayıt, SOL-005 temkinli. Rehber: `docs/AZURE-AI-SEARCH.md`
 - [ ] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader; `docs/AZURE-AI-SEARCH.md` §5)
