@@ -91,6 +91,7 @@ Sonuç: `dist\mercek-api.zip` ve `dist\mercek-web.zip`. Backend adresi frontend 
 ## 5. Paketleri yükle (tarayıcıda sürükle-bırak, 5 dk)
 
 1. Tarayıcıda `https://<api>.scm.azurewebsites.net/ZipDeployUI` (Azure hesabıyla açılır).
+   - Ya da portal → uygulama → **Geliştirme Araçları → Gelişmiş Araçlar → Git**. Yeni Kudu ekranı açılırsa sağ üstteki **Old UI** → **Tools → Zip Push Deploy**.
 2. `dist\mercek-api.zip` dosyasını sayfadaki dosya listesinin üzerine **sürükle-bırak**. İlk yüklemede `requirements.txt` kurulur (2–4 dk); ilerleme sayfada görünür.
 3. Aynısını `https://<web>.scm.azurewebsites.net/ZipDeployUI` için `dist\mercek-web.zip` ile yap.
 
