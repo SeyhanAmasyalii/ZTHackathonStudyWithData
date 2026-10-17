@@ -71,9 +71,9 @@ class FoundryAgentClient:
         except (NotFoundError, BadRequestError) as exc:
             if previous_response_id and "previous_response" in str(exc).lower():
                 raise PreviousResponseNotFound("Önceki agent cevabı bulunamadı") from exc
-            raise LLMError(f"Agent çağrısı başarısız: {type(exc).__name__}") from exc
+            raise LLMError(_describe(exc)) from exc
         except OpenAIError as exc:
-            raise LLMError(f"Agent çağrısı başarısız: {type(exc).__name__}") from exc
+            raise LLMError(_describe(exc)) from exc
 
         calls = [
             ToolCall(id=item.call_id, name=item.name, arguments=item.arguments)
@@ -94,6 +94,13 @@ class FoundryAgentClient:
                 },
             )
         return reply
+
+
+def _describe(exc: Exception) -> str:
+    """Hata türü + servisin kısa açıklaması (anahtar/token içermez; kullanıcı metni zaten taranmış)."""
+    status = getattr(exc, "status_code", None)
+    detail = str(getattr(exc, "message", "") or exc).replace("\n", " ")[:300]
+    return f"Agent çağrısı başarısız: {type(exc).__name__} {status or ''} {detail}".strip()
 
 
 def function_call_output(call_id: str, result: dict[str, Any]) -> dict[str, Any]:
