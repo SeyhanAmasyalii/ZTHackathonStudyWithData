@@ -8,6 +8,7 @@ Aşağıda `<sql>` = SQL sunucu adı (ör. `mercek-sql-<takım>`), `<rg>` = reso
 ## 1. Veritabanını oluştur (5 dk)
 
 Portal → arama: `SQL veritabanları` → **+ Oluştur**
+> Aramada **"SQL Server veritabanları"** (Azure Arc) çıkarsa o değil. Doğru sayfa **"SQL veritabanları"**; ya da arama: `Azure SQL` → **+ Oluştur** → **SQL veritabanları** kutusunda *Kaynak türü: Tek veritabanı* → **Oluştur**.
 - Üstte **"Ücretsiz Azure SQL Veritabanı teklifi"** bandı varsa → **Uygula** (aylık ücretsiz kota; hackathon aboneliğinde yoksa en küçük serverless seçilir)
 - Resource group: `<rg>` · Veritabanı adı: `mercekdb`
 - Sunucu → **Yeni oluştur**
