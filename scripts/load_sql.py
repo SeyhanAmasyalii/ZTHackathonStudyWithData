@@ -5,7 +5,7 @@ Kullanım (repo kökünden):
 
 Bağlantı backend/.env'den okunur: SQL_SERVER, SQL_DATABASE ve (SQL kimlik doğrulaması için)
 SQL_USER, SQL_PASSWORD. SQL_USER boşsa Microsoft Entra kullanılır (önce `az login`).
-Tüm değerler parametreyle gönderilir; şifre ekrana yazılmaz.
+Satırlar parti parti tek JSON parametresiyle gönderilir (OPENJSON); şifre ekrana yazılmaz.
 """
 
 import re
@@ -42,11 +42,11 @@ def main() -> None:
         print("✓ Tablolar oluşturuldu (db/schema.sql)")
 
         for table in TABLES:
-            columns = sql.TABLE_COLUMNS[table]
-            rows = [tuple(row.get(column) for column in columns) for row in getattr(raw, table)]
+            rows = getattr(raw, table)
             statement = sql.insert_sql(table)
             for start in range(0, len(rows), BATCH_SIZE):
-                cursor.executemany(statement, rows[start : start + BATCH_SIZE])
+                payload = sql.rows_payload(table, rows[start : start + BATCH_SIZE])
+                cursor.execute(statement, [payload])
             connection.commit()
             cursor.execute(f"SELECT COUNT(*) FROM dbo.{table}")
             print(f"✓ {table}: {cursor.fetchone()[0]} satır (JSON: {len(rows)})")

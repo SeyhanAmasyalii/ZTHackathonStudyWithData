@@ -85,6 +85,7 @@ Sohbette "ODMTTLMT ekranında hata alıyorum" → aynı cevap (7 hata, GAZ02 110
 | Belirti | Çözüm |
 |---|---|
 | Betik: `Client with IP address ... is not allowed` | SQL sunucusu → **Ağ** → Güvenlik duvarı kuralları → **İstemci IP adresinizi ekleyin** → Kaydet (ev/ofis IP'si değişince tekrar) |
+| Betik: `✗ SQL'den okunan veri JSON ile aynı değil` | Yükleme yarım kalmış ya da tablo elle değiştirilmiş; betiği tekrar çalıştırın (tablolar baştan kurulur) |
 | Betik: `Login failed for user` | `SQL_USER` / `SQL_PASSWORD` yanlış; parola portaldan sıfırlanabilir (SQL sunucusu → Genel Bakış → Parolayı sıfırla) |
 | İlk bağlantı 30–60 sn sürüyor ya da `database ... is not currently available` | Ücretsiz/serverless veritabanı uykudaydı; kod 3 kez dener. Tekrar çalıştırın |
 | Günlük akışında `Azure SQL okunamadı; JSON verisine geçildi` | Uygulama çalışır ama JSON'dan okur. Satırın altındaki hatayı okuyun: güvenlik duvarı ("Azure hizmetlerine izin ver"), kullanıcı/parola ya da Managed Identity kullanıcısı |

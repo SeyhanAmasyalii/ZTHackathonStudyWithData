@@ -1,3 +1,6 @@
+import json
+import re
+
 from app.config import REPO_ROOT, Settings
 from app.repositories import catalog as catalog_module
 from app.repositories import sql
@@ -15,7 +18,7 @@ class FakeCursor:
     def execute(self, statement):
         self.executed.append(statement)
         table = statement.rsplit("dbo.", 1)[1]
-        columns = sql.TABLE_COLUMNS[table]
+        columns = tuple(sql.TABLE_COLUMNS[table])
         rows = getattr(self.raw, table)
         self.rows = [tuple(row.get(column) for column in columns) for row in rows]
 
@@ -53,16 +56,28 @@ def test_connection_string_without_user_uses_entra():
     assert "Pwd" not in text
 
 
-def test_insert_sql_uses_parameters():
+def test_insert_sql_uses_one_json_parameter():
     statement = sql.insert_sql("institution_screens")
     assert statement == (
-        "INSERT INTO dbo.institution_screens (institution_code, screen_code) VALUES (?, ?)"
+        "INSERT INTO dbo.institution_screens (institution_code, screen_code) "
+        "SELECT institution_code, screen_code FROM OPENJSON(?) WITH ("
+        "institution_code NVARCHAR(20) '$.institution_code', "
+        "screen_code NVARCHAR(20) '$.screen_code')"
     )
 
 
-def test_select_sql_reads_datetimes_as_iso_text():
+def test_rows_payload_is_ascii_and_keeps_turkish_text():
+    rows = [{"institution_code": "GAZ02", "name": "Başkentgaz", "bill_type": "Doğalgaz", "x": 1}]
+    payload = sql.rows_payload("institutions", rows)
+    assert payload.isascii()
+    assert json.loads(payload) == [
+        {"institution_code": "GAZ02", "name": "Başkentgaz", "bill_type": "Doğalgaz"}
+    ]
+
+
+def test_select_sql_reads_datetimes_with_offset():
     statement = sql.select_sql("incidents")
-    assert "CONVERT(NVARCHAR(40), created_at, 127) AS created_at" in statement
+    assert "CONVERT(NVARCHAR(40), created_at, 126) AS created_at" in statement
     assert statement.endswith("FROM dbo.incidents")
 
 
@@ -77,9 +92,12 @@ def test_incident_columns_exist_in_data_and_schema(data_dir):
     assert set(columns) <= set(first)
     schema = (REPO_ROOT / "db" / "schema.sql").read_text(encoding="utf-8")
     for table, table_columns in sql.TABLE_COLUMNS.items():
-        assert f"CREATE TABLE dbo.{table} (" in schema
-        for column in table_columns:
-            assert f"    {column} " in schema, (table, column)
+        body = re.search(rf"CREATE TABLE dbo\.{table} \((.*?)\n\);", schema, re.S).group(1)
+        for column, sql_type in table_columns.items():
+            assert re.search(rf"^\s+{column}\s+{re.escape(sql_type)}\s", body, re.M), (
+                table,
+                column,
+            )
 
 
 def test_read_raw_builds_same_catalog_as_json(data_dir):
