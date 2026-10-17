@@ -8,7 +8,8 @@
 > **Tahmini süre:** ~2,5 saat (rol atamalarının etkinleşme beklemeleri dahil).
 > **Kural:** anahtar, parola, bağlantı dizesi **repoya yazılmaz**; yalnızca `backend\.env` (git'e girmez) ve
 > App Service → Ortam değişkenleri ekranına girilir.
-> **Portal dili:** ekran adları Türkçe portala göredir; İngilizce karşılığı parantez içinde.
+> **Portal dili:** her menü/düğme önce Türkçe, parantez içinde **İngilizce** adıyla yazılıdır: Türkçe **Oluştur** (Create).
+> Hackathon portalı İngilizceyse parantez içindekini arayın. Dili değiştirmek: portal sağ üst ⚙ → **Dil ve bölge** (Language + region).
 
 **Sıra:** 0 Değerler → 1 Bilgisayar → 2 Foundry modelleri → 3 Azure SQL → 4 AI Search → 5 App Service → 6 Foundry agent →
 7 Kimlik ve roller → 8 Ortam değişkenleri → 9 Paketle ve yükle → 10 Kontrol → 11 Sorunlar → 12 Demo günü
@@ -24,7 +25,7 @@ Bu tabloyu bir not dosyasına kopyalayıp doldurarak ilerleyin. Aşağıda `<…
 | `<rg>` | Resource group | Takıma verilen; başka yerde kaynak açılmaz | `rg-aioverflow` |
 | `<bölge>` | Bölge | Foundry kaynağıyla aynı bölge | Sweden Central |
 | `<takım>` | Ad eki | Adlar Azure genelinde benzersiz olmalı | `aioverflow` |
-| `<kiracı>` | Kiracı (tenant) kimliği | Portal → arama: `Microsoft Entra ID` → Genel Bakış → **Kiracı Kimliği** | `xxxxxxxx-…` |
+| `<kiracı>` | Kiracı (tenant) kimliği | Portal → arama: `Microsoft Entra ID` → Genel Bakış (Overview) → **Kiracı Kimliği** (Tenant ID) | `xxxxxxxx-…` |
 | `<foundry>` | Foundry kaynağı | Takıma verilen ya da §2'de açılan | `…-resource` |
 | `<proje>` | Foundry projesi | ai.azure.com → proje adı | `mercek` |
 | `<openai-uç>` | Model uç noktası | §2.3 | `https://<foundry>.openai.azure.com/openai/v1` |
@@ -97,19 +98,19 @@ Aynı bilgisayarda başka bir ortamın `.env`'i varsa önce yedekleyin: `copy ba
 Takıma Foundry kaynağı ve projesi verildiyse 2.1'i atlayın.
 
 ### 2.1 Foundry kaynağı ve projesi (yoksa)
-1. `https://ai.azure.com` → hackathon hesabıyla giriş → sağ üst **Yeni Atölye** anahtarı açık olsun.
-2. **+ Yeni proje** (Create project) → proje adı: `mercek` → **Gelişmiş seçenekler**: abonelik = hackathon, resource group = `<rg>`,
-   bölge = `<bölge>` → **Oluştur** (2–3 dk). Bu, `<foundry>` kaynağını ve `<proje>`'yi birlikte açar.
+1. `https://ai.azure.com` → hackathon hesabıyla giriş → sağ üst **Yeni Atölye** (New Foundry) anahtarı açık olsun.
+2. **+ Yeni proje** (Create project) → proje adı: `mercek` → **Gelişmiş seçenekler** (Advanced options): abonelik = hackathon, resource group = `<rg>`,
+   bölge = `<bölge>` → **Oluştur** (Create) (2–3 dk). Bu, `<foundry>` kaynağını ve `<proje>`'yi birlikte açar.
 
 ### 2.2 Model dağıtımları
-1. ai.azure.com → üstte proje seçili → sol menü **Modeller** (Models + endpoints) → **+ Model dağıt** → **Temel modeli dağıt**.
-2. Listede `gpt-5.5` → **Onayla** → Dağıtım adı: **`gpt-5.5`** (aynen) → Dağıtım türü: **Global Standart** (yoksa Standart) → **Dağıt**.
-3. Aynı yoldan `text-embedding-3-small` → Dağıtım adı: **`text-embedding-3-small`** → **Dağıt**.
+1. ai.azure.com → üstte proje seçili → sol menü (left menu) **Modeller** (Models + endpoints) → **+ Model dağıt** (+ Deploy model) → **Temel modeli dağıt** (Deploy base model).
+2. Listede `gpt-5.5` → **Onayla** (Confirm) → Dağıtım adı (Deployment name): **`gpt-5.5`** (aynen) → Dağıtım türü (Deployment type): **Global Standart** (yoksa Standart) → **Dağıt**.
+3. Aynı yoldan `text-embedding-3-small` → Dağıtım adı (Deployment name): **`text-embedding-3-small`** → **Dağıt**.
 4. Adları farklı verirseniz `CHAT_DEPLOYMENT` ve `EMBEDDING_DEPLOYMENT` ayarlarına o adları yazmanız gerekir.
 
 ### 2.3 Model uç noktası ve anahtar
-1. **Modeller** → `gpt-5.5` dağıtımına tıklayın → **Uç nokta** bölümü.
-2. **Hedef URI**'nin başındaki `https://<foundry>.openai.azure.com` kısmını alın, sonuna `/openai/v1` ekleyin → `<openai-uç>`.
+1. **Modeller** (Models + endpoints) → `gpt-5.5` dağıtımına tıklayın → **Uç nokta** (Endpoint) bölümü.
+2. **Hedef URI** (Target URI)'nin başındaki `https://<foundry>.openai.azure.com` kısmını alın, sonuna `/openai/v1` ekleyin → `<openai-uç>`.
 3. **Anahtar** (Key) → kopyala → `<foundry-anahtar>`.
 4. `backend\.env`:
    ```
@@ -129,39 +130,39 @@ Takıma Foundry kaynağı ve projesi verildiyse 2.1'i atlayın.
 ## 3. Azure SQL (30 dk)
 
 ### 3.1 Veritabanı ve sunucuyu oluştur (portal)
-1. `https://portal.azure.com` → üstteki arama: **`SQL veritabanları`** (SQL databases) → **+ Oluştur**.
-   - Aramada "SQL Server veritabanları (Azure Arc)" çıkarsa o değil. Doğrusu **SQL veritabanları**.
-   - Üstte **"Ücretsiz Azure SQL Veritabanı teklifi"** bandı çıkarsa **uygulamayın** (AI Search indexer'ı 5 dk'da bir bağlanacağı için ücretsiz kota birkaç günde biter).
-2. **Temel Bilgiler** sekmesi:
-   - Abonelik: hackathon · Kaynak grubu: `<rg>`
-   - Veritabanı adı: **`mercekdb`**
-   - Sunucu: **Yeni oluştur** → açılan panel:
-     - Sunucu adı: `<sql>` (küçük harf, Azure genelinde benzersiz)
-     - Konum: `<bölge>`
-     - Kimlik doğrulama yöntemi: **Hem SQL hem de Microsoft Entra kimlik doğrulamasını kullan**
-     - Microsoft Entra yöneticisi: **Yönetici ayarla** → kendi hesabınızı seçin → **Seç**
-     - Sunucu yöneticisi oturum açma: **`mercekadmin`** · Parola: güçlü bir parola → `<sql-parola>` (bir yere not edin, **repoya yazmayın**)
-     - **Tamam**
-   - SQL elastik havuzu: **Hayır**
-   - İş yükü ortamı: **Geliştirme**
-   - İşlem + depolama: **Veritabanını yapılandır** → **Hizmet katmanı: Basic** (DTU tabanlı satın alma modeli altında; "Temel" yazabilir)
-     → DTU **5**, Veri en fazla boyutu **2 GB** → **Uygula**. Sağdaki maliyet ~5 $/ay görünmeli.
-   - Yedek depolama yedekliliği: **Yerel olarak yedekli** (en ucuz)
-3. **İleri: Ağ İletişimi** sekmesi:
-   - Bağlantı yöntemi: **Genel uç nokta**
-   - **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver: Evet** (App Service ve AI Search için şart)
-   - **Geçerli istemci IP adresini ekle: Evet** (bilgisayarınızdan veri yüklemek için)
-   - Bağlantı ilkesi: Varsayılan · En düşük TLS: 1.2
-4. **Güvenlik** ve **Ek ayarlar** sekmeleri: varsayılan (Ek ayarlar → Mevcut verileri kullan: **Hiçbiri**).
-5. **Gözden geçir + oluştur** → **Oluştur** (3–5 dk) → **Kaynağa git**.
-6. **Genel Bakış → Sunucu adı** satırını kopyalayın: `<sql>.database.windows.net`.
+1. `https://portal.azure.com` → üstteki arama: **`SQL veritabanları`** (SQL databases) → **+ Oluştur** (+ Create).
+   - Aramada "SQL Server veritabanları (Azure Arc)" (SQL Server - Azure Arc) çıkarsa o değil. Doğrusu **SQL veritabanları** (SQL databases).
+   - Üstte **"Ücretsiz Azure SQL Veritabanı teklifi"** ("Free Azure SQL Database offer") bandı çıkarsa **uygulamayın** (AI Search indexer'ı 5 dk'da bir bağlanacağı için ücretsiz kota birkaç günde biter).
+2. **Temel Bilgiler** (Basics) sekmesi:
+   - Abonelik (Subscription): hackathon · Kaynak grubu (Resource group): `<rg>`
+   - Veritabanı adı (Database name): **`mercekdb`**
+   - Sunucu (Server): **Yeni oluştur** (Create new) → açılan panel:
+     - Sunucu adı (Server name): `<sql>` (küçük harf, Azure genelinde benzersiz)
+     - Konum (Location): `<bölge>`
+     - Kimlik doğrulama yöntemi (Authentication method): **Hem SQL hem de Microsoft Entra kimlik doğrulamasını kullan** (Use both SQL and Microsoft Entra authentication)
+     - Microsoft Entra yöneticisi (Set Microsoft Entra admin): **Yönetici ayarla** (Set admin) → kendi hesabınızı seçin → **Seç** (Select)
+     - Sunucu yöneticisi oturum açma (Server admin login): **`mercekadmin`** · Parola (Password): güçlü bir parola → `<sql-parola>` (bir yere not edin, **repoya yazmayın**)
+     - **Tamam** (OK)
+   - SQL elastik havuzu (Want to use SQL elastic pool?): **Hayır** (No)
+   - İş yükü ortamı (Workload environment): **Geliştirme** (Development)
+   - İşlem + depolama (Compute + storage): **Veritabanını yapılandır** (Configure database) → **Hizmet katmanı: Basic** (Service tier: Basic) (DTU tabanlı satın alma modeli / DTU-based purchasing model altında; "Temel" yazabilir)
+     → DTU **5**, Veri en fazla boyutu (Data max size) **2 GB** → **Uygula** (Apply). Sağdaki maliyet ~5 $/ay görünmeli.
+   - Yedek depolama yedekliliği (Backup storage redundancy): **Yerel olarak yedekli** (Locally-redundant backup storage) (en ucuz)
+3. **İleri: Ağ İletişimi** (Next: Networking) sekmesi:
+   - Bağlantı yöntemi (Connectivity method): **Genel uç nokta** (Public endpoint)
+   - **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver: Evet** (Allow Azure services and resources to access this server: Yes) (App Service ve AI Search için şart)
+   - **Geçerli istemci IP adresini ekle: Evet** (Add current client IP address: Yes) (bilgisayarınızdan veri yüklemek için)
+   - Bağlantı ilkesi (Connection policy): Varsayılan (Default) · En düşük TLS (Minimum TLS version): 1.2
+4. **Güvenlik** (Security) ve **Ek ayarlar** (Additional settings) sekmeleri: varsayılan (Ek ayarlar → Mevcut verileri kullan (Use existing data): **Hiçbiri** (None)).
+5. **Gözden geçir + oluştur** (Review + create) → **Oluştur** (Create) (3–5 dk) → **Kaynağa git** (Go to resource).
+6. **Genel Bakış → Sunucu adı** (Overview → Server name) satırını kopyalayın: `<sql>.database.windows.net`.
 
 ### 3.2 Güvenlik duvarını kontrol et
-SQL **sunucusu** (`<sql>`, veritabanı değil) → sol menü **Güvenlik → Ağ İletişimi**:
-- Genel ağ erişimi: **Seçili ağlar**
-- Güvenlik duvarı kuralları: kendi IP'niz listede olmalı; yoksa **+ İstemci IPv4 adresinizi ekleyin**
-- Özel durumlar: **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver** ✓
-- **Kaydet**. (IP'niz değişirse burada tekrar ekleyin.)
+SQL **sunucusu** (SQL server; `<sql>`, veritabanı değil) → sol menü **Güvenlik → Ağ İletişimi** (Security → Networking):
+- Genel ağ erişimi (Public network access): **Seçili ağlar** (Selected networks)
+- Güvenlik duvarı kuralları (Firewall rules): kendi IP'niz listede olmalı; yoksa **+ İstemci IPv4 adresinizi ekleyin** (+ Add your client IPv4 address)
+- Özel durumlar (Exceptions): **Azure hizmetlerinin ve kaynaklarının bu sunucuya erişmesine izin ver** (Allow Azure services and resources to access this server) ✓
+- **Kaydet** (Save). (IP'niz değişirse burada tekrar ekleyin.)
 
 ### 3.3 `backend\.env`
 ```
@@ -190,7 +191,7 @@ Beklenen: `✓ Tablolar hazır: app_users, audit_log, conversations, conversatio
 Bu tablolar `load_sql.py` tekrar çalışsa da silinmez.
 
 ### 3.6 Kontrol (portal sorgu düzenleyicisi)
-`mercekdb` (veritabanı) → **Sorgu düzenleyicisi (önizleme)** → **Microsoft Entra kimlik doğrulaması ile devam et** →
+`mercekdb` (veritabanı / database) → **Sorgu düzenleyicisi (önizleme)** (Query editor (preview)) → **Microsoft Entra kimlik doğrulaması ile devam et** (Continue as <hesabınız>, Microsoft Entra authentication) →
 ```sql
 SELECT COUNT(*) AS hata_logu FROM dbo.kibana_logs WHERE log_level IN ('Warning','Error');
 SELECT user_name, role, can_view_customers FROM dbo.app_users;
@@ -202,20 +203,20 @@ SELECT user_name, role, can_view_customers FROM dbo.app_users;
 ## 4. Azure AI Search (25 dk)
 
 ### 4.1 Hizmeti oluştur
-1. Portal → arama: **`AI Search`** → **Hizmetler** altında **Yapay Zeka Arama (Foundry IQ)** (Türkçe portalda Azure AI Search'ün adı) → **+ Oluştur**.
-   Market'teki üçüncü taraf ürünleri (Algolia vb.) seçmeyin.
-2. Temel Bilgiler:
-   - Kaynak grubu: `<rg>` · Hizmet adı: `<search>`
-   - Konum: `<bölge>`; **gri/devre dışıysa** ("yüksek talep") açık bir yakın bölge seçin (provada Norway East çalıştı). Aramanın farklı bölgede olması sorun değil.
-   - Fiyatlandırma katmanı: **Fiyatlandırma Katmanını Değiştir → Ücretsiz** (varsayılan Standart **ücretlidir**). Takıma Basic verildiyse o.
-3. **Gözden geçir + oluştur** → maliyet **$0,00** (Ücretsiz) → **Oluştur** → **Kaynağa git**.
-4. **Genel Bakış → URL**: `https://<search>.search.windows.net` → not edin.
+1. Portal → arama: **`AI Search`** → **Hizmetler** (Services) altında **Yapay Zeka Arama (Foundry IQ)** (AI Search; Türkçe portalda Azure AI Search'ün adı) → **+ Oluştur** (+ Create).
+   Market'teki (Marketplace) üçüncü taraf ürünleri (Algolia vb.) seçmeyin.
+2. Temel Bilgiler (Basics):
+   - Kaynak grubu (Resource group): `<rg>` · Hizmet adı (Service name): `<search>`
+   - Konum (Location): `<bölge>`; **gri/devre dışıysa** ("yüksek talep" / high demand) açık bir yakın bölge seçin (provada Norway East çalıştı). Aramanın farklı bölgede olması sorun değil.
+   - Fiyatlandırma katmanı (Pricing tier): **Fiyatlandırma Katmanını Değiştir → Ücretsiz** (Change Pricing Tier → Free) (varsayılan Standart **ücretlidir**). Takıma Basic verildiyse o.
+3. **Gözden geçir + oluştur** (Review + create) → maliyet **$0,00** (Ücretsiz / Free) → **Oluştur** (Create) → **Kaynağa git** (Go to resource).
+4. **Genel Bakış → URL** (Overview → Url): `https://<search>.search.windows.net` → not edin.
 5. Oluşturma "out of the resources" hatası verirse aynı adla başka bölgede tekrar deneyin (başarısız dağıtım kaynak bırakmaz).
 
 ### 4.2 Anahtar ve erişim modu
-1. `<search>` → **Ayarlar → Anahtarlar** (bazı portallarda Güvenlik ve ağ → Anahtarlar).
-2. **API Erişim denetimi: Her ikisi** → **Kaydet** (Managed Identity ile sorgu için şart; §7.2).
-3. **Birincil yönetici anahtarı** → kopyala → `<search-anahtar>` (yalnızca `backend\.env`'e).
+1. `<search>` → **Ayarlar → Anahtarlar** (Settings → Keys) (bazı portallarda Güvenlik ve ağ → Anahtarlar / Security + networking → Keys).
+2. **API Erişim denetimi: Her ikisi** (API Access control: Both) → **Kaydet** (Save) (Managed Identity ile sorgu için şart; §7.2).
+3. **Birincil yönetici anahtarı** (Primary admin key) → kopyala → `<search-anahtar>` (yalnızca `backend\.env`'e).
 
 ### 4.3 `backend\.env`
 ```
@@ -251,39 +252,39 @@ uv run --directory backend python ..\scripts\build_search_index.py --dene "Input
 → İlki `✓ SOL-026 %8x`, ikincisinde ✓ yok.
 
 ### 4.5 Portalda kontrol
-`<search>` → **Arama yönetimi → Dizinler**: `mercek-loglar` (107), `mercek-cozumler` (37) ·
-**Dizin oluşturucular**: iki indexer, **Yürütme geçmişi**'nde "Başarılı" (5 dk'da bir satır eklenir).
+`<search>` → **Arama yönetimi → Dizinler** (Search management → Indexes): `mercek-loglar` (107), `mercek-cozumler` (37) ·
+**Dizin oluşturucular** (Indexers): iki indexer, **Yürütme geçmişi** (Execution history)'nde "Başarılı" (Success) (5 dk'da bir satır eklenir).
 
 ---
 
 ## 5. App Service: plan, backend, frontend (30 dk)
 
 ### 5.1 App Service planı
-Portal → **Kaynak oluştur** → **App Service planı** →
-- Kaynak grubu `<rg>` · Ad `mercek-plan` · İşletim sistemi **Linux** · Bölge `<bölge>`
-- Fiyatlandırma planı: **Basic B1** (Always On ve sistem durumu denetimi için) → **Gözden geçir + oluştur → Oluştur**.
+Portal → **Kaynak oluştur** (Create a resource) → **App Service planı** (App Service plan) → **Oluştur** (Create) →
+- Kaynak grubu (Resource group) `<rg>` · Ad (Name) `mercek-plan` · İşletim sistemi (Operating System) **Linux** · Bölge (Region) `<bölge>`
+- Fiyatlandırma planı (Pricing plan): **Basic B1** (Always On ve sistem durumu denetimi için) → **Gözden geçir + oluştur → Oluştur** (Review + create → Create).
 
 ### 5.2 Backend uygulaması `<api>`
-1. **Kaynak oluştur** → **Web Uygulaması** (Web App):
-   - Kaynak grubu `<rg>` · Ad `<api>` · Yayımla: **Kod** · Çalışma zamanı yığını: **Python 3.12** · İşletim sistemi: **Linux**
-   - Bölge `<bölge>` · Linux Planı: **`mercek-plan`**
-   - "Güvenli benzersiz varsayılan ana bilgisayar adı": varsayılan (Etkin) kalabilir
-   - **Dağıtım** sekmesi: sürekli dağıtım **Devre dışı** · **İzleme** sekmesi: Application Insights **Hayır** (Foundry izlemesi ayrı)
-   - **Gözden geçir + oluştur → Oluştur** → **Kaynağa git**
-2. **Ayarlar → Yapılandırma → Yığın ayarları** (Stack settings) → **Başlangıç komutu**:
-   `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000` → **Kaydet**.
-3. **Ayarlar → Yapılandırma → Genel ayarlar** → **Always On: Açık** · **Yalnızca HTTPS: Açık** → **Kaydet**.
-4. **İzleme → Sistem durumu denetimi** (Health check) → **Etkinleştir** → Yol: `/api/health` → **Kaydet**.
-5. **Ayarlar → Kimlik** (Identity) → **Sistem tarafından atanan** → Durum **Açık** → **Kaydet → Evet** (Managed Identity; §7'de yetki verilecek).
+1. **Kaynak oluştur** (Create a resource) → **Web Uygulaması** (Web App):
+   - Kaynak grubu (Resource group) `<rg>` · Ad (Name) `<api>` · Yayımla (Publish): **Kod** (Code) · Çalışma zamanı yığını (Runtime stack): **Python 3.12** · İşletim sistemi (Operating System): **Linux**
+   - Bölge (Region) `<bölge>` · Linux Planı (Linux Plan): **`mercek-plan`**
+   - "Güvenli benzersiz varsayılan ana bilgisayar adı" (Secure unique default hostname): varsayılan (Etkin / On) kalabilir
+   - **Dağıtım** (Deployment) sekmesi: sürekli dağıtım (Continuous deployment) **Devre dışı** (Disable) · **İzleme** (Monitoring) sekmesi: Application Insights **Hayır** (No) (Foundry izlemesi ayrı)
+   - **Gözden geçir + oluştur → Oluştur** (Review + create → Create) → **Kaynağa git** (Go to resource)
+2. **Ayarlar → Yapılandırma → Yığın ayarları** (Settings → Configuration → Stack settings) → **Başlangıç komutu** (Startup Command):
+   `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000` → **Kaydet** (Save).
+3. **Ayarlar → Yapılandırma → Genel ayarlar** (Settings → Configuration → General settings) → **Always On: Açık** (Always on: On) · **Yalnızca HTTPS: Açık** (HTTPS Only: On) → **Kaydet** (Save).
+4. **İzleme → Sistem durumu denetimi** (Monitoring → Health check) → **Etkinleştir** (Enable) → Yol (Path): `/api/health` → **Kaydet** (Save).
+5. **Ayarlar → Kimlik** (Settings → Identity) → **Sistem tarafından atanan** (System assigned) → Durum (Status) **Açık** (On) → **Kaydet → Evet** (Save → Yes) (Managed Identity; §7'de yetki verilecek).
 
 ### 5.3 Frontend uygulaması `<web>`
-1. **Kaynak oluştur → Web Uygulaması**: Ad `<web>` · **Kod** · Çalışma zamanı: **Node 22 LTS** · **Linux** · Plan **`mercek-plan`** → **Oluştur**.
-2. **Yığın ayarları → Başlangıç komutu**: `node server.js` → Kaydet.
-3. **Genel ayarlar**: Always On **Açık**, Yalnızca HTTPS **Açık** → Kaydet.
-4. **Sistem durumu denetimi** → Yol: `/giris` → Kaydet.
+1. **Kaynak oluştur → Web Uygulaması** (Create a resource → Web App): Ad (Name) `<web>` · **Kod** (Code) · Çalışma zamanı (Runtime stack): **Node 22 LTS** · **Linux** · Plan **`mercek-plan`** → **Oluştur** (Create).
+2. **Yığın ayarları → Başlangıç komutu** (Stack settings → Startup Command): `node server.js` → Kaydet (Save).
+3. **Genel ayarlar** (General settings): Always On **Açık** (On), Yalnızca HTTPS (HTTPS Only) **Açık** (On) → Kaydet (Save).
+4. **Sistem durumu denetimi** (Health check) → Yol (Path): `/giris` → Kaydet (Save).
 
 ### 5.4 Gerçek adresleri al
-Her iki uygulamada **Genel Bakış → Varsayılan etki alanı** satırını kopyalayın → `<api-adres>`, `<web-adres>`
+Her iki uygulamada **Genel Bakış → Varsayılan etki alanı** (Overview → Default domain) satırını kopyalayın → `<api-adres>`, `<web-adres>`
 (ör. `mercek-api-aioverflow-abc123.westeurope-01.azurewebsites.net`). Aşağıdaki her yerde bu tam adresi kullanın.
 
 ---
@@ -292,9 +293,9 @@ Her iki uygulamada **Genel Bakış → Varsayılan etki alanı** satırını kop
 
 ### 6.1 Kendi hesabınızın Foundry yetkisi
 Kaynağı siz açtıysanız genelde vardır. `setup_agent.py` **403** verirse:
-portal → `<foundry>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → `Azure AI` / `Cognitive Services` ara →
-**Azure AI User** (yoksa **Cognitive Services User**, o da yoksa **Cognitive Services Data Contributor (Preview)**) → **Sonraki** →
-**Kullanıcı, grup veya hizmet sorumlusu** → **+ Üye seç** → kendi hesabınız → **Gözden geçir + ata**.
+portal → `<foundry>` → **Erişim denetimi (IAM)** (Access control (IAM)) → **+ Ekle → Rol ataması ekle** (+ Add → Add role assignment) → `Azure AI` / `Cognitive Services` ara →
+**Azure AI User** (yoksa **Cognitive Services User**, o da yoksa **Cognitive Services Data Contributor (Preview)**) → **Sonraki** (Next) →
+**Kullanıcı, grup veya hizmet sorumlusu** (User, group, or service principal) → **+ Üye seç** (+ Select members) → kendi hesabınız → **Gözden geçir + ata** (Review + assign).
 
 ### 6.2 `backend\.env`
 ```
@@ -313,24 +314,24 @@ Beklenen:
 Deneme: Ben Mercek; …
 ```
 `DefaultAzureCredential failed to retrieve a token` → `az login --tenant <kiracı>` (§1.3) ve tekrar.
-Portalda: ai.azure.com → **Aracılar** → `mercek-cagri` (yeşil tik). **Ayrıntılar**'da talimat ve araçlar görünür; **portalda düzenlemeyin**
-(prompt ya da araç değişince betiği tekrar çalıştırın; yeni sürüm oluşur). **Deneme alanı**'nda araçlar çalışmaz (araçları backend çalıştırır).
+Portalda: ai.azure.com → **Aracılar** (Agents) → `mercek-cagri` (yeşil tik). **Ayrıntılar** (Details)'da talimat ve araçlar görünür; **portalda düzenlemeyin**
+(prompt ya da araç değişince betiği tekrar çalıştırın; yeni sürüm oluşur). **Deneme alanı** (Playground)'nda araçlar çalışmaz (araçları backend çalıştırır).
 
 ### 6.4 İzleme (App Insights) — jüriye gösterilecek ekran
-1. ai.azure.com → **Aracılar** → `mercek-cagri` → **İzleme** sekmesi → üstteki mor bant → **Bağla**.
-2. **İzleyici ayarları** penceresi: Application insights kaynak adı **Yeni kaynak oluştur** · Ad `mercek-appinsights` ·
-   Log Analytics çalışma alanı: varsayılan (`[yeni] DefaultWorkspace-…`) · Kimlik Doğrulama Türü: **Proje Yönetilen Kimliği** → **Oluştur**.
+1. ai.azure.com → **Aracılar** (Agents) → `mercek-cagri` → **İzleme** (Monitor) sekmesi → üstteki mor bant (banner) → **Bağla** (Connect).
+2. **İzleyici ayarları** (Monitor settings) penceresi: Application insights kaynak adı (Application Insights resource name) **Yeni kaynak oluştur** (Create new) · Ad `mercek-appinsights` ·
+   Log Analytics çalışma alanı (Log Analytics workspace): varsayılan (`[yeni] DefaultWorkspace-…`) · Kimlik Doğrulama Türü (Authentication type): **Proje Yönetilen Kimliği** (Project managed identity) → **Oluştur** (Create).
 3. Gizlilik notu: izlerde kullanıcı mesajları ve araç sonuçları saklanır; *Log Analytics Reader* rolünü yalnızca takıma verin.
-4. Kurulum bitince (§10) birkaç soru sorup 5–10 dk sonra **İzlemeler** sekmesine bakın: her çalıştırmada araç adımları görünür.
+4. Kurulum bitince (§10) birkaç soru sorup 5–10 dk sonra **İzlemeler** (Traces) sekmesine bakın: her çalıştırmada araç adımları görünür.
 
 ---
 
 ## 7. Kimlik ve roller: Managed Identity (20 dk + 10 dk bekleme)
 
-`<api>`'nin kimliği §5.2/5'te açıldı. Üç yere yetki verilir. Sonunda 5–10 dk bekleyip `<api>` → **Genel Bakış → Yeniden başlat**.
+`<api>`'nin kimliği §5.2/5'te açıldı. Üç yere yetki verilir. Sonunda 5–10 dk bekleyip `<api>` → **Genel Bakış → Yeniden başlat** (Overview → Restart).
 
 ### 7.1 Azure SQL
-1. `mercekdb` → **Sorgu düzenleyicisi (önizleme)** → **Microsoft Entra kimlik doğrulaması ile devam et** (SQL kullanıcısıyla değil;
+1. `mercekdb` → **Sorgu düzenleyicisi (önizleme)** (Query editor (preview)) → **Microsoft Entra kimlik doğrulaması ile devam et** (Continue as <hesabınız>, Microsoft Entra authentication) (SQL kullanıcısıyla değil;
    `FROM EXTERNAL PROVIDER` yalnızca Entra girişte çalışır).
 2. Çalıştırın (`<api>` = uygulamanın **tam adı**, adres değil):
    ```sql
@@ -343,31 +344,31 @@ Portalda: ai.azure.com → **Aracılar** → `mercek-cagri` (yeşil tik). **Ayr�
    - `Only connections established with Active Directory accounts…` → düzenleyiciye Entra ile girin.
 
 ### 7.2 Azure AI Search
-`<search>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → arama kutusuna `Arama` yazın →
-**Arama Dizini Veri Okuyucusu** (Search Index Data Reader) → **Sonraki** →
-Erişim ata: **Yönetilen kimlik** → **+ Üye seç** → Yönetilen kimlik: **App Service** → `<api>` → **Seç** → **Gözden geçir + ata**.
-"Yönetilen Uygulama İşletmeni" ve "Arama Dizini Veri Katkıda Bulunanı" rollerini **seçmeyin**. (§4.2'deki **Her ikisi** ayarı yapılmış olmalı.)
+`<search>` → **Erişim denetimi (IAM)** (Access control (IAM)) → **+ Ekle → Rol ataması ekle** (+ Add → Add role assignment) → arama kutusuna `Arama` yazın →
+**Arama Dizini Veri Okuyucusu** (Search Index Data Reader) → **Sonraki** (Next) →
+Erişim ata (Assign access to): **Yönetilen kimlik** (Managed identity) → **+ Üye seç** (+ Select members) → Yönetilen kimlik (Managed identity): **App Service** → `<api>` → **Seç** (Select) → **Gözden geçir + ata** (Review + assign).
+"Yönetilen Uygulama İşletmeni" (Managed Application Operator Role) ve "Arama Dizini Veri Katkıda Bulunanı" (Search Index Data Contributor) rollerini **seçmeyin**. (§4.2'deki **Her ikisi** (Both) ayarı yapılmış olmalı.)
 
 ### 7.3 Foundry
-`<foundry>` → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** → arama: `Azure AI` ya da `Cognitive Services` →
+`<foundry>` → **Erişim denetimi (IAM)** (Access control (IAM)) → **+ Ekle → Rol ataması ekle** (+ Add → Add role assignment) → arama: `Azure AI` ya da `Cognitive Services` →
 1. **Azure AI User** varsa onu,
 2. yoksa **Cognitive Services User**,
 3. o da yoksa **Cognitive Services Data Contributor (Preview)** (provada bu çalıştı)
 
-→ **Sonraki** → **Yönetilen kimlik** → **App Service** → `<api>` → **Gözden geçir + ata**.
+→ **Sonraki** (Next) → **Yönetilen kimlik** (Managed identity) → **App Service** → `<api>` → **Gözden geçir + ata** (Review + assign).
 *Azure AI Developer* (provada 403), *Cognitive Services OpenAI User* ve *Data Reader* agent çağrısına **yetmez**.
 
 ### 7.4 Kontrol
-Her kaynakta **Erişim denetimi (IAM) → Rol atamaları** sekmesinde `<api>` ilgili rolle görünmeli.
+Her kaynakta **Erişim denetimi (IAM) → Rol atamaları** (Access control (IAM) → Role assignments) sekmesinde `<api>` ilgili rolle görünmeli.
 
 ---
 
 ## 8. App Service ortam değişkenleri (10 dk)
 
 ### 8.1 Backend `<api>`
-`<api>` → **Ayarlar → Ortam değişkenleri** → **Uygulama ayarları** sekmesi. İki yol:
-- **Tek tek:** **+ Ekle** → Ad / Değer → **Uygula**; hepsi bitince en alttaki **Uygula → Onayla**.
-- **Toplu:** **Gelişmiş düzenleme** → mevcut JSON listesinin sonuna aşağıdaki şablonu ekleyin (önceki son öğeden sonra virgül) → **Tamam → Uygula → Onayla**.
+`<api>` → **Ayarlar → Ortam değişkenleri** (Settings → Environment variables) → **Uygulama ayarları** (App settings) sekmesi. İki yol:
+- **Tek tek:** **+ Ekle** (+ Add) → Ad / Değer (Name / Value) → **Uygula** (Apply); hepsi bitince en alttaki **Uygula → Onayla** (Apply → Confirm).
+- **Toplu:** **Gelişmiş düzenleme** (Advanced edit) → mevcut JSON listesinin sonuna aşağıdaki şablonu ekleyin (önceki son öğeden sonra virgül) → **Tamam → Uygula → Onayla** (OK → Apply → Confirm).
 
 | Ad | Değer | Not |
 |---|---|---|
@@ -447,12 +448,12 @@ python scripts\package_azure.py --api-url https://<api-adres>
 - **Her paketlemeden önce `git pull`** (provada eski commit paketlendi, yeni özellik görünmedi).
 
 ### 9.2 Cloud Shell'e yükle
-1. Portal üst çubuğu → **Cloud Shell** (`>_`) → **Bash** → ilk açılışta "Depolama hesabı gerekmez" → **Uygula**.
+1. Portal üst çubuğu (top bar) → **Cloud Shell** (`>_`) → **Bash** → ilk açılışta "Depolama hesabı gerekmez" (No storage account required) → **Uygula** (Apply).
 2. Eski zip'leri silin:
    ```bash
    rm -f ~/mercek-api.zip ~/mercek-web.zip
    ```
-3. Cloud Shell araç çubuğu → **Dosyaları yönet → Karşıya yükle** → `C:\Users\hackadmin\AIOverflow\dist\mercek-api.zip`;
+3. Cloud Shell araç çubuğu (toolbar) → **Dosyaları yönet → Karşıya yükle** (Manage files → Upload) → `C:\Users\hackadmin\AIOverflow\dist\mercek-api.zip`;
    sonra aynı yoldan `mercek-web.zip`.
 4. Tarihleri kontrol: `ls -l ~/*.zip` → saat şimdi olmalı.
 
@@ -470,20 +471,20 @@ az webapp restart -g <rg> -n <web>
 
 ## 10. Kontrol (15 dk)
 
-İzlemek için `<api>` → **İzleme → Günlük akışı** (Log stream) ayrı sekmede açık kalsın (F5 ile yenileyin).
+İzlemek için `<api>` → **İzleme → Günlük akışı** (Monitoring → Log stream) ayrı sekmede açık kalsın (F5 ile yenileyin).
 
 | # | Nerede / ne | Beklenen |
 |---|---|---|
 | 1 | `https://<api-adres>/api/health` | `{"status":"ok"}` |
-| 2 | Günlük akışı | `Veri kaynağı: Azure SQL (mercekdb) · 2002 hata logu · 700 çağrı`, `ManagedIdentityCredential` |
+| 2 | Günlük akışı (Log stream) | `Veri kaynağı: Azure SQL (mercekdb) · 2002 hata logu · 700 çağrı`, `ManagedIdentityCredential` |
 | 3 | `https://<web-adres>` sol üst | **sürüm** = §9.1'deki commit. Değilse frontend'i `--clean true` + restart ile tekrar yükleyin, gizli pencerede açın |
 | 4 | Elif → "ODMTTLMT ekranında hata alıyorum" | 7 hata, GAZ02 110731, SOL-031 (6 çağrı) + **▶ Akışı izle · SOL-031**; günlükte `…/responses "200 OK"` ve `ad=kibana_sorgula` |
 | 5 | Aynı sohbet → "Peki nasıl çözerim?" → **F5** | SOL-031 adımları (önceki konuyu hatırlar); F5 sonrası konuşma geri gelir |
 | 6 | Elif → Yeni sohbet → "abone numarasını sistem kabul etmiyor" | günlükte `ad=hata_ara … sonuç=5`; İSKİ 13 hane, SOL-005 temkinli |
 | 7 | Kerem → "Müşteri güncelleme ekranında 'Input string was not in a correct format' hatası" | `ad=benzer_cozum_ara`; "hazır çözüm yok", aday adımları verilmez |
 | 8 | Kerem → "Müşteriye fatura talimatı tanımlanamıyor, 'aktif talimat zaten var' diyor. Kaç müşteri etkilendi?" | **Etkilenen müşteriler (31)** → tablo, 11 aranabilir |
-| 9 | Sorgu düzenleyicisi: `SELECT TOP 5 created_at, user_name, action, row_count FROM dbo.audit_log ORDER BY audit_id DESC;` | `kerem · affected_customers_view · 31` |
-| 10 | ai.azure.com → Aracılar → `mercek-cagri` → **İzlemeler** | çalıştırmalar ve araç adımları (5–10 dk gecikmeli) |
+| 9 | Sorgu düzenleyicisi (Query editor): `SELECT TOP 5 created_at, user_name, action, row_count FROM dbo.audit_log ORDER BY audit_id DESC;` | `kerem · affected_customers_view · 31` |
+| 10 | ai.azure.com → Aracılar → `mercek-cagri` → **İzlemeler** (Traces) | çalıştırmalar ve araç adımları (5–10 dk gecikmeli) |
 
 Diğer sorular ve beklenen cevaplar: `docs/MERCEK-TEST-SORULARI.md`.
 
@@ -496,11 +497,11 @@ Diğer sorular ve beklenen cevaplar: `docs/MERCEK-TEST-SORULARI.md`.
 | `az login`: MFA / "No subscriptions found" | `az login --tenant <kiracı>` |
 | `'az' is not recognized` | Azure CLI kurulduktan sonra yeni CMD açın |
 | Betik: `Client with IP address … is not allowed` | §3.2: IP'nizi ekleyin |
-| Betik: `Login failed for user` | `.env`'deki `SQL_USER`/`SQL_PASSWORD` yanlış; portal → SQL sunucusu → Genel Bakış → **Parolayı sıfırla** |
+| Betik: `Login failed for user` | `.env`'deki `SQL_USER`/`SQL_PASSWORD` yanlış; portal → SQL sunucusu (SQL server) → Genel Bakış (Overview) → **Parolayı sıfırla** (Reset password) |
 | AI Search oluşturulamıyor (kapasite) | Başka bölge (Norway East çalıştı) |
 | Indexer: `Login failed` | `.env` SQL kullanıcı/parola; `git pull` (eski betikte parola biçimi hatası vardı) |
 | Indexer: `embedding` / `DeploymentNotFound` / `401` | `text-embedding-3-small` dağıtımı yok ya da `AZURE_OPENAI_*` yanlış |
-| `/api/health` açılmıyor, "Application Error" | Günlük akışı; `ModuleNotFoundError` ise `SCM_DO_BUILD_DURING_DEPLOYMENT=true` mi, paketi tekrar yükleyin |
+| `/api/health` açılmıyor, "Application Error" | Günlük akışı (Log stream); `ModuleNotFoundError` ise `SCM_DO_BUILD_DURING_DEPLOYMENT=true` mi, paketi tekrar yükleyin |
 | Giriş ekranında "Sunucuya ulaşılamadı" | `--api-url` yanlış (https, tam adres, sonda `/` yok) ya da `CORS_ORIGINS` ≠ `https://<web-adres>` |
 | Yeni özellik/düğme görünmüyor, sürüm eski | Paketlemeden önce `git pull` yapılmamış ya da web `--clean true` + restart ile yüklenmemiş |
 | F5'te konuşma gelmiyor | Frontend eski (sürüm) ya da `db_datawriter` yok (günlükte `INSERT permission was denied`) |
@@ -516,8 +517,8 @@ Diğer sorular ve beklenen cevaplar: `docs/MERCEK-TEST-SORULARI.md`.
 
 ## 12. Demo günü
 
-- **Önce:** §10'daki kontrolleri bir kez yapın; Günlük akışı ve Foundry İzlemeler sekmeleri açık dursun.
-- **Agent tarafında sorun:** `<api>` → Ortam değişkenleri → `LLM_MODE` = `chat` → Uygula (1 dk). Her şey doğrudan model çağrısıyla çalışır.
+- **Önce:** §10'daki kontrolleri bir kez yapın; Günlük akışı (Log stream) ve Foundry İzlemeler (Traces) sekmeleri açık dursun.
+- **Agent tarafında sorun:** `<api>` → Ortam değişkenleri (Environment variables) → `LLM_MODE` = `chat` → Uygula (1 dk). Her şey doğrudan model çağrısıyla çalışır.
 - **AI Search sorunu:** `SEARCH_ENDPOINT` satırını silmek arama araçlarını kapatır; sohbet `kibana_sorgula`/`cagri_ara` ile çalışır.
 - **İlk açılış yavaşsa:** Always On açık mı (§5.2/3).
-- **Maliyet:** demodan sonra AI Search indexer'ları portalda **Zamanlama → Bir kez** yapılabilir; SQL Basic sabit ücretlidir.
+- **Maliyet:** demodan sonra AI Search indexer'ları portalda **Zamanlama → Bir kez** (Schedule → Once) yapılabilir; SQL Basic sabit ücretlidir.
