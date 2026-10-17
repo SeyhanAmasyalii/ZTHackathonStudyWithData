@@ -28,7 +28,7 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [ ] (Ek puan) Foundry'ye de Managed Identity ile bağlanma (anahtar yerine) — agent modunda zaten Entra/MI
 - [x] Foundry Agent Service (kod): `LLM_MODE=agent`, agent `scripts/setup_agent.py` ile kurulur, araçlar backend'de, hafıza Foundry'de (`previous_response_id`), SQL ekran geçmişi/sahiplik için. Rehber: `docs/FOUNDRY-AGENT.md`
 - [x] Agent prova (yerel): `az login --tenant`, `setup_agent.py` (mercek-cagri sürüm 1), `LLM_MODE=agent` ile E1 doğru
-- [ ] Foundry izleme: App Insights bağla (`docs/FOUNDRY-AGENT.md` §4.1), izlemeler sekmesinde araç adımları
+- [x] Foundry izleme: App Insights bağlandı (Proje Yönetilen Kimliği), İzlemeler sekmesinde çalıştırmalar ve araç adımları görünüyor
 - [ ] Gerçek modelle anlam eşleştirme değerlendirmesi (15–20 cümle → beklenen ekran/kurum)
 
 ## Sonra
@@ -37,6 +37,6 @@ Yeni sıfırdan başlanan sürüm (`frontend/`, `backend/`) için takip listesi.
 - [x] (Ek puan) AI Search sorgusu Managed Identity ile (Search Index Data Reader, `SEARCH_API_KEY` yok; prova: `hata_ara` 200). Rehber: `docs/AZURE-AI-SEARCH.md` §5
 - [x] Azure AI Search: `benzer_cozum_ara` (kod): 37 hazır çözüm + kapanmış çağrı notları tek indekste (`mercek-cozumler`, SQL görünümü `v_cozum_sablonlari`, 5 dk); eşleşme yüzdesi ve %75 eşiği kodda. Rehber: `docs/AZURE-AI-SEARCH.md` §6
 - [x] `benzer_cozum_ara` prova (yerel): indeks kuruldu, `--dene` ölçümüyle eşik ayarlandı; K5 → eşik altı, hazır çözüm yok, aday adımları önerilmiyor
-- [ ] Azure'a yükleme: App Service'e `SEARCH_SOLUTION_INDEX=mercek-cozumler` + API paketi
-- [ ] Duyuru + işlenmemiş e-posta araması (tek indeks; Free'de 3. indeks)
-- [ ] KVKK: modele gitmeden önce kişisel veri maskeleme
+- [x] Azure'a yükleme (prova): `SEARCH_SOLUTION_INDEX`, `LLM_MODE=agent`, Foundry ayarları, API+web paketi (48f68d4); kimliğe Cognitive Services Data Contributor (Preview)
+- [ ] (Hackathon ortamı kurulduktan sonra) Duyuru + işlenmemiş e-posta araması (tek indeks; Free'de 3. indeks)
+- [ ] (Hackathon ortamı kurulduktan sonra) KVKK: modele gitmeden önce kişisel veri taraması
