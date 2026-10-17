@@ -105,7 +105,7 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 
 1. **Kimlik yetkisi:** `<foundry>` → **Erişim denetimi (IAM)** → **Rol ataması ekle** → **Azure AI User**
    (portal listesinde yoksa — prova portalında çıkmadı — **Cognitive Services User**; provada yalnızca *Azure AI Developer*
-   ile agent çağrısı `403 Forbidden` verdi, *Cognitive Services User* eklenince çözüldü) →
+   ile agent çağrısı `403 Forbidden` verdi; agent çağrısı için gereken veri yetkisi *Cognitive Services User*'da var) →
    Erişim ata: **Yönetilen kimlik** → **App Service** → `<api>` → **Gözden geçir + ata** (5–10 dk'da etkinleşir).
 2. `<api>` → **Ayarlar → Ortam değişkenleri** → ekleyin → **Uygula**:
 
