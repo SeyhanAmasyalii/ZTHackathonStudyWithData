@@ -1,0 +1,140 @@
+{
+  "name": "mercek-loglar",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "filterable": true
+    },
+    {
+      "name": "screen_code",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "screen_name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "error_number",
+      "type": "Edm.Int32",
+      "filterable": true
+    },
+    {
+      "name": "error_code",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "institution_code",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "institution_name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "bill_type",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "message",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "explanation",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "log_count",
+      "type": "Edm.Int32",
+      "filterable": true
+    },
+    {
+      "name": "customer_count",
+      "type": "Edm.Int32"
+    },
+    {
+      "name": "first_seen",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true
+    },
+    {
+      "name": "last_seen",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true
+    },
+    {
+      "name": "content_vector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "retrievable": false,
+      "dimensions": 1536,
+      "vectorSearchProfile": "vektor"
+    }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw",
+        "kind": "hnsw"
+      }
+    ],
+    "profiles": [
+      {
+        "name": "vektor",
+        "algorithm": "hnsw",
+        "vectorizer": "foundry"
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "foundry",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "https://<FOUNDRY-KAYNAK>.openai.azure.com",
+          "deploymentId": "text-embedding-3-small",
+          "apiKey": "<FOUNDRY-API-ANAHTARI>",
+          "modelName": "text-embedding-3-small"
+        }
+      }
+    ]
+  }
+}

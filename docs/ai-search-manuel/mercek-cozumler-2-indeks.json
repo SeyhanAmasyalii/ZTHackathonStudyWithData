@@ -1,0 +1,132 @@
+{
+  "name": "mercek-cozumler",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "filterable": true
+    },
+    {
+      "name": "solution_template_id",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "symptom",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "root_cause",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "steps",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": false,
+      "retrievable": true
+    },
+    {
+      "name": "error_code",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "closure_code",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "sub_closure_code",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": false,
+      "retrievable": true
+    },
+    {
+      "name": "department_id",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true
+    },
+    {
+      "name": "closed_count",
+      "type": "Edm.Int32"
+    },
+    {
+      "name": "user_notes",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "analyzer": "tr.microsoft"
+    },
+    {
+      "name": "content_vector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "retrievable": false,
+      "dimensions": 1536,
+      "vectorSearchProfile": "vektor"
+    }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw",
+        "kind": "hnsw"
+      }
+    ],
+    "profiles": [
+      {
+        "name": "vektor",
+        "algorithm": "hnsw",
+        "vectorizer": "foundry"
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "foundry",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "https://<FOUNDRY-KAYNAK>.openai.azure.com",
+          "deploymentId": "text-embedding-3-small",
+          "apiKey": "<FOUNDRY-API-ANAHTARI>",
+          "modelName": "text-embedding-3-small"
+        }
+      }
+    ]
+  }
+}

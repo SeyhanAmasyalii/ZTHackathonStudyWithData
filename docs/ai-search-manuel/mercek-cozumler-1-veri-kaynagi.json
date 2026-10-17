@@ -1,0 +1,14 @@
+{
+  "name": "mercek-cozumler-sql",
+  "type": "azuresql",
+  "credentials": {
+    "connectionString": "Server=tcp:<SQL-SUNUCU>.database.windows.net,1433;Database=mercekdb;User ID=<SQL-KULLANICI>;Password=<SQL-PAROLA>;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  },
+  "container": {
+    "name": "v_cozum_sablonlari"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "hwm"
+  }
+}

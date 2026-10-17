@@ -1,0 +1,28 @@
+{
+  "name": "mercek-cozumler-embedding",
+  "description": "Hazır çözüm metnini Foundry embedding ile vektöre çevirir",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill",
+      "name": "embedding",
+      "context": "/document",
+      "resourceUri": "https://<FOUNDRY-KAYNAK>.openai.azure.com",
+      "deploymentId": "text-embedding-3-small",
+      "apiKey": "<FOUNDRY-API-ANAHTARI>",
+      "modelName": "text-embedding-3-small",
+      "dimensions": 1536,
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/content"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "embedding",
+          "targetName": "content_vector"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "mercek-loglar-indexer",
+  "dataSourceName": "mercek-loglar-sql",
+  "targetIndexName": "mercek-loglar",
+  "skillsetName": "mercek-loglar-embedding",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "id",
+      "targetFieldName": "id",
+      "mappingFunction": {
+        "name": "base64Encode"
+      }
+    }
+  ],
+  "outputFieldMappings": [
+    {
+      "sourceFieldName": "/document/content_vector",
+      "targetFieldName": "content_vector"
+    }
+  ],
+  "schedule": {
+    "interval": "PT5M"
+  }
+}
