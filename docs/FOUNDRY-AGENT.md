@@ -34,7 +34,7 @@ Aşağıda `<foundry>` = Foundry kaynağı (ör. `seyhanamasyali-7898-resource`)
 
 Agent SDK'sı **yalnızca Microsoft Entra** ile çalışır (anahtar yok).
 - Azure portal → `<foundry>` (Foundry kaynağı) → **Erişim denetimi (IAM)** → **+ Ekle → Rol ataması ekle** →
-  rol: **Azure AI User** (listede yoksa **Azure AI Developer**; aramaya `Azure AI` yazın) → Üyeler: **Kullanıcı, grup…** → kendi hesabınız →
+  rol: **Azure AI User** (listede yoksa **Cognitive Services User**; aramaya `Cognitive Services User` yazın) → Üyeler: **Kullanıcı, grup…** → kendi hesabınız →
   **Gözden geçir + ata**. Kaynağın sahibiyseniz (Owner) genelde gerekmez; `setup_agent.py` 403 verirse bu rolü ekleyin.
 - Bilgisayarda Azure CLI yoksa: `winget install -e --id Microsoft.AzureCLI` → **yeni** CMD penceresi açın.
 - Giriş: `az login --tenant <kiracı-kimliği>` (kiracı kimliği: portal → Microsoft Entra ID → Genel Bakış → Kiracı Kimliği).
@@ -104,7 +104,8 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 ## 5. Azure'a (App Service)
 
 1. **Kimlik yetkisi:** `<foundry>` → **Erişim denetimi (IAM)** → **Rol ataması ekle** → **Azure AI User**
-   (portal listesinde yoksa — prova portalında çıkmadı — **Azure AI Developer**; 403 sürerse ek olarak **Cognitive Services User**) →
+   (portal listesinde yoksa — prova portalında çıkmadı — **Cognitive Services User**; provada yalnızca *Azure AI Developer*
+   ile agent çağrısı `403 Forbidden` verdi, *Cognitive Services User* eklenince çözüldü) →
    Erişim ata: **Yönetilen kimlik** → **App Service** → `<api>` → **Gözden geçir + ata** (5–10 dk'da etkinleşir).
 2. `<api>` → **Ayarlar → Ortam değişkenleri** → ekleyin → **Uygula**:
 
@@ -130,7 +131,8 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
 | `setup_agent.py`: `✗ Agent oluşturulamadı: 403` | Hesabınızda `<foundry>` üzerinde **Azure AI User** yok (§2) ya da yanlış kiracıdasınız |
 | `✗ Agent oluşturulamadı: 404` | `FOUNDRY_PROJECT_ENDPOINT` yanlış (sonunda `/api/projects/<proje>` olmalı) |
 | `... deployment ... not found` | Projede `gpt-5.5` dağıtımı yok ya da `CHAT_DEPLOYMENT` adı farklı |
-| Sohbette "Şu an yanıt üretilemiyor", günlükte `Agent çağrısı başarısız: PermissionDeniedError` | App Service kimliğine Azure AI User verilmemiş/etkinleşmemiş (§5.1) |
+| Sohbette "Şu an yanıt üretilemiyor", günlükte `Agent çağrısı başarısız: PermissionDeniedError 403` | App Service kimliğine Foundry kaynağında **Azure AI User** ya da **Cognitive Services User** verilmemiş/etkinleşmemiş (§5.1; *Azure AI Developer* yetmedi). Rol sonrası 5–10 dk bekleyin, uygulamayı yeniden başlatın |
+| Günlükte `404 ... The project does not exist` | `FOUNDRY_PROJECT_ENDPOINT` yanlış yazılmış (provada sondaki bir rakam eksikti); proje adını Foundry'den kopyalayın |
 | Günlükte `Agent yapılandırması eksik: Eksik ortam değişkeni: FOUNDRY_PROJECT_ENDPOINT` | §5.2 ayarı eksik |
 | Günlükte `Agent önceki cevabı bulamadı; geçmiş yeniden gönderiliyor` | Sorun değil: Foundry kaydı yoktu, SQL'deki geçmişle devam edildi |
 | Agent modunda sorun ve demo yaklaşıyor | `LLM_MODE=chat` → Uygula (uygulama yeniden başlar), her şey eski yolla çalışır |
