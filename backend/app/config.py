@@ -43,7 +43,8 @@ class Settings(BaseSettings):
     # Foundry proje uç noktası: https://<kaynak>.services.ai.azure.com/api/projects/<proje>
     # Yalnızca Microsoft Entra ile (yerelde az login, Azure'da Managed Identity).
     foundry_project_endpoint: str = ""
-    foundry_agent_name: str = "mercek"
+    # Modül başına bir agent: mercek-cagri (M1 çağrı yönetimi), sonra ör. mercek-talep (M2).
+    foundry_agent_name: str = "mercek-cagri"
 
     data_dir: Path = _bundled_or_repo("data", "datav2")
     # Azure SQL. SQL_SERVER boşsa veri data_dir'deki JSON'lardan okunur.

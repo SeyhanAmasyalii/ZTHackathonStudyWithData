@@ -1,13 +1,13 @@
 # Mercek — Foundry Agent Service (agent ile çalıştırma)
 
-> Hedef: backend modeli doğrudan çağırmak yerine Foundry'de tanımlı **Mercek agent'ını** çağırsın.
+> Hedef: backend modeli doğrudan çağırmak yerine Foundry'de tanımlı **Mercek çağrı agent'ını** (`mercek-cagri`; ileride modül başına bir agent: ör. `mercek-talep`) çağırsın.
 > Araçlar (`kibana_sorgula`, `cagri_ara`, `hata_ara`, `benzer_cozum_ara`) **yine backend'de** çalışır: agent hangi aracı
 > çağıracağına karar verir, sayım/eşik/müşteri listesi kodda kalır. Geri dönüş tek ayar: `LLM_MODE=chat`.
 
 ## Nasıl çalışır
 
 ```
-Kullanıcı → backend (KVKK, oturum) → Foundry agent "mercek" (talimat + araç tanımları, model gpt-5.5)
+Kullanıcı → backend (KVKK, oturum) → Foundry agent "mercek-cagri" (talimat + araç tanımları, model gpt-5.5)
                                        ↓ function_call (ör. kibana_sorgula)
                                      backend aracı çalıştırır → function_call_output → agent → cevap
 ```
@@ -43,7 +43,7 @@ Agent SDK'sı **yalnızca Microsoft Entra** ile çalışır (anahtar yok).
 `backend\.env`'e ekleyin:
 ```
 FOUNDRY_PROJECT_ENDPOINT=https://<foundry>.services.ai.azure.com/api/projects/<proje>
-FOUNDRY_AGENT_NAME=mercek
+FOUNDRY_AGENT_NAME=mercek-cagri
 ```
 ```cmd
 git pull
@@ -52,13 +52,13 @@ uv run --directory backend python ..\scripts\setup_agent.py
 ```
 Beklenen:
 ```
-✓ Agent 'mercek' sürüm 1 · model gpt-5.5 · araçlar: kibana_sorgula, cagri_ara, hata_ara, benzer_cozum_ara
+✓ Agent 'mercek-cagri' sürüm 1 · model gpt-5.5 · araçlar: kibana_sorgula, cagri_ara, hata_ara, benzer_cozum_ara
 Deneme: Ben Mercek; ... kibana_sorgula, cagri_ara ... araçlarını kullanabilirim.
 ```
 Araç listesi `.env`'deki AI Search ayarlarına göre çıkar (`SEARCH_ENDPOINT`, `SEARCH_SOLUTION_INDEX`).
 **Prompt ya da araç değişince betiği tekrar çalıştırın** (yeni sürüm oluşur, backend en son sürümü kullanır).
 
-Portalda kontrol: ai.azure.com → proje → **Agents** → `mercek` → talimat ve araçlar görünür (buradan düzenlemeyin; betik ezer).
+Portalda kontrol: ai.azure.com → proje → **Agents** → `mercek-cagri` → talimat ve araçlar görünür (buradan düzenlemeyin; betik ezer).
 
 ## 4. Yerelde agent modunda dene
 
@@ -66,7 +66,7 @@ Portalda kontrol: ai.azure.com → proje → **Agents** → `mercek` → talimat
 - Elif → "ODMTTLMT ekranında hata alıyorum" → aynı cevap (7 hata, GAZ02 110731, SOL-031); terminalde `Araç çağrısı: ... ad=kibana_sorgula`.
 - Aynı sohbette "Peki nasıl çözerim?" → önceki konuyu hatırlar (geçmiş gönderilmeden, Foundry'den).
 - F5 → konuşma ekrana geri gelir (SQL).
-- ai.azure.com → proje → **Agents → mercek → Traces / İzleme** (ya da Konuşmalar): turlar ve araç çağrıları.
+- ai.azure.com → proje → **Agents → mercek-cagri → Traces / İzleme** (ya da Konuşmalar): turlar ve araç çağrıları.
 
 Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın.
 
@@ -80,7 +80,7 @@ Eski yola dönmek: `LLM_MODE=chat` (ya da satırı silin) → yeniden başlatın
    |---|---|
    | `LLM_MODE` | `agent` |
    | `FOUNDRY_PROJECT_ENDPOINT` | `https://<foundry>.services.ai.azure.com/api/projects/<proje>` |
-   | `FOUNDRY_AGENT_NAME` | `mercek` |
+   | `FOUNDRY_AGENT_NAME` | `mercek-cagri` |
 
    `AZURE_OPENAI_*` kalsın (geri dönüş için).
 3. API paketini yeniden yükleyin (yeni paket `azure-ai-projects`): `docs/AZURE-APP-SERVICE.md` (yalnızca API).

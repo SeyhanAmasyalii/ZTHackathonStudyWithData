@@ -10,7 +10,7 @@ Kullanım (repo kökünden; önce `az login`):
 Prompt ya da araç değişince betik tekrar çalıştırılır; LLM_MODE=agent iken backend bu agent'ı
 çağırır (başka bir şey değişmez).
 
-Ayarlar backend/.env'den: FOUNDRY_PROJECT_ENDPOINT, FOUNDRY_AGENT_NAME (varsayılan mercek),
+Ayarlar backend/.env'den: FOUNDRY_PROJECT_ENDPOINT, FOUNDRY_AGENT_NAME (varsayılan mercek-cagri),
 CHAT_DEPLOYMENT (agent'ın modeli), SEARCH_ENDPOINT, SEARCH_SOLUTION_INDEX.
 Kimlik: Microsoft Entra (az login); hesabınızın projede "Azure AI User" (ya da üstü) rolü olmalı.
 """
