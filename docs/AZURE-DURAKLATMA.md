@@ -12,7 +12,7 @@
 | `mercek-api-seyhan`, `mercek-web-seyhan` | App Service | Sweden Central | Hayır (ücreti plan yazar) | Dokunma |
 | `mercek-search-seyhan` | AI Search | Norway East | **Ücretsiz katman = 0 $** (24.10.2026'da kontrol edildi). Ücretli katmanda Basic ~75 $/ay; durdurulamaz | **Dokunma** (ücretli katmana geçilirse §2.2) |
 | `mercek-sql-seyhan` | SQL server | Sweden Central | Hayır | Dokunma |
-| `mercekdb` | SQL veritabanı | Sweden Central | **Basic (Temel)** ~5 $/ay, sabit (24.10.2026'da kontrol edildi) | Tut (§2.3) |
+| `mercekdb` | SQL veritabanı | Sweden Central | **Basic (Temel)** ~5 $/ay, sabit; durdurulamaz | **Sil** (§2.3), dönüşte yeniden kur (§3.0) |
 | Foundry (`chat`, `text-embedding-3-small`) | AI Foundry | — | Hayır (kullanılan token kadar) | Dokunma. Bu resource group'ta değil; yeri ayrıca kontrol edilecek |
 
 Kontrol: kaynak → **Genel Bakış → Fiyatlandırma katmanı** (App Service planında **Fiyatlandırma planı**).
@@ -52,13 +52,37 @@ Ayrıca bilgisayarındaki `backend\.env` dosyasının yerinde olduğundan emin o
 
 Silinmediyse ve SQL **ücretsiz teklifteyse**: 5 dk'lık indexer SQL'i uyanık tutup kotayı bitirir. Search → **Dizin oluşturucular** → her indexer → **Zamanlama: Bir kez** → Kaydet.
 
-### 2.3 SQL veritabanı (isteğe bağlı)
-Basic ~5 $/ay; durdurulamaz. Tutmak önerilir. Silinirse veri `scripts/load_sql.py` ile yeniden yüklenir (`docs/AZURE-SQL.md`).
+### 2.3 SQL veritabanını sil (5 dk)
+Basic ~5 $/ay ve durdurulamaz. datav2 verisi betikle yeniden yüklenir; **kaybolan** yalnızca Mercek'in kendi yazdığı
+kayıtlardır (`dbo.app_*`: erişim kaydı, konuşma geçmişi; `db/app_tables.sql`). Bunlar gerekliyse silmeden önce
+veritabanı → **Dışarı aktar** ile `.bacpac` al (bir depolama hesabı ister).
+
+1. **Search indexer'larını durdur** (isteğe bağlı; yoksa 5 dk'da bir hata kaydı düşer, ücret yazmaz): `mercek-search-seyhan` →
+   **Arama yönetimi → Dizin oluşturucular** → her indexer → **Zamanlama: Bir kez** → Kaydet.
+2. `mercekdb` → **Genel Bakış → Sil** → veritabanı adını yaz → **Sil**.
+   **SQL sunucusunu (`mercek-sql-seyhan`) silme:** ücret yazmaz; Entra admin, güvenlik duvarı ve sunucu adı korunur.
+3. Fikir değişirse: silinen veritabanı saklama süresi boyunca (Basic: 7 gün) sunucu → **Veri yönetimi → Silinen veritabanları**'ndan geri yüklenebilir.
+
+Veritabanı yokken uygulama SQL'e bağlanamaz; Mercek JSON verisine geçer.
 
 ### 2.4 Kontrol (1 hafta sonra)
 **MercekAbonelik → Maliyet Yönetimi → Maliyet analizi**: günlük maliyet ~0 olmalı. **Bütçeler**'de aylık bütçe ve %80 e-posta uyarısı kurulu olsun.
 
 ## 3. Geri aç
+
+### 3.0 SQL veritabanı (silindiyse, 15 dk)
+1. `mercek-sql-seyhan` → **+ Veritabanı oluştur** → ad **`mercekdb`** (aynı ad → `SQL_DATABASE` değişmez) → `docs/AZURE-SQL.md` §1:
+   - Sürekli açık indexer isteniyorsa **Basic** (~5 $/ay, §1.1);
+   - Ara sıra çalışma için **Ücretsiz Azure SQL Veritabanı teklifi** (0 $; kota bitince ay sonuna kadar duraklar). Bu durumda indexer'lar **Bir kez** zamanlamasında kalsın (`--zamanlamasiz`).
+2. Veriyi yükle (repo kökünde, `backend\.env` hazır):
+   ```cmd
+   git pull
+   uv run --directory backend python ..\scripts\load_sql.py
+   uv run --directory backend python ..\scripts\setup_app_tables.py
+   ```
+3. Managed Identity kullanılıyorsa api kullanıcısını yeniden aç: `docs/AZURE-SQL.md` §4.2 ve §5.2 (`CREATE USER [mercek-api-seyhan] FROM EXTERNAL PROVIDER` …).
+4. Search'ü yeniden bağla (görünümleri kurar, indexer'ları çalıştırır): §3.3'teki komut (ücretsiz teklifte `--zamanlamasiz` ekle).
+5. Kontrol: `https://<api>/api/health` → 200; Mercek'te bir soru sor, Günlük akışında SQL hatası olmamalı.
 
 ### 3.1 App Service planı (3 dk)
 1. `mercek-plan` → **Ölçeği artır** → §1'de not ettiğin katman (ör. **Basic B1**) → **Seç**.
