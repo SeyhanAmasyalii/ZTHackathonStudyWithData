@@ -10,9 +10,9 @@
 |---|---|---|---|---|
 | `mercek-plan` | App Service planı | Sweden Central | **Evet** (Basic B1 ~13 $/ay). Uygulamayı "Durdur"mak ücreti kesmez | **Free F1'e düşür** (§2.1) |
 | `mercek-api-seyhan`, `mercek-web-seyhan` | App Service | Sweden Central | Hayır (ücreti plan yazar) | Dokunma |
-| `mercek-search-seyhan` | AI Search | Norway East | Katmana bağlı: **Ücretsiz = 0 $**, Basic ~75 $/ay, Standart daha fazla. Durdurulamaz | Ücretsizse **dokunma**; ücretliyse **sil** (§2.2) |
+| `mercek-search-seyhan` | AI Search | Norway East | **Ücretsiz katman = 0 $** (24.10.2026'da kontrol edildi). Ücretli katmanda Basic ~75 $/ay; durdurulamaz | **Dokunma** (ücretli katmana geçilirse §2.2) |
 | `mercek-sql-seyhan` | SQL server | Sweden Central | Hayır | Dokunma |
-| `mercekdb` | SQL veritabanı | Sweden Central | Basic ~5 $/ay (sabit); ücretsiz teklif 0 $ | Tut (§2.3) |
+| `mercekdb` | SQL veritabanı | Sweden Central | **Basic (Temel)** ~5 $/ay, sabit (24.10.2026'da kontrol edildi) | Tut (§2.3) |
 | Foundry (`chat`, `text-embedding-3-small`) | AI Foundry | — | Hayır (kullanılan token kadar) | Dokunma. Bu resource group'ta değil; yeri ayrıca kontrol edilecek |
 
 Kontrol: kaynak → **Genel Bakış → Fiyatlandırma katmanı** (App Service planında **Fiyatlandırma planı**).
