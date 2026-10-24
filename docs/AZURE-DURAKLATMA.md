@@ -13,7 +13,8 @@
 | `mercek-search-seyhan` | AI Search | Norway East | **Ücretsiz katman = 0 $** (24.10.2026'da kontrol edildi). Ücretli katmanda Basic ~75 $/ay; durdurulamaz | **Dokunma** (ücretli katmana geçilirse §2.2) |
 | `mercek-sql-seyhan` | SQL server | Sweden Central | Hayır | Dokunma |
 | `mercekdb` | SQL veritabanı | Sweden Central | **Basic (Temel)** ~5 $/ay, sabit; durdurulamaz | **Sil** (§2.3), dönüşte yeniden kur (§3.0) |
-| Foundry (`chat`, `text-embedding-3-small`) | AI Foundry | — | Hayır (kullanılan token kadar) | Dokunma. Bu resource group'ta değil; yeri ayrıca kontrol edilecek |
+| `seyhanamasyali-7898-resource` (+ proje `seyhanamasyali-7898`) | AI Foundry | Sweden Central | Hayır (kullanılan token kadar) | **Eski abonelikte bırakıldı** (§4.1) |
+| `mercek-appinsights` + `DefaultWorkspace-78d24885-…` | Application Insights + Log Analytics | Sweden Central | Neredeyse yok (aylık 5 GB'a kadar ücretsiz) | rg_mercek'e taşınır (§4) |
 
 Kontrol: kaynak → **Genel Bakış → Fiyatlandırma katmanı** (App Service planında **Fiyatlandırma planı**).
 
@@ -114,5 +115,23 @@ uv run --directory backend python ..\scripts\build_search_index.py --indeks heps
 
 Taşımada **IAM rol atamaları taşınmaz**. Taşınan kaynaklarda Erişim denetimi (IAM) → Rol atamaları'na bak; eksikse yeniden ver
 (ör. Search'te `Search Index Data Reader` → `mercek-api-seyhan`). SQL içindeki kullanıcılar (`CREATE USER … FROM EXTERNAL PROVIDER`)
-veritabanında durur, taşımadan etkilenmez. Foundry kaynağı **rg_mercek**'te değil: yerini bul, istenirse aynı yolla
-(**Taşı → Başka bir aboneliğe taşı**) MercekAbonelik'e al; taşınamazsa yeniden kur ve `AZURE_OPENAI_*` ayarlarını güncelle.
+veritabanında durur, taşımadan etkilenmez.
+
+`mercek-appinsights` ve bağlı olduğu `DefaultWorkspace-78d24885-…` (Log Analytics) **Azure subscription 1 / DefaultResourceGroup-WEU**'dan
+**MercekAbonelik / rg_mercek**'e taşınır. Aynı gruptaki `DefaultWorkspace-b25c9223-…-WEU` ve `TutoringCenterManagerapi` başka projeye aittir; taşınmaz.
+
+### 4.1 Foundry eski abonelikte kaldı (karar: 24.10.2026)
+`seyhanamasyali-7898-resource` (endpoint `https://seyhanamasyali-7898-resource.openai.azure.com`) **Azure subscription 1 /
+DefaultResourceGroup-WEU**'da duruyor. Taşıma doğrulaması reddetti: MercekAbonelik'te model kotası yok
+(`TargetMoveSubscriptionNotEligible`: `AIServices.GlobalStandard.claude-haiku-5-5` 50 gerekli / 0 kalan,
+`OpenAI.GlobalStandard.gpt-5.5` 500 gerekli / 0 kalan). Token başına ücretlendiği için kullanılmazken 0 $; kullanılırsa
+fatura **Azure subscription 1**'e yazar. Uygulama ayarları (`AZURE_OPENAI_*`) değişmedi.
+
+Projeye dönüldüğünde iki yol:
+1. **Kota iste, sonra taşı:** ai.azure.com → Yönetim merkezi → **Kota** → abonelik **MercekAbonelik**, bölge **Sweden Central** →
+   `gpt-5.5`, `claude-haiku-5-5` ve embedding modeli için en az mevcut deploy kapasitesi kadar kota iste. Onay gelince
+   DefaultResourceGroup-WEU → **Taşı → Başka bir aboneliğe taşı** → Foundry kaynağı ve projesi → hedef **rg_mercek**.
+   Ad, endpoint ve anahtar değişmez.
+2. **Yeni Foundry kur:** MercekAbonelik'te yeni Foundry + deploy'lar (`docs/AZURE-AI-SEARCH.md` §1, `docs/FOUNDRY-AGENT.md`).
+   Yeni endpoint/anahtar: App Service ortam değişkenleri ve `backend\.env`; ardından `build_search_index.py --indeks hepsi`
+   (embedding becerisi ve vektörleştirici yeni adresi alır) ve agent kurulumu (`scripts/setup_agent.py`). Eski Foundry en son silinir.
